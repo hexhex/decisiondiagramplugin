@@ -10,9 +10,7 @@ plugin_LTLIBRARIES = libdlvhexbm.la
 # add all sources of your plugin
 #
 libdlvhexbm_la_SOURCES = BMPlugin.cpp
-libdlvhexbm_la_LIBADD = $(top_srcdir)/rpcompiler/src/librpcompiler.la
-
-#rpcompiler_OBJCETS = rpcompiler/src/scanner.o rpcompiler/src/parser.o rpcompiler/src/ParseTreeNode.o rpcompiler/src/CodeGenerator.o rpcompiler/src/ParseTreeNodeIterator.o rpcompiler/src/RPParser.o
+#libdlvhexbm_la_LIBADD = $(libdir)/dlvhex/libdlvhexbase.la $(libdir)/dlvhex/libaspsolver.la
 
 #
 # extend compiler flags by CFLAGS of other needed libraries
@@ -27,9 +25,8 @@ AM_CPPFLAGS = \
 
 libdlvhexbm_la_LDFLAGS = -avoid-version -module
 
-
-libdlvhexbm-static.la: $(libdlvhexbm_la_OBJECTS) $(rpcompiler_OBJCETS)
-	$(CXXLINK) -avoid-version -module -rpath $(plugindir) $(libdlvhexasp_la_OBJECTS) $(rpcompiler_OBJCETS)
+libdlvhexbm-static.la: $(libdlvhexbm_la_OBJECTS)
+	$(CXXLINK) -avoid-version -module -rpath $(plugindir) $(libdlvhexasp_la_OBJECTS)
 
 install-static: libdlvhexbm-static.la
 	$(LIBTOOL) --mode=install $(INSTALL) -s libdlvhexbm-static.la $(DESTDIR)$(plugindir)/libdlvhexbm-static.la

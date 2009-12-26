@@ -7,12 +7,15 @@
 #include <iostream>
 #include <fstream>
 
+#include <stdio.h>
 #include <string>
 #include <sstream>
 #include <stdlib.h>
 
 #include <Parser.h>
 #include <CodeGenerator.h>
+
+#include <RPProcess.h>
 
 namespace dlvhex {
 	namespace bm {
@@ -27,6 +30,43 @@ namespace dlvhex {
 			virtual void
 			convert(std::istream& i, std::ostream& o)
 			{
+				// - Call the belief merging compiler
+				RPProcess rpp;
+				rpp.spawn();
+
+				std::istream& pi = rpp.getInput();
+				std::ostream& po = rpp.getOutput();
+				std::string line;
+
+				// Send input to rpcompiler
+				while(getline(i, line)) {
+					po << line << std::endl;
+				}
+				rpp.endoffile();
+
+				// Read output from rpcomopiler
+				std::stringstream rpoutput;
+				while(getline(pi, line)) {
+					rpoutput << line << std::endl;
+				}
+
+				// On errors throw a PluginError
+				int errcode;
+				if((errcode = rpp.close()) != 0){
+					// Read error message from rpcompiler
+					std::stringstream errmsg;
+					errmsg << std::string("rpcompiler returned error code ") << errcode << ": " << rpoutput.str();
+					throw PluginError(errmsg.str());
+				}else{
+					// Otherwise write the compiler output into o; dlvhex will execute it
+					o << rpoutput.str();
+					// Workaround (dlvhex crashes on empty input)
+					o << "%" << std::endl;
+				}
+
+				return;
+
+/*
 				std::string line;
 				std::stringstream buffer;
 				// Read whole program into a buffer (belief merging program)
@@ -70,9 +110,7 @@ namespace dlvhex {
 
 
 				// TODO
-				// - Call the belief merging compiler
-				// - On errors throw a PluginError
-				// - Otherwise write the compiler output into o; dlvhex will execute it
+*/
 			}
 		};
 

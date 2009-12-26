@@ -81,6 +81,7 @@ AC_SUBST([plugindir])
 AC_CONFIG_FILES([
            Makefile 
            src/Makefile
+           include/Makefile
            examples/Makefile
            rpcompiler/Makefile 
            rpcompiler/src/Makefile
