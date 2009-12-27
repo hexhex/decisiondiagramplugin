@@ -35,8 +35,6 @@ int main(int argc, char *argv[]){
 
 		// Generate output code
 		if (parserinst.succeeded()){
-			// std::cout << "Parsing finished with " << parserinst.getWarningCount() << " warning" << (parserinst.getWarningCount() == 0 || parserinst.getWarningCount() > 1 ? "s" : "") << std::endl;
-
 			// Retrieve parse tree
 			ParseTreeNode* parseTree = parserinst.getParseTree();
 

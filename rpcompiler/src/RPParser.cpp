@@ -60,14 +60,12 @@ struct RPParser::rp_grammar : public grammar<rp_grammar>{
 			COLON =				str_p(":");
 			SLASH =				str_p("/");
 			NUMBER =			token_node_d[ int_p ];
-			IDENTIFIER =			token_node_d[ (*(range_p('a','z') | range_p('A','Z') | range_p('0','9'))) | (str_p("\"") >> *(~ch_p('\"') | str_p("\\\"")) >> str_p("\"")) ];
+			IDENTIFIER =			token_node_d[ (ch_p('"') >> *(~ch_p('"')) >> ch_p('"')) | (*(range_p('a','z') | range_p('A','Z') | range_p('0','9'))) ];
 
 			// Grammer
 			Source =			RevisionPlanSection >> SEMICOLON;
 			KeyValuePair =			IDENTIFIER >> COLON >> IDENTIFIER >> SEMICOLON;
 			Predicate =			IDENTIFIER >> COLON >> IDENTIFIER >> SLASH >> NUMBER >> SEMICOLON;
-//			KeyValuePair =			inner_node_d[space_p >> IDENTIFIER >> space_p] >> COLON >> IDENTIFIER >> SEMICOLON;
-//			Predicate =			inner_node_d[space_p >> IDENTIFIER >> space_p] >> COLON >> IDENTIFIER >> SLASH >> NUMBER >> SEMICOLON;
 			CommonSignatureSection =	*Predicate;
 			BeliefBaseSection =		*KeyValuePair;
 			RevisionPlanSection =		(OCBRACKET >> *KeyValuePair >> *Source >> CCBRACKET) |
@@ -128,6 +126,10 @@ std::string RPParser::getInputFileName(int index){
 ParseTreeNode* RPParser::createParseTree(iter_t const& i, int l){
 
 	ParseTreeNode* result = NULL;
+	std::string rs;
+	int begin;
+	int end;
+	int j;
 
 	iter_t chi = i->children.begin();
 	switch(i->value.id().to_long()){
@@ -226,7 +228,22 @@ ParseTreeNode* RPParser::createParseTree(iter_t const& i, int l){
 			result = createParseTree(chi, l + 1);
 			break;
 		case TIDENTIFIER:
-			result = new StringTreeNode(std::string(chi->value.begin(), chi->value.end()));
+			rs = std::string(chi->value.begin(), chi->value.end());
+			// Trim (because of the fact that the skip parser does not cut out the whitespaces perfectly)
+			begin = rs.length() - 1;
+			end = 0;
+			j = 0;
+			for (std::string::iterator it = rs.begin(); it != rs.end(); it++, j++){
+				if (j < begin && (*it) != ' ' && (*it) != '\t' && (*it) != '\r' && (*it) != '\n') begin = j;
+				if (j > end && (*it) != ' ' && (*it) != '\t' && (*it) != '\r' && (*it) != '\n') end = j;
+			}
+			if (end >= begin){
+				rs = rs.substr(begin, end - begin + 1);
+			}else{
+				rs = std::string("");
+			}
+			result = new StringTreeNode(rs);
+
 			break;
 		case TNUMBER:
 			result = new IntTreeNode(atoi(std::string(chi->value.begin(), chi->value.end()).c_str()));
@@ -247,6 +264,8 @@ RPParser::RPParser(std::string i) : parsefiles(false), inputstring(i) {
 
 void RPParser::parse(){
 
+	RPParser::rp_grammar grammer;
+
 	if (parsefiles){
 		isparsed = false;
 		scannererrors = 0;
@@ -254,7 +273,6 @@ void RPParser::parse(){
 		syntaxwarnings = 0;
 
 		// Parse all input files
-		RPParser::rp_grammar grammer;
 		FILE* filePtr;
 		std::string parsingContent;
 		while ((filePtr = getNextInputFile()) != NULL){
@@ -266,7 +284,8 @@ void RPParser::parse(){
 		}
 		isparsed = true;
 	}else{
-		// TODO: Parse string (inputstring) rather than files
+		tree_parse_info<> info = pt_parse(inputstring.c_str(), grammer, space_p);
+		parsetree = createParseTree(info.trees.begin(), 0);
 	}
 }
 

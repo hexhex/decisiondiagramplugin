@@ -158,9 +158,12 @@ namespace dlvhex {
 					}
 				}else{
 					out	<< "BM-plugin:" << std::endl << std::endl
+						<< "----------" << std::endl
+						<< " Arguments:" << std::endl
 						<< " --beliefmerging  This option will cause BM-plugin to parse the complete" << std::endl
-						<< "                  input file as belief merging program. For details see" << std::endl
-						<< "                  the documentation of BM-plugin" << std::endl << std::endl;
+						<< "                  input file as belief merging program. Internally, the" << std::endl
+						<< "                  rpcompiler will be called. For details see the" << std::endl
+						<< "                  documentation of BM-plugin" << std::endl << std::endl;
 				}
 			}
 

@@ -73,8 +73,11 @@ void CodeGenerator::generateCode(std::ostream &os, std::ostream &err){
 
 // Translates one belief base definition including the mappings
 void CodeGenerator::translateBeliefBase(ParseTreeNode *parsetree, std::ostream &os, std::ostream &err){
-	std::string name = std::string("");
-	std::string mappings = std::string("");
+	std::string name;
+	std::string mappings;
+	std::string inputrewriter;
+	bool useInputRewriter = false;
+
 	// A belief base section has the sub-element "beliefbase" with key-value pairs as it's 0th child
 	for (ParseTreeNodeIterator it = parsetree->getChild(0)->getChild(0)->begin(ParseTreeNode::kvpair); it != parsetree->getChild(0)->getChild(0)->end(); ++it){
 		// Extract key and value of the current pair
@@ -84,6 +87,10 @@ void CodeGenerator::translateBeliefBase(ParseTreeNode *parsetree, std::ostream &
 		if (key == (std::string("name"))){
 			name = value;
 		}
+		if (key == (std::string("inputrewriter"))){
+			inputrewriter = value;
+			useInputRewriter = true;
+		}
 		if (key == (std::string("mapping"))){
 			mappings = mappings + "     " + value + "\n";
 		}
@@ -92,7 +99,7 @@ void CodeGenerator::translateBeliefBase(ParseTreeNode *parsetree, std::ostream &
 	os << "% Belief base \"" << name << "\"" << std::endl;
 	os << "sources(" << name << ", AnswerNr) :- &hex[\"" << std::endl;
 	os << mappings;
-	os << "\", \"\"](" << "AnswerNr" << ")." << std::endl;
+	os << "\", \"" << (useInputRewriter ? std::string("--inputrewriter=\"") + inputrewriter + std::string("\"") : "") << "\"](" << "AnswerNr" << ")." << std::endl;
 }
 
 // Translates one revision plan section recursively
