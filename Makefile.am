@@ -6,4 +6,5 @@ SUBDIRS = \
 	  include/ \
           src/ \
           examples/ \
-	  rpcompiler/
+	  rpcompiler/ \
+	  dotreader/

@@ -54,6 +54,13 @@ LT_INIT
 #
 PKG_CHECK_MODULES([DLVHEX], [dlvhex >= 1.7])
 
+#
+# DotReader needs the graphviz library
+#
+PKG_CHECK_MODULES(LIBDOTREADER, libgvc >= 2.2)
+AC_SUBST(LIBDOTREADER_LIBS)
+AC_SUBST(LIBDOTREADER_CFLAGS)
+
 
 # checking for boost libs
 BOOST_REQUIRE([1.33.0])
@@ -86,6 +93,9 @@ AC_CONFIG_FILES([
            rpcompiler/Makefile 
            rpcompiler/src/Makefile
            rpcompiler/examples/Makefile
+           dotreader/Makefile 
+           dotreader/src/Makefile
+           dotreader/examples/Makefile
 ])
 
 AC_OUTPUT

@@ -40,7 +40,9 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	install-sh ltmain.sh missing ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/boost.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -144,6 +146,8 @@ LDFLAGS =
 LEX = flex
 LEXLIB = -lfl
 LEX_OUTPUT_ROOT = lex.yy
+LIBDOTREADER_CFLAGS = -I/usr/include/graphviz  
+LIBDOTREADER_LIBS = -lgvc -lgraph -lcdt  
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -235,7 +239,8 @@ SUBDIRS = \
 	  include/ \
           src/ \
           examples/ \
-	  rpcompiler/
+	  rpcompiler/ \
+	  dotreader/
 
 all: all-recursive
 
