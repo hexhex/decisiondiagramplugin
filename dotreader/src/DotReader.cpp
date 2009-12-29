@@ -336,7 +336,7 @@ int main(int argc, char **argv){
 				std::string to;
 				readChunk(input, cursor, from);
 				readChunk(input, cursor, to);
-				std::cout << "     " << from << " -> " << to << ";" << std::endl;
+				std::cout << "     " << from << " -> " << to << " [label=\"else\"];" << std::endl;
 			}else if (cmdChunk == std::string("innernode")){
 				readChunk(input, cursor, trash);
 			}else if (cmdChunk == std::string("leafnode")){
