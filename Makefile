@@ -15,10 +15,10 @@
 
 
 
-pkgdatadir = $(datadir)/dlvhex-bmplugin
-pkgincludedir = $(includedir)/dlvhex-bmplugin
-pkglibdir = $(libdir)/dlvhex-bmplugin
-pkglibexecdir = $(libexecdir)/dlvhex-bmplugin
+pkgdatadir = $(datadir)/dlvhex-decisiondiagramplugin
+pkgincludedir = $(includedir)/dlvhex-decisiondiagramplugin
+pkglibdir = $(libdir)/dlvhex-decisiondiagramplugin
+pkglibexecdir = $(libexecdir)/dlvhex-decisiondiagramplugin
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
@@ -37,7 +37,7 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS COPYING \
 	ChangeLog INSTALL NEWS config.guess config.sub depcomp \
-	install-sh ltmain.sh missing ylwrap
+	install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/boost.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -103,12 +103,12 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run tar
+ACLOCAL = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run aclocal-1.11
+AMTAR = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run automake-1.11
 AWK = mawk
 BOOST_CPPFLAGS = 
 BOOST_ROOT = 
@@ -122,7 +122,7 @@ CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"dlvhex-bmplugin\" -DPACKAGE_TARNAME=\"dlvhex-bmplugin\" -DPACKAGE_VERSION=\"0.0.1\" -DPACKAGE_STRING=\"dlvhex-bmplugin\ 0.0.1\" -DPACKAGE_BUGREPORT=\"e0525250@mail.student.tuwien.ac.at\" -DPACKAGE_URL=\"\" -DBMPLUGIN_MAJOR=0 -DBMPLUGIN_MINOR=0 -DBMPLUGIN_MICRO=1 -DPACKAGE=\"dlvhex-bmplugin\" -DVERSION=\"0.0.1\" -DYYTEXT_POINTER=1 -DHAVE_DIRENT_H=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE__BOOL=1 -DHAVE_STDBOOL_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_BOOST_SCOPED_PTR_HPP=1 -DHAVE_BOOST_SHARED_PTR_HPP=1 -DHAVE_BOOST_ALGORITHM_STRING_HPP=1 -DHAVE_BOOST_TOKENIZER_HPP=1
+DEFS = -DPACKAGE_NAME=\"dlvhex-decisiondiagramplugin\" -DPACKAGE_TARNAME=\"dlvhex-decisiondiagramplugin\" -DPACKAGE_VERSION=\"0.0.1\" -DPACKAGE_STRING=\"dlvhex-decisiondiagramplugin\ 0.0.1\" -DPACKAGE_BUGREPORT=\"e0525250@mail.student.tuwien.ac.at\" -DPACKAGE_URL=\"\" -DDDPLUGIN_MAJOR=0 -DDDPLUGIN_MINOR=0 -DDDPLUGIN_MICRO=1 -DPACKAGE=\"dlvhex-decisiondiagramplugin\" -DVERSION=\"0.0.1\" -DHAVE_DIRENT_H=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE__BOOL=1 -DHAVE_STDBOOL_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_BOOST_SCOPED_PTR_HPP=1 -DHAVE_BOOST_SHARED_PTR_HPP=1 -DHAVE_BOOST_ALGORITHM_STRING_HPP=1 -DHAVE_BOOST_TOKENIZER_HPP=1
 DEPDIR = .deps
 DISTCHECK_CONFIGURE_FLAGS =  '--with-boost='
 DLVHEX_CFLAGS = -I/usr/local/include  
@@ -143,9 +143,6 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
-LEX = flex
-LEXLIB = -lfl
-LEX_OUTPUT_ROOT = lex.yy
 LIBDOTREADER_CFLAGS = -I/usr/include/graphviz  
 LIBDOTREADER_LIBS = -lgvc -lgraph -lcdt  
 LIBOBJS = 
@@ -154,7 +151,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -162,11 +159,11 @@ OBJDUMP = objdump
 OBJEXT = o
 OTOOL = 
 OTOOL64 = 
-PACKAGE = dlvhex-bmplugin
+PACKAGE = dlvhex-decisiondiagramplugin
 PACKAGE_BUGREPORT = e0525250@mail.student.tuwien.ac.at
-PACKAGE_NAME = dlvhex-bmplugin
-PACKAGE_STRING = dlvhex-bmplugin 0.0.1
-PACKAGE_TARNAME = dlvhex-bmplugin
+PACKAGE_NAME = dlvhex-decisiondiagramplugin
+PACKAGE_STRING = dlvhex-decisiondiagramplugin 0.0.1
+PACKAGE_TARNAME = dlvhex-decisiondiagramplugin
 PACKAGE_URL = 
 PACKAGE_VERSION = 0.0.1
 PATH_SEPARATOR = :
@@ -177,12 +174,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.0.1
-YACC = bison -y
-YFLAGS = 
-abs_builddir = /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk
-abs_srcdir = /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk
-abs_top_builddir = /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk
-abs_top_srcdir = /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk
+abs_builddir = /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk
+abs_srcdir = /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk
+abs_top_builddir = /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk
+abs_top_srcdir = /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -211,7 +206,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-bmplugin/trunk/install-sh
+install_sh = ${SHELL} /home/redl/Desktop/dlvhex/dlvhex-decisiondiagramplugin/trunk/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -239,7 +234,6 @@ SUBDIRS = \
 	  include/ \
           src/ \
           examples/ \
-	  rpcompiler/ \
 	  dotreader/
 
 all: all-recursive

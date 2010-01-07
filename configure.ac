@@ -35,11 +35,7 @@ AC_CHECK_HEADERS([sys/param.h])
 AC_HEADER_STDBOOL
 AC_C_CONST
 
-# Checks for library functions.
-_LT_SET_OPTION([LT_INIT],[dlopen])
-AC_DIAGNOSE([obsolete],[AC_LIBTOOL_DLOPEN: Remove this warning and the call to _LT_SET_OPTION when you
-put the `dlopen' option into LT_INIT's first parameter.])
- # we build a module library
+# we build a module library
 AC_DISABLE_STATIC # we don't need a static library
 LT_INIT
 

@@ -9,8 +9,8 @@ plugin_LTLIBRARIES = libdlvhexdd.la
 # replace 'plugin' on the left side as above and
 # add all sources of your plugin
 #
-libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp
-#libdlvhexbm_la_LIBADD = $(libdir)/dlvhex/libdlvhexbase.la $(libdir)/dlvhex/libaspsolver.la
+libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp DecisionDiagram.cpp OpUnion.cpp OpUnfold.cpp OpMajorityVoting.cpp OpToBinaryDecisionTree.cpp OpUserPreferences.cpp OpOrderBinaryDecisionTree.cpp OpAvg.cpp
+#libdlvhexdd_la_LIBADD = $(libdir)/dlvhex/libdlvhexbase.la $(libdir)/dlvhex/libaspsolver.la
 
 #
 # extend compiler flags by CFLAGS of other needed libraries
@@ -18,17 +18,15 @@ libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/rpcompiler/include \
-	-I/media/Data/Uni/Diplomarbeit/Tools/dlvhex/dlvhex/trunk/include/dlvhex \
-	-I/media/Data/Uni/Diplomarbeit/Tools/dlvhex/dlvhex/trunk/include \
 	$(BOOST_CPPFLAGS) \
 	$(DLVHEX_CFLAGS)
 
-libdlvhexbm_la_LDFLAGS = -avoid-version -module
+libdlvhexdd_la_LDFLAGS = -avoid-version -module
 
-libdlvhexdd-static.la: $(libdlvhexbm_la_OBJECTS)
+libdlvhexdd-static.la: $(libdlvhexdd_la_OBJECTS)
 	$(CXXLINK) -avoid-version -module -rpath $(plugindir) $(libdlvhexdd_la_OBJECTS)
 
-install-static: libdlvhexbm-static.la
+install-static: libdlvhexdd-static.la
 	$(LIBTOOL) --mode=install $(INSTALL) -s libdlvhexdd-static.la $(DESTDIR)$(plugindir)/libdlvhexdd-static.la
 
 uninstall-static:

@@ -12,13 +12,20 @@
 #include <sstream>
 #include <stdlib.h>
 
-#include <Parser.h>
-#include <CodeGenerator.h>
+//#include <Parser.h>
+//#include <CodeGenerator.h>
 
-#include <RPProcess.h>
+#include "dlvhex-mergingplugin/IOperator.h"
+#include <OpUnion.h>
+#include <OpUnfold.h>
+#include <OpMajorityVoting.h>
+#include <OpToBinaryDecisionTree.h>
+#include <OpUserPreferences.h>
+#include <OpOrderBinaryDecisionTree.h>
+#include <OpAvg.h>
 
 namespace dlvhex {
-	namespace bm {
+	namespace dd {
 
 		class BeliefMergingParserDriver : public PluginConverter
 		{
@@ -30,6 +37,8 @@ namespace dlvhex {
 			virtual void
 			convert(std::istream& i, std::ostream& o)
 			{
+/*
+	THIS CODE SECTION WORKS
 				// - Call the belief merging compiler
 				RPProcess rpp;
 				rpp.spawn();
@@ -65,8 +74,10 @@ namespace dlvhex {
 				}
 
 				return;
+*/
 
 /*
+	THIS ONE NOT
 				std::string line;
 				std::stringstream buffer;
 				// Read whole program into a buffer (belief merging program)
@@ -117,16 +128,16 @@ namespace dlvhex {
 		//
 		// A plugin must derive from PluginInterface
 		//
-		class BMPlugin : public PluginInterface
+		class DecisionDiagramPlugin : public PluginInterface
 		{
 		private:
 			PluginConverter *converter;
 
 		public:
-			BMPlugin() : converter(NULL){
+			DecisionDiagramPlugin() : converter(NULL){
 			}
 
-			virtual ~BMPlugin(){
+			virtual ~DecisionDiagramPlugin(){
 				if (converter) delete converter;
 			}
 
@@ -157,10 +168,10 @@ namespace dlvhex {
 						}
 					}
 				}else{
-					out	<< "BM-plugin:" << std::endl << std::endl
+					out	<< "DD-plugin:" << std::endl << std::endl
 						<< "----------" << std::endl
 						<< " Arguments:" << std::endl
-						<< " --beliefmerging  This option will cause BM-plugin to parse the complete" << std::endl
+						<< " --beliefmerging  This option will cause DD-plugin to parse the complete" << std::endl
 						<< "                  input file as belief merging program. Internally, the" << std::endl
 						<< "                  rpcompiler will be called. For details see the" << std::endl
 						<< "                  documentation of BM-plugin" << std::endl << std::endl;
@@ -173,24 +184,48 @@ namespace dlvhex {
 		//
 		// now instantiate the plugin
 		//
-		BMPlugin theBMPlugin;
+		DecisionDiagramPlugin theDDPlugin;
 
 	} // namespace bm
 } // namespace dlvhex
+
+using namespace dlvhex::dd;
+
+OpUnion _union;
+OpUnfold _unfold;
+OpMajorityVoting _majorityvoting;
+OpToBinaryDecisionTree _tobinarydecisiontree;
+OpUserPreferences _userpreferences;
+OpOrderBinaryDecisionTree _orderbinarydecisiontree;
+OpAvg _avg;
+
+extern "C"
+std::vector<dlvhex::merging::IOperator*>
+OPERATORIMPORTFUNCTION()
+{
+	std::vector<dlvhex::merging::IOperator*> operators;
+	operators.push_back(&_union);
+	operators.push_back(&_unfold);
+	operators.push_back(&_majorityvoting);
+	operators.push_back(&_tobinarydecisiontree);
+	operators.push_back(&_userpreferences);
+	operators.push_back(&_orderbinarydecisiontree);
+	operators.push_back(&_avg);
+}
 
 //
 // and let it be loaded by dlvhex!
 //
 extern "C"
-dlvhex::bm::BMPlugin*
+dlvhex::dd::DecisionDiagramPlugin*
 PLUGINIMPORTFUNCTION()
 {
 
-  dlvhex::bm::theBMPlugin.setPluginName("dlvhex-BMPlugin");
-  dlvhex::bm::theBMPlugin.setVersion(	0,
+  dlvhex::dd::theDDPlugin.setPluginName("dlvhex-DecisionDiagramPlugin");
+  dlvhex::dd::theDDPlugin.setVersion(	0,
 					0,
 					1);
-  return &dlvhex::bm::theBMPlugin;
+  return &dlvhex::dd::theDDPlugin;
 }
 
 
