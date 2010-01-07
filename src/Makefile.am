@@ -3,13 +3,13 @@ AUTOMAKE_OPTIONS = gnu
 #
 # replace 'plugin' on the right side by your plugin's name
 #
-plugin_LTLIBRARIES = libdlvhexbm.la
+plugin_LTLIBRARIES = libdlvhexdd.la
 
 #
 # replace 'plugin' on the left side as above and
 # add all sources of your plugin
 #
-libdlvhexbm_la_SOURCES = BMPlugin.cpp
+libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp
 #libdlvhexbm_la_LIBADD = $(libdir)/dlvhex/libdlvhexbase.la $(libdir)/dlvhex/libaspsolver.la
 
 #
@@ -25,11 +25,11 @@ AM_CPPFLAGS = \
 
 libdlvhexbm_la_LDFLAGS = -avoid-version -module
 
-libdlvhexbm-static.la: $(libdlvhexbm_la_OBJECTS)
-	$(CXXLINK) -avoid-version -module -rpath $(plugindir) $(libdlvhexasp_la_OBJECTS)
+libdlvhexdd-static.la: $(libdlvhexbm_la_OBJECTS)
+	$(CXXLINK) -avoid-version -module -rpath $(plugindir) $(libdlvhexdd_la_OBJECTS)
 
 install-static: libdlvhexbm-static.la
-	$(LIBTOOL) --mode=install $(INSTALL) -s libdlvhexbm-static.la $(DESTDIR)$(plugindir)/libdlvhexbm-static.la
+	$(LIBTOOL) --mode=install $(INSTALL) -s libdlvhexdd-static.la $(DESTDIR)$(plugindir)/libdlvhexdd-static.la
 
 uninstall-static:
-	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/libdlvhexbm-static.la
+	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/libdlvhexdd-static.la

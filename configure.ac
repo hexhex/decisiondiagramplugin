@@ -1,15 +1,15 @@
 AC_PREREQ(2.64)
-AC_INIT([dlvhex-bmplugin],[0.0.1],[e0525250@mail.student.tuwien.ac.at])
-AC_CONFIG_SRCDIR([src/BMPlugin.cpp])
+AC_INIT([dlvhex-decisiondiagramplugin],[0.0.1],[e0525250@mail.student.tuwien.ac.at])
+AC_CONFIG_SRCDIR([src/DecisionDiagramPlugin.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 
 MAJOR=`echo $PACKAGE_VERSION | sed "s,^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\),\1,"`
 MINOR=`echo $PACKAGE_VERSION | sed "s,^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\),\2,"`
 MICRO=`echo $PACKAGE_VERSION | sed "s,^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\),\3,"`
 
-AC_DEFINE_UNQUOTED([BMPLUGIN_MAJOR], [$MAJOR], [Major version number of the bm-plugin])
-AC_DEFINE_UNQUOTED([BMPLUGIN_MINOR], [$MINOR], [Minor version number of the bm-plugin])
-AC_DEFINE_UNQUOTED([BMPLUGIN_MICRO], [$MICRO], [Micro version number of the bm-plugin])
+AC_DEFINE_UNQUOTED([DDPLUGIN_MAJOR], [$MAJOR], [Major version number of the dd-plugin])
+AC_DEFINE_UNQUOTED([DDPLUGIN_MINOR], [$MINOR], [Minor version number of the dd-plugin])
+AC_DEFINE_UNQUOTED([DDPLUGIN_MICRO], [$MICRO], [Micro version number of the dd-plugin])
 
 AM_INIT_AUTOMAKE
 
@@ -26,8 +26,6 @@ esac
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AC_PROG_LEX
-AC_PROG_YACC
 
 # Checks for header files.
 AC_HEADER_DIRENT
@@ -90,9 +88,6 @@ AC_CONFIG_FILES([
            src/Makefile
            include/Makefile
            examples/Makefile
-           rpcompiler/Makefile 
-           rpcompiler/src/Makefile
-           rpcompiler/examples/Makefile
            dotreader/Makefile 
            dotreader/src/Makefile
            dotreader/examples/Makefile
