@@ -211,6 +211,7 @@ OPERATORIMPORTFUNCTION()
 	operators.push_back(&_userpreferences);
 	operators.push_back(&_orderbinarydecisiontree);
 	operators.push_back(&_avg);
+	return operators;
 }
 
 //
