@@ -18,6 +18,8 @@ std::string getNodeClassification(graph_t *g, Agnode_t *v);
  * \return std::string rs with leading and successional blanks, tabs and newlines cut off
  */
 std::string trim(std::string rs){
+	if (rs.length() == 0) return rs;
+
 	int begin = rs.length() - 1;
 	int end = 0;
 	int j = 0;
@@ -82,7 +84,7 @@ std::string getNodeName(graph_t *g, Agnode_t *v){
  * \return std::string The classification of node v if present, otherwise the empty string
  */
 std::string getNodeClassification(graph_t *g, Agnode_t *v){
-	std::string nodeLabel = std::string(v->name);
+	std::string nodeLabel = agget(v, (char*)"label");
 
 	// Extract classification
 	int classStart = nodeLabel.find_first_of("[") + 1;
@@ -110,6 +112,7 @@ std::string writeNodeAsAtom(graph_t *g, Agnode_t *v){
 
 	bool hasInEdges = false;
 	bool hasOutEdges = false;
+	static bool rootWritten = false;
 
 	Agedge_t *e;
 
@@ -122,14 +125,15 @@ std::string writeNodeAsAtom(graph_t *g, Agnode_t *v){
 	}
 
 	// Generate code for this node
-	std::string nodeLabel = getNodeName(g, v);
+	std::string nodeName = getNodeName(g, v);
 	if (hasInEdges && hasOutEdges){
-		ss << "innernode(" << nodeLabel << ").";
+		ss << "innernode(" << nodeName << ").";
 	}else if (hasInEdges){
-		ss << "leafnode(" << trim(nodeLabel) << ", " << trim(getNodeClassification(g, v)) << ").";
+		ss << "leafnode(" << trim(nodeName) << ", " << trim(getNodeClassification(g, v)) << ").";
 	}else{
-		ss << "root(" << nodeLabel << ").";
-		ss << "innernode(" << nodeLabel << ").";
+		if (!rootWritten) ss << "root(" << nodeName << ")." << std::endl;
+		ss << "innernode(" << nodeName << ").";
+		rootWritten = true;	// Write root only once; if the graph is a forest (rather than a tree), the first root discovered is used
 	}
 
 	return ss.str();
@@ -146,24 +150,25 @@ std::string writeEdgeAsAtom(graph_t *g, Agedge_t *e){
 	std::stringstream ss;
 
 	// Determine type of edges
-	if (edgeLabel.length() == 0){
-		ss << "elseedge(" << e->head->name << ", " << e->tail->name << ").";
+	if (edgeLabel.length() == 0 || edgeLabel == std::string("else")){
+		ss << "elseedge(" << e->tail->name << ", " << e->head->name << ").";
 	}else{
 		// Conditinoal edge: Extract operands and operator of condition
 		int operatorPos = -1;
 		int operatorLength = -1;
-		if (operatorPos < 0 && edgeLabel.find_first_of("<=") != std::string::npos) { operatorPos = edgeLabel.find_first_of("<="); operatorLength = 2; }
-		if (operatorPos < 0 && edgeLabel.find_first_of(">=") != std::string::npos) { operatorPos = edgeLabel.find_first_of(">="); operatorLength = 2; }
-		if (operatorPos < 0 && edgeLabel.find_first_of("<") != std::string::npos) { operatorPos = edgeLabel.find_first_of("<"); operatorLength = 1; }
-		if (operatorPos < 0 && edgeLabel.find_first_of(">") != std::string::npos) { operatorPos = edgeLabel.find_first_of(">"); operatorLength = 1; }
-		if (operatorPos < 0 && edgeLabel.find_first_of("=") != std::string::npos) { operatorPos = edgeLabel.find_first_of("="); operatorLength = 1; }
+		if (operatorPos < 0 && edgeLabel.find("<=") != std::string::npos) { operatorPos = edgeLabel.find_first_of("<="); operatorLength = 2; }
+		if (operatorPos < 0 && edgeLabel.find(">=") != std::string::npos) { operatorPos = edgeLabel.find_first_of(">="); operatorLength = 2; }
+		if (operatorPos < 0 && edgeLabel.find("<") != std::string::npos) { operatorPos = edgeLabel.find_first_of("<"); operatorLength = 1; }
+		if (operatorPos < 0 && edgeLabel.find(">") != std::string::npos) { operatorPos = edgeLabel.find_first_of(">"); operatorLength = 1; }
+		if (operatorPos < 0 && edgeLabel.find("=") != std::string::npos) { operatorPos = edgeLabel.find_first_of("="); operatorLength = 1; }
 		std::string firstOperand = edgeLabel.substr(0, operatorPos);
 		std::string secondOperand = edgeLabel.substr(operatorPos + operatorLength);
 		std::string operator_ = edgeLabel.substr(operatorPos, operatorLength);
 
 		// Generate code for this conditional edge
-		ss << "edge(" << getNodeName(g, e->head) << ", " << getNodeName(g, e->tail) << ", " << trim(firstOperand) << ", \"" << trim(operator_) << "\", " << trim(secondOperand) << ").";
+		ss << "conditionaledge(" << getNodeName(g, e->tail) << ", " << getNodeName(g, e->head) << ", " << trim(firstOperand) << ", \"" << trim(operator_) << "\", " << trim(secondOperand) << ").";
 	}
+
 	return ss.str();
 }
 
@@ -271,7 +276,7 @@ int main(int argc, char **argv){
 		graph_t *g;
 		FILE *fp;
 		gvc = gvContext();
-		fp = stdin;//fopen("/home/redl/Desktop/hello.dot", "r");
+		fp = stdin;
 		g = agread(stdin);
 
 		if (!g){
@@ -282,7 +287,7 @@ int main(int argc, char **argv){
 			Agnode_t *v;
 			Agedge_t *e;
 
-			// Iterate through all nodes or the graph
+			// Iterate through all nodes of the graph
 			for (v = agfstnode(g); v; v = agnxtnode(g,v)){
 
 				// Write node
@@ -316,7 +321,7 @@ int main(int argc, char **argv){
 		std::cout << "digraph {" << std::endl;
 		while (readChunk(input, cursor, cmdChunk)){
 
-			// Create list of edges (nodes are generated implicitly)
+			// Create list of edges (nodes are in general generated implicitly, but we write it explicitly since some nodes could be disconnected)
 			if (cmdChunk == std::string("conditionaledge")){
 				// Conditional edge
 				std::string from;
@@ -338,7 +343,9 @@ int main(int argc, char **argv){
 				readChunk(input, cursor, to);
 				std::cout << "     " << from << " -> " << to << " [label=\"else\"];" << std::endl;
 			}else if (cmdChunk == std::string("innernode")){
-				readChunk(input, cursor, trash);
+				std::string name;
+				readChunk(input, cursor, name);
+				std::cout << "     " << name << ";" << std::endl;
 			}else if (cmdChunk == std::string("leafnode")){
 				std::string name;
 				std::string classification;

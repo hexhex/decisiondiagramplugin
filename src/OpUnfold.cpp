@@ -31,56 +31,10 @@ DecisionDiagram OpUnfold::unfold(DecisionDiagram::Node* root, DecisionDiagram& d
 
 			// Avoid duplicate node names
 			unfoldedChild.useUniqueLabels(&ddResult);
-			ddResult.addDecisionDiagram(&unfoldedChild);
+			DecisionDiagram::Node *childRoot = ddResult.addDecisionDiagram(&unfoldedChild);
 
-/*
-			bool dupfound = false;
-			std::set<DecisionDiagram::Node*> ccNodes = unfoldedChild.getNodes();
-			std::set<DecisionDiagram::Edge*> ccEdges = unfoldedChild.getEdges();
-			//    Check all nodes of the currently unfolded child
-			for (std::set<DecisionDiagram::Node*>::iterator currentChildIt = ccNodes.begin(); currentChildIt != ccNodes.end(); currentChildIt++){
-				std::string originalname;
-				int appendixctr = 1;
-				dupfound = true;
-				while (dupfound){
-					dupfound = false;
-					std::stringstream newname;
-					//   Compare each of them with all nodes of the (partial) result
-					std::set<DecisionDiagram::Node*> resultnodes = ddResult.getNodes();
-					for (std::set<DecisionDiagram::Node*>::iterator resultIt = resultnodes.begin(); resultIt != resultnodes.end(); resultIt++){
-						if ((*currentChildIt)->getLabel() == (*resultIt)->getLabel()){
-							if (appendixctr == 1) originalname = (*resultIt)->getLabel();
-							else appendixctr++;
-
-							// rename node
-							newname << originalname << "_" << appendixctr;
-							(*currentChildIt)->setLabel(newname.str());
-
-							// recheck for duplicates until a unique name was found
-							dupfound = true;
-							break;
-						}
-					}
-				}
-			}
-
-			// A unique name was found:
-			// Incorporate the child decision diagram into this one
-			//   take all nodes ...
-			for (std::set<DecisionDiagram::Node*>::iterator currentChildIt = ccNodes.begin(); currentChildIt != ccNodes.end(); currentChildIt++){
-				ddResult.addNode(*currentChildIt);
-			}
-			//   ... and all edges from the child decision diagram
-			for (std::set<DecisionDiagram::Edge*>::iterator currentChildIt = ccEdges.begin(); currentChildIt != ccEdges.end(); currentChildIt++){
-				ddResult.addEdge(*currentChildIt);
-			}
-*/
-		}
-
-		// Connect the current root node with it's children
-		std::set<DecisionDiagram::Edge*> rootEdges = root->getOutEdges();
-		for (std::set<DecisionDiagram::Edge*>::iterator rootEdgeIt = rootEdges.begin(); rootEdgeIt != rootEdges.end(); rootEdgeIt++){
-			ddResult.addEdge(*rootEdgeIt);
+			// Connect the current root node with this child
+			ddResult.addEdge(newRoot, childRoot, (*childIt)->getCondition());
 		}
 	}
 
@@ -104,6 +58,7 @@ HexAnswer OpUnfold::apply(int arity, std::vector<HexAnswer*>& arguments, Operato
 					cyclestring << (first ? "" : ", ") << (*it)->getLabel();
 					first = false;
 				}
+
 				throw DecisionDiagram::InvalidDecisionDiagram("Cycle detected: " + cyclestring.str());
 			}
 

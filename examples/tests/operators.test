@@ -1,0 +1,11 @@
+../TNM.txt TNM.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpUnfold1.txt OpUnfold1.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpUnfold2.txt OpUnfold2.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpUnfold3.txt OpUnfold3.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpOrderBinaryDecisionTree1.txt OpOrderBinaryDecisionTree1.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpOrderBinaryDecisionTree2.txt OpOrderBinaryDecisionTree2.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpOrderBinaryDecisionTree3.txt OpOrderBinaryDecisionTree3.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpToBinaryDecisionTree1.txt OpToBinaryDecisionTree1.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpToBinaryDecisionTree2.txt OpToBinaryDecisionTree2.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpAvg1.txt OpAvg1.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge
+../OpAvg2.txt OpAvg2.out 1 --irw=rpcompiler --filter=root,innernode,leafnode,conditionaledge,elseedge

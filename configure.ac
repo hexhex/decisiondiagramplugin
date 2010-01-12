@@ -85,6 +85,7 @@ AC_CONFIG_FILES([
            include/Makefile
            examples/Makefile
            dotreader/Makefile 
+           dotreader/include/Makefile 
            dotreader/src/Makefile
            dotreader/examples/Makefile
 ])

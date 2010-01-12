@@ -29,7 +29,7 @@ mapping: "
 
 [revision plan]
 {
-	operator: average;
+	operator: avg;
 	{
 		kb1
 	};

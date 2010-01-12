@@ -1,0 +1,1 @@
+{elseedge(v2,leaf2), elseedge(v1,leaf2_1), elseedge(root,v2), conditionaledge(v2,leaf1,z,"<",w), conditionaledge(v1,leaf1_1,z,"<",w), conditionaledge(root,v1,x,"<",y), leafnode(leaf1_1,class1), leafnode(leaf2_1,class2), leafnode(leaf2,class2), leafnode(leaf1,class1), innernode(v2), innernode(v1), innernode(root), root(root)}

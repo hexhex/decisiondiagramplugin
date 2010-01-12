@@ -632,7 +632,7 @@ std::vector<DecisionDiagram::Node*> DecisionDiagram::containsCycles() const{
 				DecisionDiagram::Node* childNode = (*it)->getTo();
 
 				// Check if a cycle is discovered; in case of a cycle, this child has already a parent tag
-				if (parents.find(childNode) != parents.end()){
+				if (parents.find(childNode) != parents.end() && parents[childNode] != p.first){
 					// Cycle detected
 					// Backtrack the path to extract the cycle
 					std::vector<Node*> cycle;
