@@ -23,8 +23,8 @@
 #
 
 MKTEMP="mktemp -t tmp.XXXXXXXXXX"
-TMPFILE=$($MKTEMP) # global temp. file for generated output
-TMPFILE2=$($MKTEMP) # global temp. file for reference output
+TMPFILE_DOT=$($MKTEMP)
+TMPFILE_HEX=$($MKTEMP)
 
 failed=0
 warned=0
@@ -34,37 +34,55 @@ echo ============ dotconverter tests start ============
 
 for t in $(find $TESTDIR -name '*.test' -type f)
 do
-    while read INPUT OUTPUT ADDPARM
+    while read INPUT REFOUTPUT ADDPARM
     do
 	let ntests++
 
 	INPUT=$TESTDIR/$INPUT
-	OUTPUT=$TESTDIR/$OUTPUT
+	REFOUTPUT=$TESTDIR/$REFOUTPUT
 
-	if [ ! -f $INPUT ] || [ ! -f $OUTPUT ]; then
+	if [ ! -f $INPUT ] || [ ! -f $REFOUTPUT ]; then
 	    test ! -f $INPUT && echo WARN: Could not find program file $INPUT
-	    test ! -f $OUTPUT && echo WARN: Could not find answer sets file $OUTPUT
+	    test ! -f $REFOUTPUT && echo WARN: Could not find reference output $REFOUTPUT
 	    continue
 	fi
 
-	# run dotconverter with specified parameters and input
-	$DOTCONVERTER  $PARAMETERS $ADDPARM < $INPUT | uniq | sort -r > $TMPFILE
+	# check if output is a dot file or an answer-set;
+	# use the appropriate script to compare the results
+	if [ "$ADDPARM" = "--todot" ]
+	then
+		# to dot file
 
-	# sort is necessary since equivalence is independent from the order of nodes and edges (nodes and edges form a set)
-	uniq $OUTPUT | sort -r > $TMPFILE2
+		# run dotconverter with specified parameters and input
+		$DOTCONVERTER $PARAMETERS $ADDPARM < $INPUT > $TMPFILE_DOT
 
-	if cmp -s $TMPFILE $TMPFILE2
+		# compare with reference output
+		$CMPSCRIPT "$TMPFILE_DOT" "$REFOUTPUT" "dot" >/dev/null
+		succ=$?
+	else
+		# to answer-set file
+
+		# run dotconverter with specified parameters and input
+		$DOTCONVERTER $PARAMETERS $ADDPARM < $INPUT > $TMPFILE_HEX
+
+		# compare with reference output
+		$CMPSCRIPT "$TMPFILE_HEX" "$REFOUTPUT" "hex" >/dev/null
+		succ=$?
+	fi
+
+	if [ $succ = 0 ]
 	then
 	    echo PASS: $INPUT
 	else
-		echo "FAIL: $DOTREADER $PARAMETERS $ADDPARM $INPUT"
+		echo "FAIL: [$INPUT $ADDPARM-->] $REFOUTPUT"
 		let failed++
 	fi
     done < $t # redirect test file to the while loop
 done
 
 # cleanup
-rm -f $TMPFILE
+rm -f $TMPFILE_DOT
+rm -f $TMPFILE_HEX
 
 echo ========== dotconverter tests completed ==========
 
