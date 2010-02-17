@@ -84,10 +84,10 @@ AC_CONFIG_FILES([
            src/Makefile
            include/Makefile
            examples/Makefile
-           dotreader/Makefile 
-           dotreader/include/Makefile 
-           dotreader/src/Makefile
-           dotreader/examples/Makefile
+           dotconverter/Makefile 
+           dotconverter/include/Makefile 
+           dotconverter/src/Makefile
+           dotconverter/examples/Makefile
 ])
 
 AC_OUTPUT
