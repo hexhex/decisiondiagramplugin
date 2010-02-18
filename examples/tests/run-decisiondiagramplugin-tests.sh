@@ -3,7 +3,7 @@
 #
 # dlvhex -- Answer-Set Programming with external interfaces.
 # Copyright (C) 2005, 2006, 2007 Roman Schindlauer
-# Modified by Christoph Redl in January 2010
+# Modified by Christoph Redl in Feburary 2010
 # 
 # This file is part of dlvhex.
 #
@@ -27,45 +27,46 @@ failed=0
 warned=0
 ntests=0
 
-echo ============ operator tests start ============
+echo ============ decisiondiagramplugin tests start ============
 
 for t in $(find $TESTDIR -name '*.test' -type f)
 do
-    while read INPUT REFOUTPUT
+    while read INPUT REFOUTPUT ADDDHPARAM
     do
 	let ntests++
 
 	INPUT=$TESTDIR/$INPUT
 	REFOUTPUT=$TESTDIR/$REFOUTPUT
 
-	if [ ! -f $INPUT ] || [ ! -f $ANSWERSETS ]; then
+	if [ ! -f $INPUT ] || [ ! -f $REFOUTPUT ]; then
 	    test ! -f $INPUT && echo WARN: Could not find program file $INPUT
 	    test ! -f $REFOUTPUT && echo WARN: Could not find reference output $REFOUTPUT
 	    continue
 	fi
 
-	# compare with reference output
-	$CMPSCRIPT "$INPUT" "$REFOUTPUT" >/dev/null
-	succ=$?
+	OLDDLVHEXPARAMETERS=$DLVHEXPARAMETERS
+	DLVHEXPARAMETERS="$DLVHEXPARAMETERS $ADDDHPARAM"
+	export DLVHEXPARAMETERS
 
-	if [ $succ = 0 ]
+	# compare with reference output
+	if $CMPSCRIPT $INPUT $REFOUTPUT > /dev/null
 	then
-		echo PASS: $INPUT
+		echo "PASS: $INPUT"
 	else
-		echo FAIL: $INPUT
+		echo "FAIL: $INPUT"
 		let failed++
 	fi
+
+	DLVHEXPARAMETERS=$OLDDLVHEXPARAMETERS
+	export DLVHEXPARAMETERS
     done < $t # redirect test file to the while loop
 done
 
-# cleanup
-rm -f $TMPFILE
-
-echo ========== operator tests completed ==========
+echo ========== decisiondiagramplugin tests completed ==========
 
 echo Tested $ntests dlvhex programs
 echo $failed failed tests, $warned warnings
 
-echo ============= operator tests end =============
+echo ============= decisiondiagramplugin tests end =============
 
 exit $failed
