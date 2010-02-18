@@ -22,18 +22,24 @@
 # USA.
 #
 
-MKTEMP="mktemp -t tmp.XXXXXXXXXX"
-TMPFILE_DOT=$($MKTEMP)
-TMPFILE_HEX=$($MKTEMP)
-
 failed=0
 warned=0
 ntests=0
 
+# Create temporary files
+MKTEMP="mktemp -t tmp.XXXXXXXXXX"
+TMPFILE_DOT=$($MKTEMP)
+TMPFILE_HEX=$($MKTEMP)
+
+# Check prerequisites
+#   none
+
+# Tests
 echo ============ dotconverter tests start ============
 
 for t in $(find $TESTDIR -name '*.test' -type f)
 do
+    # input format: [input file] [reference output] [parameters for dotconverter]
     while read INPUT REFOUTPUT ADDDCPARM
     do
 	let ntests++
@@ -42,7 +48,7 @@ do
 	REFOUTPUT=$TESTDIR/$REFOUTPUT
 
 	if [ ! -f $INPUT ] || [ ! -f $REFOUTPUT ]; then
-	    test ! -f $INPUT && echo WARN: Could not find program file $INPUT
+	    test ! -f $INPUT && echo WARN: Could not find input file $INPUT
 	    test ! -f $REFOUTPUT && echo WARN: Could not find reference output $REFOUTPUT
 	    continue
 	fi
@@ -57,7 +63,7 @@ do
 		$DOTCONVERTER $PARAMETERS $ADDDCPARM < $INPUT > $TMPFILE_DOT
 
 		# compare with reference output
-		$CMPSCRIPT $TMPFILE_DOT $REFOUTPUT "dot" > /dev/null
+		$CMPSCRIPT $TMPFILE_DOT $REFOUTPUT "dot" &> /dev/null
 		succ=$?
 	else
 		# to answer-set file
@@ -66,13 +72,13 @@ do
 		$DOTCONVERTER $PARAMETERS $ADDPARM < $INPUT > $TMPFILE_HEX
 
 		# compare with reference output
-		$CMPSCRIPT $TMPFILE_HEX $REFOUTPUT "hex" > /dev/null
+		$CMPSCRIPT $TMPFILE_HEX $REFOUTPUT "hex" &> /dev/null
 		succ=$?
 	fi
 
 	if [ $succ = 0 ]
 	then
-	    echo "PASS: $INPUT"
+		echo "PASS: $INPUT"
 	else
 		echo "FAIL: [$INPUT $ADDPARM-->] $REFOUTPUT"
 		let failed++

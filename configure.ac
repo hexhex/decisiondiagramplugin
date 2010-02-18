@@ -62,6 +62,34 @@ BOOST_SMART_PTR
 BOOST_STRING_ALGO
 BOOST_TOKENIZER
 
+#
+# the default system-wide plugin dir $(libdir)/dlvhex/plugins can be
+# overridden by setting PLUGIN_DIR=... at configure-time
+#
+if test "$SYS_PLUGIN_DIR" = ""; then
+    sysplugindir="\${libdir}/dlvhex/plugins"
+else
+    sysplugindir="$SYS_PLUGIN_DIR"
+fi
+
+AC_SUBST(sysplugindir)
+
+CPPFLAGS="$CPPFLAGS -DSYS_PLUGIN_DIR='\"$sysplugindir\"'"
+
+#
+# the user plugin dir consists of the user home concatenated with
+# and USER_PLUGIN_DIR, which is .dlvhex/plugins by default and can be
+# overridden by setting USER_PLUGIN_DIR=... at configure-time
+#
+if test "$USER_PLUGIN_DIR" = ""; then
+    userplugindir=".dlvhex/plugins"
+else
+    userplugindir="$USER_PLUGIN_DIR"
+fi
+
+AC_SUBST(userplugindir)
+
+CPPFLAGS="$CPPFLAGS -DUSER_PLUGIN_DIR='\"$userplugindir\"'"
 
 #
 # where the plugin will be installed by default.
