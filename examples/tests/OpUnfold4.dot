@@ -1,0 +1,7 @@
+digraph {
+     root -> leaf1 [label="x<y"];
+     root -> leaf1_1 [label="else"];
+     leaf1_1 [label="leaf1 [class1]"];
+     leaf1 [label="leaf1 [class1]"];
+     root [label="root"];
+}

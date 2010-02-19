@@ -344,14 +344,26 @@ int main(int argc, char **argv){
 				std::cout << "     " << from << " -> " << to << " [label=\"else\"];" << std::endl;
 			}else if (cmdChunk == std::string("innernode")){
 				std::string name;
+				std::string label;
 				readChunk(input, cursor, name);
-				std::cout << "     " << name << ";" << std::endl;
+				if (name.find_first_of('_') != std::string::npos){
+					label = name.substr(0, name.find_first_of('_'));
+				}else{
+					label = name;
+				}
+				std::cout << "     " << name << " [label=\"" << label << "\"];" << std::endl;
 			}else if (cmdChunk == std::string("leafnode")){
 				std::string name;
+				std::string label;
 				std::string classification;
 				readChunk(input, cursor, name);
 				readChunk(input, cursor, classification);
-				std::cout << "     " << name << " [label=\"" << name << " [" << classification << "]\"];" << std::endl;
+				if (name.find_first_of('_') != std::string::npos){
+					label = name.substr(0, name.find_first_of('_'));
+				}else{
+					label = name;
+				}
+				std::cout << "     " << name << " [label=\"" << label << " [" << classification << "]\"];" << std::endl;
 			}else if (cmdChunk == std::string("root")){
 				readChunk(input, cursor, trash);
 			}else{

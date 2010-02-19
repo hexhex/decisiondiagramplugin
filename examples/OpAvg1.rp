@@ -19,12 +19,12 @@ mapping: "
 [belief base]
 name: kb2;
 mapping: "
-	root(b).
-	innernode(b).
+	root(a).
+	innernode(a).
 	leafnode(leaf1, class1).
 	leafnode(leaf2, class2).
-	conditionaledge(b, leaf1, a, \'<\', \'20\').
-	elseedge(b, leaf2).
+	conditionaledge(a, leaf1, a, \'<\', \'20\').
+	elseedge(a, leaf2).
 ";
 
 [revision plan]

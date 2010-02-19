@@ -18,7 +18,7 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 	if (root->getOutEdgesCount() > 2){
 		bool firstOutEdge = true;
 		
-		// Create a new intermediate node
+		// Create a new intermediate node (with a label similar to the original name)
 		DecisionDiagram::Node* intermediateNode = dd->addNode(dd->getUniqueLabel(root->getLabel()));
 
 		std::set<DecisionDiagram::Edge*> oedges = root->getOutEdges();
@@ -31,11 +31,8 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 			}else{
 				// All other edges are redirected to the intermediate node
 				DecisionDiagram::Node *currentSubNode = (*it)->getTo();
-				if (dynamic_cast<DecisionDiagram::ElseEdge*>(*it) != NULL){
-					dd->addElseEdge(intermediateNode, currentSubNode);
-				}else{
-					dd->addEdge(intermediateNode, currentSubNode, (*it)->getCondition());
-				}
+				dd->addEdge(intermediateNode, currentSubNode, (*it)->getCondition());
+
 				// Remove the original edge
 				dd->removeEdge(*it);
 
@@ -64,20 +61,23 @@ HexAnswer OpToBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answ
 			throw IOperator::OperatorException(msg.str());
 		}
 
-		// Construct input decision diagram
-		DecisionDiagram dd((*answers[0])[0]);
+		HexAnswer answer;
+		for (int answerSetNr = 0; answerSetNr < answers[0]->size(); answerSetNr++){
+			// Construct input decision diagram
+			DecisionDiagram dd((*answers[0])[answerSetNr]);
 
-		// Check preconditions
-		if (!dd.isTree()){
-			throw IOperator::OperatorException("tobinarydecisiontree expects a decision tree, but the given decision diagram is not a tree.");
+			// Check preconditions
+			if (!dd.isTree()){
+				throw IOperator::OperatorException("tobinarydecisiontree expects a decision tree, but the given decision diagram is not a tree.");
+			}
+
+			// Convert it into a binary one
+			toBinary(&dd, dd.getRoot());
+
+			// Convert the final decision diagram into a hex answer
+			answer.push_back(dd.toAnswerSet());
 		}
 
-		// Convert it into a binary one
-		toBinary(&dd, dd.getRoot());
-
-		// Convert the final decision diagram into a hex answer
-		HexAnswer answer;
-		answer.push_back(dd.toAnswerSet());
 		return answer;
 	}catch(DecisionDiagram::InvalidDecisionDiagram ide){
 		throw IOperator::OperatorException(std::string("InvalidDecisionDiagram: ") + ide.getMessage());

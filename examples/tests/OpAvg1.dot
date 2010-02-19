@@ -1,0 +1,7 @@
+digraph {
+     a -> leaf2 [label="else"];
+     a -> leaf1 [label="a<15"];
+     leaf2 [label="leaf2 [class2]"];
+     leaf1 [label="leaf1 [class1]"];
+     a [label="a"];
+}

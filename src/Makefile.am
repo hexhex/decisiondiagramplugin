@@ -9,7 +9,7 @@ plugin_LTLIBRARIES = libdlvhexdd.la
 # replace 'plugin' on the left side as above and
 # add all sources of your plugin
 #
-libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp DecisionDiagram.cpp OpUnion.cpp OpUnfold.cpp OpMajorityVoting.cpp OpToBinaryDecisionTree.cpp OpUserPreferences.cpp OpOrderBinaryDecisionTree.cpp OpAvg.cpp
+libdlvhexdd_la_SOURCES = DecisionDiagramPlugin.cpp DecisionDiagram.cpp OpUnfold.cpp OpMajorityVoting.cpp OpToBinaryDecisionTree.cpp OpUserPreferences.cpp OpOrderBinaryDecisionTree.cpp OpAvg.cpp
 #libdlvhexdd_la_LIBADD = $(libdir)/dlvhex/libdlvhexbase.la $(libdir)/dlvhex/libaspsolver.la
 
 #

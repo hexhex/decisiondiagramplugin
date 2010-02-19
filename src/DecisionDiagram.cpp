@@ -444,14 +444,12 @@ DecisionDiagram::Node* DecisionDiagram::addDecisionDiagram(DecisionDiagram* dd2)
 	Node* root = NULL;
 	std::set<Edge*> dd2edges = dd2->getEdges();
 	for (std::set<Node*>::iterator it = dd2nodes.begin(); it != dd2nodes.end(); it++){
-//std::cout << "ADDING " << (*it)->toString() << std::endl;
 		Node* n = addNode(*it);
 		if ((*it) == dd2->getRoot()){
 			root = n;
 		}
 	}
 	for (std::set<Edge*>::iterator it = dd2edges.begin(); it != dd2edges.end(); it++){
-//std::cout << "ADDING " << (*it)->toString() << std::endl;
 		addEdge(*it);
 	}
 

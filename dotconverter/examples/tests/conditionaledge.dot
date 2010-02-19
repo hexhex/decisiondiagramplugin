@@ -1,5 +1,5 @@
 digraph {
-     a;
+     a [label="a"];
      b [label="b [classb]"];
      a -> b [label="x<y"];
 }

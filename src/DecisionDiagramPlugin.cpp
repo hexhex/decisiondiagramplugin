@@ -16,7 +16,6 @@
 //#include <CodeGenerator.h>
 
 #include "dlvhex-mergingplugin/IOperator.h"
-#include <OpUnion.h>
 #include <OpUnfold.h>
 #include <OpMajorityVoting.h>
 #include <OpToBinaryDecisionTree.h>
@@ -191,7 +190,6 @@ namespace dlvhex {
 
 using namespace dlvhex::dd;
 
-OpUnion _union;
 OpUnfold _unfold;
 OpMajorityVoting _majorityvoting;
 OpToBinaryDecisionTree _tobinarydecisiontree;
@@ -204,7 +202,6 @@ std::vector<dlvhex::merging::IOperator*>
 OPERATORIMPORTFUNCTION()
 {
 	std::vector<dlvhex::merging::IOperator*> operators;
-	operators.push_back(&_union);
 	operators.push_back(&_unfold);
 	operators.push_back(&_majorityvoting);
 	operators.push_back(&_tobinarydecisiontree);

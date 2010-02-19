@@ -43,7 +43,7 @@ DecisionDiagram::Node* OpOrderBinaryDecisionTree::sink(DecisionDiagram* dd, Deci
 		msg << "Error: Decision tree is not binary. Node \"" << root->getLabel() << "\" has " << root->getOutEdgesCount() << " outgoing edges.";
 		throw IOperator::OperatorException(msg.str());
 	}
-//std::cout << root->getLabel() << std::endl;
+
 	// Check if root needs to be exchanged with one of it's children
 	std::set<DecisionDiagram::Edge*> iedges = root->getInEdges();
 	std::set<DecisionDiagram::Edge*> oedges = root->getOutEdges();
@@ -64,30 +64,28 @@ DecisionDiagram::Node* OpOrderBinaryDecisionTree::sink(DecisionDiagram* dd, Deci
 	if (exchangechild != NULL){
 		// Root needs to be exchanged with this child
 
-		//              root                                child
+		//              root                               echild
 		//        (c1)/      \(c2)       ===>       (c3)/          \(c4)
-		//        sibling    child                  root            root-copy
+		//        sibling    echild                 root            root-copy
 		//              (c3)/     \(c4)        (c1)/    \(c2)  (c1)/         \(c2)
 		//          resttree1    resttree2   sibling resttree1  sibling-copy  resttree2
 
 		// First, use human readable names for the nodes of interest
-//std::cout << "1" << std::endl;
 		DecisionDiagram::Node* newroot = exchangechild;
-		DecisionDiagram::Node* sibling1root = root->getChild(1 - echildNr);				// Take the other child
+		DecisionDiagram::Node* sibling1root = root->getChild(1 - echildNr);				// Take the other child (echild's sibling)
 		DecisionDiagram::Condition siblingcondition = root->getOutEdge(1 - echildNr)->getCondition();	// c1
 		DecisionDiagram::Condition currentchildcondition = root->getOutEdge(echildNr)->getCondition();	// c2
-		DecisionDiagram siblingCopy;									// Copy the sub-tree since we need it twice
+		DecisionDiagram siblingCopy;									// Copy the sub-tree since we need it twice (see figure)
 		siblingCopy.partialAddDecisionDiagram(dd, sibling1root);
 		siblingCopy.useUniqueLabels(dd);
-//std::cout << "{{" << siblingCopy.toString() << "}}" << std::endl;
+
 		DecisionDiagram::Node* sibling2root = dd->addDecisionDiagram(&siblingCopy);
 		DecisionDiagram::Node* newrootSuccessor1 = root;						// The old root is a successor (child) of the new root
-		DecisionDiagram::Node* newrootSuccessor2 = dd->addNode(dd->getUniqueLabel(root->getLabel()));	// We need it twice
-		DecisionDiagram::Node* resttree1root = newroot->getChild(0);
+		DecisionDiagram::Node* newrootSuccessor2 = dd->addNode(dd->getUniqueLabel(root->getLabel()));	// We need the old root node twice
+		DecisionDiagram::Node* resttree1root = newroot->getChild(0);					// root of resttree1
 		DecisionDiagram::Condition resttree1condition = newroot->getOutEdge(0)->getCondition();		// c3
-		DecisionDiagram::Node* resttree2root = newroot->getChild(1);
+		DecisionDiagram::Node* resttree2root = newroot->getChild(1);					// root of resttree2
 		DecisionDiagram::Condition resttree2condition = newroot->getOutEdge(1)->getCondition();		// c4
-//std::cout << "2" << std::endl;
 
 		// Cut out all edges from the old root to it's successors
 		for (std::set<DecisionDiagram::Edge*>::iterator e = oedges.begin(); e != oedges.end(); e++) dd->removeEdge(*e);
@@ -96,27 +94,20 @@ DecisionDiagram::Node* OpOrderBinaryDecisionTree::sink(DecisionDiagram* dd, Deci
 		// Cut out all edges from the child which becomes the new root root to it's successors
 		std::set<DecisionDiagram::Edge*> newrootOutEdges = newroot->getOutEdges();
 		for (std::set<DecisionDiagram::Edge*>::iterator e = newrootOutEdges.begin(); e != newrootOutEdges.end(); e++) dd->removeEdge(*e);
-//std::cout << "3" << std::endl;
 
 		// Create new connections
-		dd->addEdge(newrootSuccessor1, sibling1root, siblingcondition);
-//std::cout << "3a" << std::endl;
-		dd->addEdge(newrootSuccessor1, resttree1root, currentchildcondition);
-//std::cout << "3b " << (sibling2root) << std::endl;
-		dd->addEdge(newrootSuccessor2, sibling2root, siblingcondition);
-//std::cout << "3c" << std::endl;
-		dd->addEdge(newrootSuccessor2, resttree2root, currentchildcondition);
-//std::cout << "4" << std::endl;
+		dd->addEdge(newrootSuccessor1, sibling1root, siblingcondition);					// root to sibling
+		dd->addEdge(newrootSuccessor1, resttree1root, currentchildcondition);				// root to resttree1
+		dd->addEdge(newrootSuccessor2, sibling2root, siblingcondition);					// root-copy to sibling-copy
+		dd->addEdge(newrootSuccessor2, resttree2root, currentchildcondition);				// root-copy to resttree2
 
 		// Sink the new root successors since sinking might goes on further
-		DecisionDiagram::Node* subtree1root = sink(dd, newrootSuccessor1);
-		DecisionDiagram::Node* subtree2root = sink(dd, newrootSuccessor2);
-//std::cout << "5" << std::endl;
+		DecisionDiagram::Node* subtree1root = sink(dd, newrootSuccessor1);				// subtree1root can be equal to newrootSuccessor1, but might be different
+		DecisionDiagram::Node* subtree2root = sink(dd, newrootSuccessor2);				// subtree2root can be equal to newrootSuccessor2, but might be different
 
 		// Redirect the edges to the new subtree roots (since they might have changed)
 		dd->addEdge(newroot, subtree1root, resttree1condition);
 		dd->addEdge(newroot, subtree2root, resttree2condition);
-//std::cout << "6" << std::endl;
 
 		return newroot;
 	}else{
@@ -137,17 +128,20 @@ DecisionDiagram::Node* OpOrderBinaryDecisionTree::order(DecisionDiagram* dd, Dec
 		for (std::set<DecisionDiagram::Edge*>::iterator it = oedges.begin(); it != oedges.end(); it++){
 			DecisionDiagram::Node* child = (*it)->getTo();
 
-			// Redirect the edges to the new subtree roots (since they might have changed)
+			// redirect the edges to the new subtree roots (since they might have changed)
 			DecisionDiagram::Condition condition = (*it)->getCondition();
 			dd->removeEdge(*it);
 
-			DecisionDiagram::Node* subtree = order(dd, child);
+			// order the subtree
+			DecisionDiagram::Node* subtreeroot = order(dd, child);
 
-			dd->addEdge(root, subtree, condition);
+			dd->addEdge(root, subtreeroot, condition);
 		}
 
 		// Now sink the current root node and return the new root
 		return sink(dd, root);
+	}else{
+		return root;
 	}
 }
 
@@ -160,26 +154,24 @@ HexAnswer OpOrderBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& a
 			msg << "orderbinarydecisiontree is a unary operator. " << arity << " answers were passed.";
 			throw IOperator::OperatorException(msg.str());
 		}
-		if (answers[0]->size() != 1){
-			std::stringstream msg;
-			msg << "orderbinarydecisiontree expects the answer to contain exactly one answer set.";
-			throw IOperator::OperatorException(msg.str());
-		}
 
-		// Construct input decision tree
-		DecisionDiagram dd((*answers[0])[0]);
-
-		// Check preconditions
-		if (!dd.isTree()){
-			throw IOperator::OperatorException("orderbinarydecisiontree expects a decision tree, but the given decision diagram is not a tree.");
-		}
-
-		// Order the nodes
-		order(&dd, dd.getRoot());
-
-		// Convert the final decision diagram into a hex answer
 		HexAnswer answer;
-		answer.push_back(dd.toAnswerSet());
+		for (int answerSetNr = 0; answerSetNr < answers[0]->size(); answerSetNr++){
+			// Construct input decision tree
+			DecisionDiagram dd((*answers[0])[answerSetNr]);
+
+			// Check preconditions
+			if (!dd.isTree()){
+				throw IOperator::OperatorException("orderbinarydecisiontree expects a decision tree, but the given decision diagram is not a tree.");
+			}
+
+			// Order the nodes
+			order(&dd, dd.getRoot());
+
+			// Convert the final decision diagram into a hex answer
+			answer.push_back(dd.toAnswerSet());
+		}
+
 		return answer;
 	}catch(DecisionDiagram::InvalidDecisionDiagram ide){
 		throw IOperator::OperatorException(std::string("InvalidDecisionDiagram: ") + ide.getMessage());

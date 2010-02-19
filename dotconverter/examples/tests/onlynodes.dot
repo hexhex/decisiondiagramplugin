@@ -1,4 +1,4 @@
 digraph {
-     a;
-     b;
+     a [label="a"];
+     b [label="b"];
 }

@@ -8,25 +8,25 @@ predicate: elseedge/2;
 [belief base]
 name: tnm;
 mapping: "
-	root(\'check m\').
+	root(checkM).
 
-	innernode(\'check m\').
-	innernode(\'check t\').
-	innernode(\'check n\').
+	innernode(checkM).
+	innernode(checkT).
+	innernode(checkN).
 
 	leafnode(stage1, stage1).
 	leafnode(stage2, stage2).
 	leafnode(stage3, stage2).
 	leafnode(stage4, stage2).
 
-	conditionaledge(\'check m\', stage4, m, \'=\', 1).
-	elseedge(\'check m\', \'check n\').
+	conditionaledge(checkM, stage4, m, \'=\', 1).
+	elseedge(checkM, checkN).
 
-	conditionaledge(\'check n\', stage3, n, \'>\', 0).
-	elseedge(\'check n\', \'check t\').
+	conditionaledge(checkN, stage3, n, \'>\', 0).
+	elseedge(checkN, checkT).
 
-	conditionaledge(\'check t\', stage2, t, \'>=\', 3).
-	elseedge(\'check t\', stage1).
+	conditionaledge(checkT, stage2, t, \'>=\', 3).
+	elseedge(checkT, stage1).
 ";
 
 [revision plan]

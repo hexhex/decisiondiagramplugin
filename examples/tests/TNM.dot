@@ -1,0 +1,15 @@
+digraph {
+     checkN -> checkT [label="else"];
+     checkT -> stage1 [label="else"];
+     checkM -> checkN [label="else"];
+     checkN -> stage3 [label="n>0"];
+     checkT -> stage2 [label="t>=3"];
+     checkM -> stage4 [label="m=1"];
+     stage4 [label="stage4 [stage2]"];
+     stage3 [label="stage3 [stage2]"];
+     stage2 [label="stage2 [stage2]"];
+     stage1 [label="stage1 [stage1]"];
+     checkN [label="checkN"];
+     checkT [label="checkT"];
+     checkM [label="checkM"];
+}
