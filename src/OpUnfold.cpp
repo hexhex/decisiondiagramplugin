@@ -41,7 +41,7 @@ DecisionDiagram OpUnfold::unfold(DecisionDiagram::Node* root, DecisionDiagram& d
 	return ddResult;
 }
 
-HexAnswer OpUnfold::apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters){
+HexAnswer OpUnfold::apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException){
 	try{
 		HexAnswer result;
 		for (int answerSetNr = 0; answerSetNr < arguments[0]->size(); answerSetNr++){

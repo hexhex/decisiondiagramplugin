@@ -46,7 +46,7 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 	}
 }
 
-HexAnswer OpToBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters){
+HexAnswer OpToBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException){
 
 	try{
 		// Check arity

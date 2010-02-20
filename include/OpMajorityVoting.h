@@ -21,12 +21,12 @@ namespace dlvhex{
 		 *	A	... answer to the operator result
 		 */
 		class OpMajorityVoting : public IOperator{
-		private:
-			DecisionDiagram unfold(DecisionDiagram::Node* root, DecisionDiagram& ddin);
-			DecisionDiagram::Node* makeInnerNode(DecisionDiagram* dd, DecisionDiagram::Node* n_old);
+		protected:
+			typedef std::map<std::string, int> Votings;
+			void insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings);
 		public:
 			virtual std::string getName();
-			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters);
+			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
 		};
 	}
 }

@@ -145,7 +145,7 @@ DecisionDiagram::Node* OpOrderBinaryDecisionTree::order(DecisionDiagram* dd, Dec
 	}
 }
 
-HexAnswer OpOrderBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters){
+HexAnswer OpOrderBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException){
 
 	try{
 		// Check arity

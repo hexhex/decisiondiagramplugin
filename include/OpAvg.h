@@ -25,7 +25,7 @@ namespace dlvhex{
 			DecisionDiagram::Node* average(DecisionDiagram* result, DecisionDiagram* dd1, DecisionDiagram::Node* n1, DecisionDiagram* dd2, DecisionDiagram::Node* n2);
 		public:
 			virtual std::string getName();
-			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters);
+			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
 		};
 	}
 }

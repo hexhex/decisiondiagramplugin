@@ -180,7 +180,7 @@ DecisionDiagram::Node* OpAvg::average(DecisionDiagram* result, DecisionDiagram* 
 	}
 }
 
-HexAnswer OpAvg::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters){
+HexAnswer OpAvg::apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException){
 	try{
 		// Check arity
 		if (arity != 2){
