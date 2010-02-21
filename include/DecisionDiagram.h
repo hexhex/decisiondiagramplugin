@@ -43,6 +43,7 @@ namespace dlvhex{
 			/**
 			 * A class representing one node of a decision diagram.
 			 */
+			class LeafNode;
 			class Node{
 			private:
 				std::string label;		// This node's label
@@ -71,9 +72,14 @@ namespace dlvhex{
 				Edge* getOutEdge(int index);
 
 				virtual std::string toString() const;
+
+				virtual bool operator==(const Node& n2) const;
+				virtual bool operator==(const LeafNode& n2) const;
+				virtual bool operator!=(const Node& n2) const;
+				virtual bool operator!=(const LeafNode& n2) const;
 			};
 
-			/*! \fn DecisionDiagram::LeafNode::Node(std::string l)
+			/*! \fn DecisionDiagram::Node::Node(std::string l)
 			 *  \brief Construct a new node with a certain label.
 			 *  \param l The label of the node
 			 */
@@ -158,6 +164,26 @@ namespace dlvhex{
 			 *  \return std::string The string representation of this node.
 			 */
 
+			/*! \fn virtual bool DecisionDiagram::Node::operator==(const Node& n2) const
+			 * Compares this node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Node::operator==(const LeafNode& n2) const
+			 * Compares this node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Node::operator!=(const Node& n2) const
+			 * Compares this node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are not semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Node::operator!=(const LeafNode& n2) const
+			 * Compares this node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are not semantically equivalent.
+			 */
+
 
 			/**
 			 * A class representing one leaf node of a decision diagram.
@@ -175,6 +201,9 @@ namespace dlvhex{
 				void setClassification(std::string c);
 
 				virtual std::string toString() const;
+
+				virtual bool operator==(const Node& n2) const;
+				virtual bool operator==(const LeafNode& n2) const;
 			};
 
 			/*! \fn DecisionDiagram::LeafNode::LeafNode(std::string l, std::string c)
@@ -203,6 +232,16 @@ namespace dlvhex{
 			 *  \return std::string The string representation of this leaf node.
 			 */
 
+			/*! \fn virtual bool DecisionDiagram::LeafNode::operator==(const Node& n2) const
+			 * Compares this leaf node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::LeafNode::operator==(const LeafNode& n2) const
+			 * Compares this leaf node with another one _semantically_. Two nodes are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the nodes are semantically equivalent.
+			 */
+
 
 			/**
 			 * A class representing the condition of an edge of a decision diagram.
@@ -229,14 +268,17 @@ namespace dlvhex{
 				Condition(std::string operand1_, std::string operand2_, std::string operation_);
 
 				virtual ~Condition();
-				std::string getOperand1();
-				std::string getOperand2();
-				CmpOp getOperation();
+				std::string getOperand1() const;
+				std::string getOperand2() const;
+				CmpOp getOperation() const;
 
 				static CmpOp stringToCmpOp(std::string operation_);
 				static std::string cmpOpToString(CmpOp op);
 
 				virtual std::string toString() const;
+
+				virtual bool operator==(const Condition& c2) const;
+				virtual bool operator!=(const Condition& c2) const;
 			};
 
 			/*! \fn DecisionDiagram::Condition::Condition(std::string operand1_, std::string operand2_, CmpOp operation_)
@@ -258,17 +300,17 @@ namespace dlvhex{
 			 *  \brief Destructor
 			 */
 
-			/*! \fn std::string DecisionDiagram::Condition::getOperand1()
+			/*! \fn std::string DecisionDiagram::Condition::getOperand1() const
 			 *  \brief Returns the first operand of the range query.
 			 *  \return std::string The first operand of the range query
 			 */
 
-			/*! \fn std::string DecisionDiagram::Condition::getOperand2()
+			/*! \fn std::string DecisionDiagram::Condition::getOperand2() const
 			 *  \brief Returns the second operand of the range query.
 			 *  \return std::string The second operand of the range query
 			 */
 
-			/*! \fn CmpOp DecisionDiagram::Condition::getOperation()
+			/*! \fn CmpOp DecisionDiagram::Condition::getOperation() const
 			 *  \brief Returns the operation of the range query.
 			 *  \return CmpOp The operation of the range query
 			 */
@@ -291,10 +333,21 @@ namespace dlvhex{
 			 *  \return std::string The string representation of this condition.
 			 */
 
+			/*! \fn bool DecisionDiagram::Condition::operator==(const Condition& c2) const
+			 * Compares this condition with another one _semantically_. Two conditions are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the conditions are semantically equivalent.
+			 */
+
+			/*! \fn bool DecisionDiagram::Condition::operator!=(const Condition& c2) const
+			 * Compares this condition with another one _semantically_. Two conditions are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the conditions are not semantically equivalent.
+			 */
+
 
 			/**
 			 * A class representing one edge of a decision diagram.
 			 */
+			class ElseEdge;
 			class Edge{
 			private:
 				Node *from, *to;
@@ -308,9 +361,14 @@ namespace dlvhex{
 
 				Node* getFrom();
 				Node* getTo();
-				Condition getCondition();
+				Condition getCondition() const;
 
 				virtual std::string toString() const;
+
+				virtual bool operator==(const Edge& e2) const;
+				virtual bool operator==(const ElseEdge& e2) const;
+				virtual bool operator!=(const Edge& e2) const;
+				virtual bool operator!=(const ElseEdge& e2) const;
 			};
 
 			/*! \fn DecisionDiagram::Edge::Edge(Node *f, Node *t, Condition c)
@@ -334,7 +392,7 @@ namespace dlvhex{
 			 *  \return Node* The destination node of this edge
 			 */
 
-			/*! \fn Condition DecisionDiagram::Edge::getCondition()
+			/*! \fn Condition DecisionDiagram::Edge::getCondition() const
 			 *  \brief Returns the condition of this conditional edge.
 			 *  \return Condition The condition of this conditional edge
 			 */
@@ -342,6 +400,26 @@ namespace dlvhex{
 			/*! \fn std::string DecisionDiagram::Edge::toString()
 			 *  \brief Returns a string representation of this edge.
 			 *  \return std::string The string representation of this edge.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Edge::operator==(const Edge& e2) const
+			 * Compares this edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Edge::operator==(const ElseEdge& e2) const
+			 * Compares this edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Edge::operator!=(const Edge& e2) const
+			 * Compares this edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are not semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::Edge::operator!=(const ElseEdge& e2) const
+			 * Compares this edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are not semantically equivalent.
 			 */
 
 
@@ -357,6 +435,9 @@ namespace dlvhex{
 				virtual ~ElseEdge();
 
 				virtual std::string toString() const;
+
+				virtual bool operator==(const Edge& e2) const;
+				virtual bool operator==(const ElseEdge& e2) const;
 			};
 
 			/*! \fn DecisionDiagram::ElseEdge::ElseEdge(Node *f, Node *t)
@@ -372,6 +453,16 @@ namespace dlvhex{
 			/*! \fn std::string DecisionDiagram::ElseEdge::toString()
 			 *  \brief Returns a string representation of this unconditional (else) edge.
 			 *  \return std::string The string representation of this unconditional (else) edge.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::ElseEdge::operator==(const Edge& e2) const
+			 * Compares this else edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are semantically equivalent.
+			 */
+
+			/*! \fn virtual bool DecisionDiagram::ElseEdge::operator==(const ElseEdge& e2) const
+			 * Compares this else edge with another one _semantically_. Two edges are equivalent if they encode the same classifier.
+			 *  \throws bool True iff the edges are semantically equivalent.
 			 */
 
 
@@ -423,6 +514,10 @@ namespace dlvhex{
 			// Advanced
 			std::vector<Node*> containsCycles() const;
 			bool isTree() const;
+			virtual bool operator==(const DecisionDiagram &dd2) const;
+			virtual bool operator!=(const DecisionDiagram &dd2) const;
+			bool containsPath(const Node* from, const Node* to) const;
+
 
 			// Output generation
 			AtomSet toAnswerSet() const;
@@ -628,6 +723,21 @@ namespace dlvhex{
 /*! \fn bool DecisionDiagram::isTree() const
  * Checks if this decision diagram is a tree.
  *  \throws bool True iff this decision diagram is a tree, otherwise false.
+ */
+
+/*! \fn virtual bool DecisionDiagram::operator==(const DecisionDiagram& dd2) const
+ * Compares this decision diagram with another one _semantically_. Two decision diagrams are equivalent if they encode the same classifier.
+ *  \throws bool True iff the decision diagrams are semantically equivalent.
+ */
+
+/*! \fn virtual bool DecisionDiagram::operator!=(const DecisionDiagram& dd2) const
+ * Compares this decision diagram with another one _semantically_. Two decision diagrams are equivalent if they encode the same classifier.
+ *  \throws bool True iff the decision diagrams are not semantically equivalent.
+ */
+
+/*! \fn bool DecisionDiagram::containsPath(const Node* from, const Node* to) const;
+ * Checks if there is a path from a certain node to a certain other one
+ *  \throws bool True iff there is a path from "from" to "to"
  */
 
 /*! \fn AtomSet DecisionDiagram::toAnswerSet() const

@@ -1,0 +1,14 @@
+digraph {
+     v2 -> leaf4 [label="else"];
+     v1 -> leaf2 [label="else"];
+     root -> v2 [label="else"];
+     v2 -> leaf2 [label="x<a"];
+     v1 -> leaf1 [label="x<a"];
+     root -> v1 [label="v<y"];
+     leaf4 [label="leaf4 [class3]"];
+     leaf2 [label="leaf2 [class2]"];
+     leaf1 [label="leaf1 [class1]"];
+     v2 [label="v2"];
+     v1 [label="v1"];
+     root [label="root"];
+}

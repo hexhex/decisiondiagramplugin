@@ -22,6 +22,7 @@
 #include <OpUserPreferences.h>
 #include <OpOrderBinaryDecisionTree.h>
 #include <OpAvg.h>
+#include <OpSimplify.h>
 
 namespace dlvhex {
 	namespace dd {
@@ -196,6 +197,7 @@ OpToBinaryDecisionTree _tobinarydecisiontree;
 OpUserPreferences _userpreferences;
 OpOrderBinaryDecisionTree _orderbinarydecisiontree;
 OpAvg _avg;
+OpSimplify _simplify;
 
 extern "C"
 std::vector<dlvhex::merging::IOperator*>
@@ -208,6 +210,7 @@ OPERATORIMPORTFUNCTION()
 	operators.push_back(&_userpreferences);
 	operators.push_back(&_orderbinarydecisiontree);
 	operators.push_back(&_avg);
+	operators.push_back(&_simplify);
 	return operators;
 }
 

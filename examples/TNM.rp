@@ -16,8 +16,8 @@ mapping: "
 
 	leafnode(stage1, stage1).
 	leafnode(stage2, stage2).
-	leafnode(stage3, stage2).
-	leafnode(stage4, stage2).
+	leafnode(stage3, stage3).
+	leafnode(stage4, stage4).
 
 	conditionaledge(checkM, stage4, m, \'=\', 1).
 	elseedge(checkM, checkN).

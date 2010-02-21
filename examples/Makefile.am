@@ -14,7 +14,11 @@ EXTRA_DIST = \
   OpMajorityVoting2.rp \
   OpUserPreferences1.rp \
   OpUserPreferences2.rp \
-  OpUserPreferences3.rp
+  OpUserPreferences3.rp \
+  OpSimplify1.rp \
+  OpSimplify2.rp \
+  OpSimplify3.rp \
+  OpSimplify4.rp
 
 TESTS = tests/run-decisiondiagramplugin-tests.sh
 TESTS_ENVIRONMENT = DLVHEX=dlvhex RPCOMPILER=rpcompiler CMPSCRIPT=$(top_srcdir)/examples/compare.sh DOTCONVERTER=$(top_srcdir)/dotconverter/src/dotconverter TESTDIR=$(top_srcdir)/examples/tests DLVHEXPARAMETERS="--plugindir=$(top_builddir)/src --operatorpath=$(top_builddir)/src/.libs/" SYSPLUGINDIR=$(sysplugindir) USERPLUGINDIR=$(userplugindir)

@@ -4,6 +4,7 @@
 #include <stack>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 
 using namespace dlvhex::dd;
 
@@ -96,6 +97,59 @@ std::string DecisionDiagram::Node::toString() const{
 	return label;
 }
 
+bool DecisionDiagram::Node::operator==(const DecisionDiagram::Node &n2) const{
+
+	try{
+		// check if n2 is a leaf
+		const LeafNode& l2 = dynamic_cast<const LeafNode&>(n2);
+		return *this == l2;
+	}catch(std::bad_cast){
+		// n2 is an inner node
+		std::set<Edge*> outEdges_n2 = n2.getOutEdges();
+		if (outEdges_n2.size() != outEdges.size()) return false;
+
+		// For all edges of n1, search the appropriate edge of n2 (with respect to the edge condition)
+		for (std::set<Edge*>::iterator it1 = outEdges.begin(); it1 != outEdges.end(); it1++){
+			Edge* e1 = *it1;
+			bool accordingEdgeFound = false;
+			for (std::set<Edge*>::iterator it2 = outEdges_n2.begin(); it2 != outEdges_n2.end(); it2++){
+				Edge* e2 = *it2;
+
+				// check if these two edges coincide
+				if (e1->getCondition() == e2->getCondition()){
+					// yes: now compare the subdiagrams
+					if (*(e1->getTo()) != *(e2->getTo())){
+						return false;
+					}
+					// yes, they coincide
+					accordingEdgeFound = true;
+					break;
+				}
+
+			}
+			// we must find an according edge in n2 for each edge in n1
+			// Note: We do not have to check it the other way round since we safely assume that all edge conditions are distinct.
+			//       Thus is is sufficient to check the edge count (see above).
+			if (!accordingEdgeFound){
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+bool DecisionDiagram::Node::operator==(const DecisionDiagram::LeafNode &n2) const{
+	return false;
+}
+
+bool DecisionDiagram::Node::operator!=(const DecisionDiagram::Node &n2) const{
+	return !(*this == n2);
+}
+
+bool DecisionDiagram::Node::operator!=(const DecisionDiagram::LeafNode &n2) const{
+	return !(*this == n2);
+}
+
 
 // ------------------------------ LeafNode ------------------------------
 
@@ -118,6 +172,21 @@ std::string DecisionDiagram::LeafNode::toString() const{
 	return std::string("\"") + label + std::string("[") + classification + std::string("]") + std::string("\"");
 }
 
+bool DecisionDiagram::LeafNode::operator==(const DecisionDiagram::Node &n2) const{
+	try{
+		// check if n2 is a leaf
+		const LeafNode& l2 = dynamic_cast<const LeafNode&>(n2);
+		return *this == l2;
+	}catch(std::bad_cast){
+		// n2 is an innner node
+		return false;
+	}
+}
+
+bool DecisionDiagram::LeafNode::operator==(const DecisionDiagram::LeafNode &n2) const{
+	return classification == n2.classification;
+}
+
 
 // ------------------------------ Condition ------------------------------
 
@@ -131,15 +200,15 @@ DecisionDiagram::Condition::Condition(std::string operand1_, std::string operand
 DecisionDiagram::Condition::~Condition(){
 }
 
-std::string DecisionDiagram::Condition::getOperand1(){
+std::string DecisionDiagram::Condition::getOperand1() const{
 	return operand1;
 }
 
-std::string DecisionDiagram::Condition::getOperand2(){
+std::string DecisionDiagram::Condition::getOperand2() const{
 	return operand2;
 }
 
-DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::getOperation(){
+DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::getOperation() const{
 	return operation;
 }
 
@@ -168,6 +237,29 @@ std::string DecisionDiagram::Condition::toString() const{
 	return operand1 + cmpOpToString(operation) + operand2;
 }
 
+bool DecisionDiagram::Condition::operator==(const DecisionDiagram::Condition &c2) const{
+	switch(getOperation()){
+		case Condition::lt: return	(operand1 == c2.getOperand1() && operand2 == c2.getOperand2() && c2.getOperation() == Condition::lt) ||
+						(operand1 == c2.getOperand2() && operand1 == c2.getOperand2() && c2.getOperation() == Condition::gt);
+		case Condition::le: return	(operand1 == c2.getOperand1() && operand2 == c2.getOperand2() && c2.getOperation() == Condition::le) ||
+						(operand1 == c2.getOperand2() && operand1 == c2.getOperand2() && c2.getOperation() == Condition::ge);
+		case Condition::eq: return	(c2.getOperation() == Condition::eq) &&
+						((operand1 == c2.getOperand1() && operand2 == c2.getOperand2()) ||
+						(operand2 == c2.getOperand1() && operand1 == c2.getOperand2()));
+		case Condition::ge: return	(operand1 == c2.getOperand1() && operand2 == c2.getOperand2() && c2.getOperation() == Condition::ge) ||
+						(operand1 == c2.getOperand2() && operand1 == c2.getOperand2() && c2.getOperation() == Condition::le);
+		case Condition::gt: return	(operand1 == c2.getOperand1() && operand2 == c2.getOperand2() && c2.getOperation() == Condition::gt) ||
+						(operand1 == c2.getOperand2() && operand1 == c2.getOperand2() && c2.getOperation() == Condition::lt);
+		case Condition::else_: return true;
+		default: assert(false);
+	}
+}
+
+bool DecisionDiagram::Condition::operator!=(const DecisionDiagram::Condition &c2) const{
+	return !(*this == c2);
+}
+
+
 // ------------------------------ Edge ------------------------------
 
 DecisionDiagram::Edge::Edge(Node *f, Node *t, Condition c) : from(f), to(t), condition(c){
@@ -184,12 +276,30 @@ DecisionDiagram::Node* DecisionDiagram::Edge::getTo(){
 	return to;
 }
 
-DecisionDiagram::Condition::Condition DecisionDiagram::Edge::getCondition(){
+DecisionDiagram::Condition::Condition DecisionDiagram::Edge::getCondition() const{
 	return condition;
 }
 
 std::string DecisionDiagram::Edge::toString() const{
 	return from->getLabel() + std::string(" --(") + condition.toString() + std::string(")--> ") + to->getLabel();
+}
+
+bool DecisionDiagram::Edge::operator==(const DecisionDiagram::Edge &e2) const{
+	return	condition == e2.condition &&
+		from == e2.from &&
+		to == e2.to;
+}
+
+bool DecisionDiagram::Edge::operator==(const DecisionDiagram::ElseEdge &e2) const{
+	return false;
+}
+
+bool DecisionDiagram::Edge::operator!=(const DecisionDiagram::Edge &e2) const{
+	return !(*this == e2);
+}
+
+bool DecisionDiagram::Edge::operator!=(const DecisionDiagram::ElseEdge &e2) const{
+	return !(*this == e2);
 }
 
 
@@ -203,6 +313,15 @@ DecisionDiagram::ElseEdge::~ElseEdge(){
 
 std::string DecisionDiagram::ElseEdge::toString() const{
 	return from->getLabel() + std::string(" --> ") + to->getLabel();
+}
+
+bool DecisionDiagram::ElseEdge::operator==(const DecisionDiagram::Edge &e2) const{
+	return false;
+}
+
+bool DecisionDiagram::ElseEdge::operator==(const DecisionDiagram::ElseEdge &e2) const{
+	return	from == e2.from &&
+		to == e2.to;
 }
 
 
@@ -565,7 +684,7 @@ std::string DecisionDiagram::getUniqueLabel(std::string proposal) const{
 			// Duplicate?
 			if ((*it)->getLabel() == result){
 				appendixctr++;
-//std::cout << "!" << std::endl;
+
 				// rename node
 				newname << proposal << "_" << appendixctr;
 				result = newname.str();
@@ -576,7 +695,7 @@ std::string DecisionDiagram::getUniqueLabel(std::string proposal) const{
 			}
 		}
 	}
-//std::cout << result << std::endl;
+
 	return result;
 }
 
@@ -669,6 +788,28 @@ bool DecisionDiagram::isTree() const{
 	}
 	// No such node was found
 	return true;
+}
+
+bool DecisionDiagram::operator==(const DecisionDiagram &dd2) const{
+	// Just compare the root nodes, then the diagrams are compared recursivly
+	return (*getRoot()) == (*dd2.getRoot());
+}
+
+bool DecisionDiagram::operator!=(const DecisionDiagram &dd2) const{
+	return !(*this == dd2);
+}
+
+bool DecisionDiagram::containsPath(const Node* from, const Node* to) const{
+	if (from == to) return true;
+	else{
+		// check recursivly if one of from's children has a path to "to"
+		std::set<Edge*> outEdges = from->getOutEdges();
+		for (std::set<Edge*>::iterator it = outEdges.begin(); it != outEdges.end(); it++){
+			if (containsPath((*it)->getTo(), to)) return true;
+		}
+		// no path found
+		return false;
+	}
 }
 
 DecisionDiagram::Node* DecisionDiagram::getNodeByLabel(std::string label) const{

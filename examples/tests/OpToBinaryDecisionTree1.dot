@@ -1,8 +1,8 @@
 digraph {
      root_1 -> leaf3 [label="else"];
      root -> root_1 [label="else"];
-     root_1 -> leaf1 [label="x<y"];
-     root -> leaf2 [label="z<y"];
+     root_1 -> leaf2 [label="z<y"];
+     root -> leaf1 [label="x<y"];
      leaf3 [label="leaf3 [class3]"];
      leaf2 [label="leaf2 [class2]"];
      leaf1 [label="leaf1 [class1]"];

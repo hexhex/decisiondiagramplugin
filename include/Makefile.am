@@ -6,4 +6,6 @@ noinst_HEADERS = OpUnfold.h \
 		 OpUserPreferences.h \
 		 OpToBinaryDecisionTree.h \
 		 OpOrderBinaryDecisionTree.h \
+		 OpUserPreferences.h \
+		 OpSimplify.h \
 		 DecisionDiagram.h

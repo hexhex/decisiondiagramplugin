@@ -22,9 +22,19 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 		DecisionDiagram::Node* intermediateNode = dd->addNode(dd->getUniqueLabel(root->getLabel()));
 
 		std::set<DecisionDiagram::Edge*> oedges = root->getOutEdges();
+		DecisionDiagram::Edge* selectedEdge = NULL;
 		for (std::set<DecisionDiagram::Edge*>::iterator it = oedges.begin(); it != oedges.end(); it++){
 			// Just take the first conditional edge as it is
-			if (dynamic_cast<DecisionDiagram::ElseEdge*>(*it) == NULL && firstOutEdge){
+			// Note: In theory, the order in which the conditions are checked is irrelevant since the resulting diagrams are equivalent in any case.
+			//       However, it makes writing test cases much easier if the behaviour is deterministic. Therefore we look for the
+			//       lexically smallest condition and check it first.
+			if (dynamic_cast<DecisionDiagram::ElseEdge*>(*it) == NULL &&
+								(selectedEdge == NULL || (*it)->getCondition().toString().compare(selectedEdge->getCondition().toString()) < 0)){
+				selectedEdge = *it;
+			}
+		}
+		for (std::set<DecisionDiagram::Edge*>::iterator it = oedges.begin(); it != oedges.end(); it++){
+			if (*it == selectedEdge){
 				firstOutEdge = false;
 				// Convert the sub decision diagram into a binary one
 				toBinary(dd, (*it)->getTo());

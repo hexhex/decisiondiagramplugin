@@ -1,0 +1,11 @@
+digraph {
+     y -> leaf22 [label="else"];
+     y -> leaf21 [label="xx<c"];
+     root -> leaf4 [label="w<y"];
+     root -> y [label="v<y"];
+     leaf4 [label="leaf4 [commonclass]"];
+     leaf22 [label="leaf22 [class2]"];
+     leaf21 [label="leaf21 [class1]"];
+     y [label="y"];
+     root [label="root"];
+}
