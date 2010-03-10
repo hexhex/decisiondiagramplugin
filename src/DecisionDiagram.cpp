@@ -216,7 +216,7 @@ DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::stringToCmpOp(std:
 	if (operation_ == std::string("<")) return Condition::lt;
 	if (operation_ == std::string("<=")) return Condition::le;
 	if (operation_ == std::string("=")) return Condition::eq;
-	if (operation_ == std::string(">")) return Condition::ge;
+	if (operation_ == std::string(">")) return Condition::gt;
 	if (operation_ == std::string(">=")) return Condition::gt;
 	throw InvalidDecisionDiagram(std::string("Unreconized operator: ") + operation_);
 }
@@ -364,7 +364,11 @@ DecisionDiagram::DecisionDiagram(AtomSet as){
 		if (it->getArguments()[3].getUnquotedString() == std::string("=")) cmpop = Condition::eq;
 		if (it->getArguments()[3].getUnquotedString() == std::string(">")) cmpop = Condition::ge;
 		if (it->getArguments()[3].getUnquotedString() == std::string(">=")) cmpop = Condition::gt;
-		Condition c(it->getArguments()[2].getString(), it->getArguments()[4].getString(), cmpop);
+
+		// convert both operators into integer values
+		std::string op1 = it->getArguments()[2].getUnquotedString();
+		std::string op2 = it->getArguments()[4].getUnquotedString();
+		Condition c(op1, op2, cmpop);
 		addEdge(n1, n2, c);
 	}
 
@@ -832,7 +836,7 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 			// leaf node
 			Tuple args;
 			args.push_back(Term(n->getLabel()));
-			args.push_back(Term(dynamic_cast<struct LeafNode*>(n)->getClassification()));
+			args.push_back(Term(dynamic_cast<struct LeafNode*>(n)->getClassification(), true));
 			as.insert(AtomPtr(new Atom(std::string("leafnode"), args)));
 		}else{
 			// inner node
@@ -851,9 +855,9 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 			Tuple args;
 			args.push_back(Term(e->getFrom()->getLabel()));
 			args.push_back(Term(e->getTo()->getLabel()));
-			args.push_back(Term(e->getCondition().getOperand1()));
+			args.push_back(Term(e->getCondition().getOperand1(), true));
 			args.push_back(Term(DecisionDiagram::Condition::cmpOpToString(e->getCondition().getOperation()), true));
-			args.push_back(Term(e->getCondition().getOperand2()));
+			args.push_back(Term(e->getCondition().getOperand2(), true));
 			as.insert(AtomPtr(new Atom(std::string("conditionaledge"), args)));
 		}else{
 			// else edge

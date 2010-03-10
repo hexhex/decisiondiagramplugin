@@ -45,15 +45,18 @@ LT_INIT
 
 #
 # of course we need dlvhex itself!
-#
+# we further need the curl library since we link the executable statically to dlvhex
 PKG_CHECK_MODULES([DLVHEX], [dlvhex >= 1.7])
+LIBCURL_CHECK_CONFIG([], [], [], [AC_MSG_ERROR([could not find CURL library. Download it at http://curl.haxx.se/.])])
 
 #
-# DotReader needs the graphviz library
+# DotConverter needs the graphviz library
 #
-PKG_CHECK_MODULES(LIBDOTREADER, libgvc >= 2.2)
-AC_SUBST(LIBDOTREADER_LIBS)
-AC_SUBST(LIBDOTREADER_CFLAGS)
+PKG_CHECK_MODULES(GRAPHVIZ, libgvc >= 2.2)
+
+PKG_CHECK_MODULES(LIBDOTCONVERTER, libgvc >= 2.2)
+AC_SUBST(LIBDOTCONVERTER_LIBS)
+AC_SUBST(LIBDOTCONVERTER_CFLAGS)
 
 
 # checking for boost libs

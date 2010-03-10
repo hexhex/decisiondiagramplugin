@@ -55,7 +55,7 @@ do
 
 	# check if output is a dot file or an answer-set;
 	# use the appropriate script to compare the results
-	if [ "$ADDDCPARM" = "--todot" ]
+	if [ "$ADDDCPARM" = "hex dot" ]
 	then
 		# to dot file
 
@@ -69,10 +69,10 @@ do
 		# to answer-set file
 
 		# run dotconverter with specified parameters and input
-		$DOTCONVERTER $PARAMETERS $ADDPARM < $INPUT > $TMPFILE_HEX
+		$DOTCONVERTER $PARAMETERS $ADDDCPARM < $INPUT > $TMPFILE_HEX
 
 		# compare with reference output
-		$CMPSCRIPT $TMPFILE_HEX $REFOUTPUT "hex" &> /dev/null
+		$CMPSCRIPT $TMPFILE_HEX $REFOUTPUT "hex" #&> /dev/null
 		succ=$?
 	fi
 

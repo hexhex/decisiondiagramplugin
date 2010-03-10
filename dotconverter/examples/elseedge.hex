@@ -1,4 +1,4 @@
 root(a).
 innernode(a).
-leafnode(b, classb).
+leafnode(b, "classb").
 elseedge(a, b).

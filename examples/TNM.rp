@@ -19,13 +19,13 @@ mapping: "
 	leafnode(stage3, stage3).
 	leafnode(stage4, stage4).
 
-	conditionaledge(checkM, stage4, m, \'=\', 1).
+	conditionaledge(checkM, stage4, m, \'=\', \'1\').
 	elseedge(checkM, checkN).
 
-	conditionaledge(checkN, stage3, n, \'>\', 0).
+	conditionaledge(checkN, stage3, n, \'>\', \'0\').
 	elseedge(checkN, checkT).
 
-	conditionaledge(checkT, stage2, t, \'>=\', 3).
+	conditionaledge(checkT, stage2, t, \'>=\', \'3\').
 	elseedge(checkT, stage1).
 ";
 
