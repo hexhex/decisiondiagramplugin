@@ -1,0 +1,10 @@
+../emptygraph.hex emptygraph.dot --todot
+../onlynodes.hex onlynodes.dot --todot
+../elseedge.hex elseedge.dot --todot
+../conditionaledge.hex conditionaledge.dot --todot
+../moreedges.hex moreedges.dot --todot
+emptygraph.dot ../emptygraph.hex --toas
+onlynodes.dot ../onlynodes.hex --toas
+elseedge.dot ../elseedge.hex --toas
+conditionaledge.dot ../conditionaledge.hex --toas
+moreedges.dot ../moreedges.hex --toas

@@ -1,0 +1,13 @@
+digraph {
+     a [label="a"];
+     b [label="b"];
+     c [label="c"];
+     d [label="d [class1]"];
+     e [label="e [class2]"];
+     a -> b [label="x<y"];
+     a -> c [label="else"];
+     b -> d [label="z<20"];
+     b -> e [label="else"];
+     c -> d [label="z<10"];
+     c -> e [label="else"];
+}
