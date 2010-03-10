@@ -21,4 +21,4 @@ EXTRA_DIST = \
   OpSimplify4.rp
 
 TESTS = tests/run-decisiondiagramplugin-tests.sh
-TESTS_ENVIRONMENT = DLVHEX=dlvhex RPCOMPILER=rpcompiler CMPSCRIPT=$(top_srcdir)/examples/compare.sh DOTCONVERTER=$(top_srcdir)/dotconverter/src/dotconverter TESTDIR=$(top_srcdir)/examples/tests DLVHEXPARAMETERS="--plugindir=$(top_builddir)/src --operatorpath=$(top_builddir)/src/.libs/" SYSPLUGINDIR=$(sysplugindir) USERPLUGINDIR=$(userplugindir)
+TESTS_ENVIRONMENT = DLVHEX=dlvhex RPCOMPILER=rpcompiler CMPSCRIPT=$(top_srcdir)/examples/compare.sh GRAPHCONVERTER=$(top_srcdir)/graphconverter/src/graphconverter TESTDIR=$(top_srcdir)/examples/tests DLVHEXPARAMETERS="--plugindir=$(top_builddir)/src --operatorpath=$(top_builddir)/src/.libs/" SYSPLUGINDIR=$(sysplugindir) USERPLUGINDIR=$(userplugindir)
