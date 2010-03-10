@@ -1,5 +1,0 @@
-digraph {
-     a -> b [label="else"];
-     b [label="b [classb]"];
-     a [label="a"];
-}
