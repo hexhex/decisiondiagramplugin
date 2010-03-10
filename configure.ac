@@ -115,10 +115,10 @@ AC_CONFIG_FILES([
            src/Makefile
            include/Makefile
            examples/Makefile
-           dotconverter/Makefile 
-           dotconverter/include/Makefile 
-           dotconverter/src/Makefile
-           dotconverter/examples/Makefile
+           graphconverter/Makefile 
+           graphconverter/include/Makefile 
+           graphconverter/src/Makefile
+           graphconverter/examples/Makefile
 ])
 
 AC_OUTPUT

@@ -6,4 +6,4 @@ SUBDIRS = \
 	  include/ \
           src/ \
           examples/ \
-	  dotconverter/
+	  graphconverter/
