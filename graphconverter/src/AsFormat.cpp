@@ -26,7 +26,7 @@ DecisionDiagram* AsFormat::read(){
 	vector<AtomSet> answersets;
 	answersetParser.parse(std::cin, answersets);
 	if (answersets.size() != 1){
-		std::cerr << answersets.size() << "answer-sets were passed, but exactly one is expected" << std::endl;
+		std::cerr << "Error: " << answersets.size() << "answer-sets were passed, but exactly one is expected" << std::endl;
 		return NULL;
 	}else{
 		// translate atomset into the internal data structure

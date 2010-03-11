@@ -51,6 +51,17 @@ std::map<std::string, int> StringHelper::extractDistribution(std::string classif
 	}
 }
 
+std::string StringHelper::encodeDistributionMap(std::map<std::string, int> map){
+	std::stringstream ss;
+	ss << "{";
+	for (std::map<std::string, int>::iterator it = map.begin(); it != map.end(); it++){
+		if (it != map.begin()) ss << ",";
+		ss << it->first << ":" << it->second;
+	}
+	ss << "}";
+	return ss.str();
+}
+
 std::string StringHelper::extractKey(std::string str){
 	if (str.find_first_of(":"))
 		return str.substr(0, str.find_first_of(":"));

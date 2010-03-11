@@ -887,7 +887,7 @@ std::string DecisionDiagram::toDotFileString() const{
 	for (std::set<Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
 		Edge* e = *it;
 		if (dynamic_cast<ElseEdge*>(e) != NULL){
-			output << "     " << e->getFrom()->toString() << " -> " << e->getTo()->toString() << ";" << std::endl;
+			output << "     " << e->getFrom()->toString() << " -> " << e->getTo()->toString() << " [label=\"else\"];" << std::endl;
 		}else{
 			output << "     " << e->getFrom()->toString() << " -> " << e->getTo()->toString() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
 		}

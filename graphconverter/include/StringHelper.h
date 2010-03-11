@@ -31,6 +31,7 @@ public:
 	static std::string extractClassification(std::string str);
 	static std::string extractClass(std::string classification);
 	static std::map<std::string, int> extractDistribution(std::string classification);
+	static std::string encodeDistributionMap(std::map<std::string, int> map);
 	static std::string extractKey(std::string str);
 	static std::string extractValue(std::string str);
 	static std::string toString(int v);
@@ -70,6 +71,12 @@ public:
  * Expects a class label of the form: "class {c1:v1,c2:v2,...,cn:vn}",  where "class" is some classification cathegory and c_i/v_i represent a distribution over the possibilities.
  * \param str Input
  *  \return std::map<std::string, int> Will return the v_i/n_i-pairs of the string (in form of a map)
+ */
+
+/*! \fn static std::string StringHelper::encodeDistributionMap(std::map<std::string, int> map)
+ * Encodes the given distribution map as string
+ * \param map Input
+ *  \return std::string A string representation of map
  */
 
 /*! \fn static std::string StringHelper::extractKey(std::string str)

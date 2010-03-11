@@ -26,7 +26,7 @@ DecisionDiagram* HexFormat::read(){
 
 	// check if the program consists of facts only
 	for (Program::iterator rule = prog.begin(); rule != prog.end(); ++rule){
-		std::cerr << "A rule was found. The input program must not contain rules, but facts only." << std::endl;
+		std::cerr << "Error: A rule was found. The input program must not contain rules, but facts only." << std::endl;
 		return NULL;
 	}
 
@@ -38,7 +38,7 @@ DecisionDiagram* HexFormat::read(){
 		if (atom->getPredicate().getString() == std::string("conditionaledge") && atom->getArity() == 5) continue;
 		if (atom->getPredicate().getString() == std::string("elseedge") && atom->getArity() == 2) continue;
 
-		std::cerr << "An illegal atom was found: " << atom->getPredicate().getString() << "/" << atom->getArity() << "." << std::endl << std::endl << "Input programs must only contain atoms over root/1, innernode/1, leafnode/2, conditionaledge/5 and elseedge/2." << std::endl;
+		std::cerr << "Error: An illegal atom was found: " << atom->getPredicate().getString() << "/" << atom->getArity() << "." << std::endl << std::endl << "Input programs must only contain atoms over root/1, innernode/1, leafnode/2, conditionaledge/5 and elseedge/2." << std::endl;
 		return NULL;
 	}
 

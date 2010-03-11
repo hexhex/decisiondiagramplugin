@@ -8,4 +8,5 @@ noinst_HEADERS = OpUnfold.h \
 		 OpOrderBinaryDecisionTree.h \
 		 OpUserPreferences.h \
 		 OpSimplify.h \
+		 OpDistributionMapVoting.h \
 		 DecisionDiagram.h

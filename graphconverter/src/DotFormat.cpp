@@ -21,7 +21,7 @@ DecisionDiagram* DotFormat::read(){
 	g = agread(stdin);
 
 	if (!g){
-		std::cerr << "Error while graph reading";
+		std::cerr << "Error: Error while graphviz was reading the diagram. It seems that the file does not contain a valid dot graph.";
 		return NULL;
 	}else{
 		DecisionDiagram* dd = new DecisionDiagram();

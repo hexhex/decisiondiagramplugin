@@ -1,5 +1,7 @@
-#include <OpMajorityVoting.h>
+#include <OpDistributionMapVoting.h>
 #include <DecisionDiagram.h>
+
+#include <StringHelper.h>
 
 #include <iostream>
 #include <sstream>
@@ -7,11 +9,11 @@
 
 using namespace dlvhex::dd;
 
-std::string OpMajorityVoting::getName(){
-	return "majorityvoting";
+std::string OpDistributionMapVoting::getName(){
+	return "distributionmapvoting";
 }
 
-void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings){
+void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings){
 
 	// Merge the decision diagrams
 	// Extract all leaf nodes of dd1
@@ -34,12 +36,15 @@ void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output, s
 		for (std::set<DecisionDiagram::LeafNode*>::iterator newLeafIt = newoutputLeafs.begin(); newLeafIt != newoutputLeafs.end(); newLeafIt++){
 			// Check if this is a new leaf node
 			if (votings.find(*newLeafIt) == votings.end()){
-				// The new entry is equal to the entry of the former leaf, except that the counter for the classification of the new leaf is incremented by 1
-				votings[*newLeafIt] = votings[*formerLeafIt];
-				if (votings[*newLeafIt].find((*newLeafIt)->getClassification()) == votings[*newLeafIt].end()){
-					votings[*newLeafIt][(*newLeafIt)->getClassification()] = 1;
-				}else{
-					votings[*newLeafIt][(*newLeafIt)->getClassification()]++;
+				try{
+					// The new entry for a certain classification is equal to the sum of the former entries
+					votings[*newLeafIt] = votings[*formerLeafIt];
+					Votings uv = StringHelper::extractDistribution((*newLeafIt)->getClassification());
+					for (Votings::iterator vIt = votings[*newLeafIt].begin(); vIt != votings[*newLeafIt].end();  vIt++){
+						votings[*newLeafIt][vIt->first] +=uv[vIt->first]; 
+					}
+				}catch(StringHelper::NotContainedException nce){
+					throw OperatorException(std::string("Leaf node with label \"") + (*newLeafIt)->getClassification() + std::string("\" does not contain a distribution map"));
 				}
 			}
 		}
@@ -62,53 +67,51 @@ void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output, s
 	}
 }
 
-HexAnswer OpMajorityVoting::apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException){
+HexAnswer OpDistributionMapVoting::apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException){
 
 	try{
 		// Check arity
-		if (arity < 1){
+		if (arity != 2){
 			std::stringstream msg;
-			msg << "majorityvoting expects at least one diagram as arguments.";
+			msg << "distributionmapvoting expects exactly two diagrams as arguments.";
 			throw IOperator::OperatorException(msg.str());
 		}
 		for (int answer = 0; answer < arity; answer++){
 			if (arguments[answer]->size() != 1){
 				std::stringstream msg;
-				msg << "majorityvoting expects each answer to contain exactly one answer set. Answer " << answer << " contains " << arguments[answer]->size() << " answer-sets.";
+				msg << "distributionmapvoting expects each answer to contain exactly one answer set. Answer " << answer << " contains " << arguments[answer]->size() << " answer-sets.";
 				throw IOperator::OperatorException(msg.str());
 			}
 		}
 
 		// Prepare a data structure for votings:
-		// 	Each leaf node needs a set of string/int pairs. The string is a classification and the integer value the number of diagrams that voted for this class
-		//	at this point of the diagram.
+		// 	Each leaf node needs a set of string/int pairs. The string is a classification and the integer value the number of training examples that ended in this leaf node and
+		//	voted for this class
 		std::map<DecisionDiagram::LeafNode*, Votings> votings;
 
-		// Construct final decision diagram (=copy of the first input diagram for now)
-		DecisionDiagram output((*arguments[0])[0]);
-		if (!output.isTree()){
+		// Construct both decision diagrams
+		DecisionDiagram diag1((*arguments[0])[0]);
+		DecisionDiagram diag2((*arguments[1])[0]);
+		if (!diag1.isTree() || !diag2.isTree()){
 			throw IOperator::OperatorException("All input diagrams are expected to be trees.");
 		}
 
 		// Initialize the votings structure
-		std::set<DecisionDiagram::LeafNode*> leafs = output.getLeafNodes();
+		std::set<DecisionDiagram::LeafNode*> leafs = diag1.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator it = leafs.begin(); it != leafs.end(); it++){
-			Votings uv;
-			uv[(*it)->getClassification()] = 1;
-			votings[*it] = uv;
-		}
-
-		// Insert all input decision diagrams
-		for (int answer = 1; answer < arity; answer++){
-			DecisionDiagram ddInput((*arguments[answer])[0]);
-			if (!ddInput.isTree()){
-				throw IOperator::OperatorException("All input diagrams are expected to be trees.");
+			try{
+				Votings uv = StringHelper::extractDistribution((*it)->getClassification());
+				votings[*it] = uv;
+			}catch(StringHelper::NotContainedException nce){
+				throw OperatorException(std::string("Leaf node with label \"") + (*it)->getClassification() + std::string("\" does not contain a distribution map"));
 			}
-			insert(ddInput, output, votings);
 		}
 
-		// Finally, for all remaining leaf nodes, take the classification with the highest votes
-		std::set<DecisionDiagram::LeafNode*> outputLeafs = output.getLeafNodes();
+		// Insert the second decision diagram into the first one
+		insert(diag2, diag1, votings);
+
+		// Finally, for all remaining leaf nodes, take the classification with the highest number of votes
+		std::set<DecisionDiagram::LeafNode*> outputLeafs = diag1.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = outputLeafs.begin(); leafIt != outputLeafs.end(); leafIt++){
 			Votings v = votings[*leafIt];
 			int highestVotes = 0;
@@ -120,12 +123,12 @@ HexAnswer OpMajorityVoting::apply(int arity, std::vector<HexAnswer*>& arguments,
 				}
 			}
 			// Take the highest voted classification as the final one
-			(*leafIt)->setClassification(highestVotedClass);
+			(*leafIt)->setClassification(highestVotedClass + StringHelper::encodeDistributionMap(v));
 		}
 
 		// Convert the final decision diagram into a hex answer
 		HexAnswer answer;
-		answer.push_back(output.toAnswerSet());
+		answer.push_back(diag1.toAnswerSet());
 		return answer;
 	}catch(DecisionDiagram::InvalidDecisionDiagram idde){
 		throw IOperator::OperatorException(std::string("InvalidDecisionDiagram: ") + idde.getMessage());

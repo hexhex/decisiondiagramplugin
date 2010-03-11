@@ -23,25 +23,29 @@ DecisionDiagram* RmxmlFormat::read(){
 			DecisionDiagram dd = getDDDiag(&doc);
 			return new DecisionDiagram(dd);
 		}catch(...){
-			std::cout << "XML document is well-formed, but does not encode a valid decision tree." << std::endl;
+			std::cerr << "Error: XML document is well-formed, but does not encode a valid decision tree." << std::endl;
 			return NULL;
 		}
 	}else{
-		std::cout << "Could not parse stdin as XML document: " << doc.ErrorDesc() << std::endl;
+		std::cerr << "Error: Could not parse stdin as XML document: " << doc.ErrorDesc() << std::endl;
 		return NULL;
 	}
 }
 
 bool RmxmlFormat::write(DecisionDiagram* dd){
 	if (!dd->isTree()){
-		std::cerr << "Could not write diagram. It must be a tree." << std::endl;
+		std::cerr << "Error: Could not write diagram. It must be a tree." << std::endl;
 		return false;
 	}
 
-	TiXmlDocument doc = getXmlDiag(dd); 
-	doc.Print();
-
-	return true;
+	try{
+		TiXmlDocument doc = getXmlDiag(dd); 
+		doc.Print();
+		return true;
+	}catch(DecisionDiagram::InvalidDecisionDiagram idd){
+		std::cerr << "Error: " << idd.getMessage() << std::endl;
+		return false;
+	}
 }
 
 // ============================== DD --> XML ==============================
