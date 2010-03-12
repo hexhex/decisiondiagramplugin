@@ -1,8 +1,15 @@
 digraph {
      rootA -> rootB [label="else"];
-     rootB -> "leaf2B[x{x:3,y:2}]" [label="else"];
      rootA -> rootB_1 [label="a<x"];
-     rootB -> "leaf1B[y{x:2,y:4}]" [label="b<x"];
-     rootB_1 -> "leaf1B_1[x{x:6,y:4}]" [label="b<x"];
-     rootB_1 -> "leaf2B_1[x{x:7,y:2}]" [label="else"];
+     rootB -> leaf1B [label="b<x"];
+     rootB_1 -> leaf1B_1 [label="b<x"];
+     rootB -> leaf2B [label="else"];
+     rootB_1 -> leaf2B_1 [label="else"];
+     leaf1B [label="leaf1B [y{x:2,y:4}]"];
+     leaf1B_1 [label="leaf1B [x{x:6,y:4}]"];
+     rootA [label="rootA"];
+     rootB [label="rootB"];
+     rootB_1 [label="rootB"];
+     leaf2B [label="leaf2B [x{x:3,y:2}]"];
+     leaf2B_1 [label="leaf2B [x{x:7,y:2}]"];
 }

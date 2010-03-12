@@ -169,7 +169,7 @@ void DecisionDiagram::LeafNode::setClassification(std::string c){
 }
 
 std::string DecisionDiagram::LeafNode::toString() const{
-	return std::string("\"") + label + std::string("[") + classification + std::string("]") + std::string("\"");
+	return label + std::string(" [") + classification + std::string("]");
 }
 
 bool DecisionDiagram::LeafNode::operator==(const DecisionDiagram::Node &n2) const{
@@ -217,7 +217,7 @@ DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::stringToCmpOp(std:
 	if (operation_ == std::string("<=")) return Condition::le;
 	if (operation_ == std::string("=")) return Condition::eq;
 	if (operation_ == std::string(">")) return Condition::gt;
-	if (operation_ == std::string(">=")) return Condition::gt;
+	if (operation_ == std::string(">=")) return Condition::ge;
 	throw InvalidDecisionDiagram(std::string("Unreconized operator: ") + operation_);
 }
 
@@ -362,8 +362,8 @@ DecisionDiagram::DecisionDiagram(AtomSet as){
 		if (it->getArguments()[3].getUnquotedString() == std::string("<")) cmpop = Condition::lt;
 		if (it->getArguments()[3].getUnquotedString() == std::string("<=")) cmpop = Condition::le;
 		if (it->getArguments()[3].getUnquotedString() == std::string("=")) cmpop = Condition::eq;
-		if (it->getArguments()[3].getUnquotedString() == std::string(">")) cmpop = Condition::ge;
-		if (it->getArguments()[3].getUnquotedString() == std::string(">=")) cmpop = Condition::gt;
+		if (it->getArguments()[3].getUnquotedString() == std::string(">")) cmpop = Condition::gt;
+		if (it->getArguments()[3].getUnquotedString() == std::string(">=")) cmpop = Condition::ge;
 
 		// convert both operators into integer values
 		std::string op1 = it->getArguments()[2].getUnquotedString();
@@ -879,17 +879,30 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 
 std::string DecisionDiagram::toDotFileString() const{
 
-	// Create a list of nodes
 	std::stringstream output;
 	output << "digraph {" << std::endl;
 
-	// Create list of edges (nodes are generated implicitly)
+	// Create list of edges
 	for (std::set<Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
 		Edge* e = *it;
 		if (dynamic_cast<ElseEdge*>(e) != NULL){
-			output << "     " << e->getFrom()->toString() << " -> " << e->getTo()->toString() << " [label=\"else\"];" << std::endl;
+			output << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"else\"];" << std::endl;
 		}else{
-			output << "     " << e->getFrom()->toString() << " -> " << e->getTo()->toString() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
+			output << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
+		}
+	}
+
+	// Create a list of leaf nodes
+	for (std::set<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
+		Node* n = *it;
+
+		// extract a reasonable label for this node
+		std::string lab = n->getLabel();
+		if (lab.find_first_of("_") != std::string::npos) lab = lab.substr(0, lab.find_first_of("_"));
+		if (dynamic_cast<LeafNode*>(n) != NULL){
+			output << "     " << n->getLabel() << " [label=\"" << lab << " [" << dynamic_cast<LeafNode*>(n)->getClassification() << "]\"];" << std::endl;
+		}else{
+			output << "     " << n->getLabel() << " [label=\"" << lab << "\"];" << std::endl;
 		}
 	}
 

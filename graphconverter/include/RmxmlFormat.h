@@ -14,7 +14,10 @@ private:
 
 	// DD --> XML
 	TiXmlDocument getXmlDiag(DecisionDiagram* dd);
-	void getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* node, TiXmlElement* parent, int& id);
+	TiXmlElement getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id);
+	TiXmlElement getXmlAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id);
+	TiXmlElement getXmlNormalAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex);
+	TiXmlElement getXmlClassificationAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex);
 	std::string getXmlCmpAttribute(DecisionDiagram::Condition c);
 	std::string getXmlCmpValue(DecisionDiagram::Condition c);
 	std::string getXmlCmpOperation(DecisionDiagram::Condition c);

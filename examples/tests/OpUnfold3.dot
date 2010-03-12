@@ -6,10 +6,10 @@ digraph {
      v2 -> v4 [label="else"];
      v1 -> v4_1 [label="else"];
      root -> v2 [label="else"];
-     v3_1 -> leaf1_1_1 [label="z>=w"];
-     v4_1 -> leaf1_2 [label="z>=w"];
-     v4 -> leaf1_1 [label="z>=w"];
-     v3 -> leaf1 [label="z>=w"];
+     v3_1 -> leaf1_1_1 [label="z>w"];
+     v4_1 -> leaf1_2 [label="z>w"];
+     v4 -> leaf1_1 [label="z>w"];
+     v3 -> leaf1 [label="z>w"];
      v2 -> v3 [label="z<w"];
      v1 -> v3_1 [label="z<w"];
      root -> v1 [label="x<y"];

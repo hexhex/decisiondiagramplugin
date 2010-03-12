@@ -72,7 +72,8 @@ TiXmlDocument RmxmlFormat::getXmlDiag(dlvhex::dd::DecisionDiagram* dd){
 	treemodel.InsertEndChild(source);
 	treemodel.SetAttribute("id", ++id);
 
-	getXmlDiag(dd, dd->getRoot(), &treemodel, id);
+	treemodel.InsertEndChild(getXmlDiag(dd, dd->getRoot(), id));
+	treemodel.InsertEndChild(getXmlAttributeList(dd, dd->getRoot(), id));
 
 	root.InsertEndChild(treemodel);
 	doc.InsertEndChild(root);
@@ -80,7 +81,7 @@ TiXmlDocument RmxmlFormat::getXmlDiag(dlvhex::dd::DecisionDiagram* dd){
 	return doc;
 }
 
-void RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, TiXmlElement* parent, int& id){
+TiXmlElement RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id){
 
 	// add current element
 	TiXmlElement* newElement;
@@ -189,14 +190,228 @@ void RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* ddnode,
 
 			// add the child itself (recursively)
 			edge.InsertEndChild(condition);
-			getXmlDiag(dd, (*eit)->getTo(), &edge, id);
+			newElement->InsertEndChild(getXmlDiag(dd, (*eit)->getTo(), id));
 
 			children.InsertEndChild(edge);
 		}
 		newElement->InsertEndChild(children);
 	}
-	// add this node to it's parent
-	parent->InsertEndChild(TiXmlElement(*newElement));
+
+	return TiXmlElement(*newElement);
+}
+
+// Writes the attribute list for a diagram (meta-attributes)
+TiXmlElement RmxmlFormat::getXmlAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id){
+	// inner node
+
+	// <headerExampleSet>
+	// |
+	// |---<attributes class="SimpleAttributes">
+	//     |
+	//     |---<attributes>
+	//         |
+	//         ...
+
+
+	// some header information
+	TiXmlElement headerExampleSet("headerExampleSet");
+	TiXmlElement simpleAttributes("attributes");
+	simpleAttributes.SetAttribute("class", "SimpleAttributes");
+	simpleAttributes.SetAttribute("id", ++id);
+
+	// add simple and special attributes
+	int attrIndex = 0;
+	TiXmlElement attrib = getXmlNormalAttributeList(dd, node, id, attrIndex);
+	attrib.InsertEndChild(getXmlClassificationAttributeList(dd, node, id, attrIndex));
+	simpleAttributes.InsertEndChild(attrib);
+	headerExampleSet.InsertEndChild(simpleAttributes);
+
+	return headerExampleSet;
+}
+
+TiXmlElement RmxmlFormat::getXmlNormalAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex){
+	// <attributes class="SimpleAttributes">
+	// |
+	// |---<attributes>
+	//     |
+	//     |---<AttributeRole>
+	//     |   |
+	//     |   |---<special>
+	//     |   |---<attribute>
+	//     |       |---<attributeDescription>
+	//     |       |   |
+	//     |       |   |---<name>
+	//     |       |   |---<valueType>
+	//     |       |   |---<blockType>
+	//     |       |   |---<index>
+	//     |       |
+	//     |       |---<transformations/>
+	//     |       |---<statistics/>
+	//     |
+	//     |---<AttributeRole>
+	//     |   |
+	//     |    ...
+
+	// extract the (normal) attributes
+	std::set<std::string> attributes;
+	std::set<DecisionDiagram::Edge*> edges = dd->getEdges();
+	for (std::set<DecisionDiagram::Edge*>::iterator edgeIt = edges.begin(); edgeIt != edges.end(); edgeIt++){
+		// only conditional edges contain conditions
+		if (!dynamic_cast<DecisionDiagram::ElseEdge*>(*edgeIt)){
+			attributes.insert(getXmlCmpAttribute((*edgeIt)->getCondition()));
+		}
+	}
+
+	TiXmlElement attributesElement("attributes");
+	attributesElement.SetAttribute("id", ++id);
+
+	// for all (normal) attributes
+	for (std::set<std::string>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); attrIt++){
+		// Add the current attribute
+		TiXmlElement attributeRole("AttributeRole");
+		attributeRole.SetAttribute("id", ++id);
+		//    it's not a special attribute
+		TiXmlElement special("special");
+		special.InsertEndChild(TiXmlText("false"));
+		attributeRole.SetAttribute("id", ++id);
+		attributeRole.InsertEndChild(special);
+		//    the attributes' meta-attributes
+		TiXmlElement attribute("attribute");
+		attribute.SetAttribute("class", "NumericalAttribute");
+		attribute.SetAttribute("id", ++id);
+		//    fill in the meta-attributes of the current attribute: name, valueType, blockType, defaultValue, index
+		TiXmlElement constructiondescription("constructionDescription");
+		constructiondescription.InsertEndChild(TiXmlText(attrIt->c_str()));
+		TiXmlElement description("attributeDescription");
+		description.SetAttribute("id", ++id);
+		TiXmlElement aName("name");
+		aName.InsertEndChild(TiXmlText(attrIt->c_str()));
+		TiXmlElement aValueType("valueType");
+		aValueType.InsertEndChild(TiXmlText("3"));
+		TiXmlElement aBlockType("blockType");
+		aBlockType.InsertEndChild(TiXmlText("1"));
+		TiXmlElement aDefaultValue("defaultValue");
+		aDefaultValue.InsertEndChild(TiXmlText("0.0"));
+		TiXmlElement aIndex("index");
+		aIndex.InsertEndChild(TiXmlText(StringHelper::toString(++attrIndex).c_str()));
+
+		// assemble the whole thing
+		description.InsertEndChild(aName);
+		description.InsertEndChild(aValueType);
+		description.InsertEndChild(aBlockType);
+		description.InsertEndChild(aDefaultValue);
+		description.InsertEndChild(aIndex);
+		attribute.InsertEndChild(constructiondescription);
+		attribute.InsertEndChild(description);
+		TiXmlElement transformations("transformations");
+		transformations.SetAttribute("id", ++id);
+		attribute.InsertEndChild(transformations);
+		TiXmlElement statistics("statistics");
+		statistics.SetAttribute("id", ++id);
+		statistics.SetAttribute("class", "linked-list");
+		attribute.InsertEndChild(statistics);
+		attributeRole.InsertEndChild(attribute);
+
+		// finally insert the attribute
+		attributesElement.InsertEndChild(attributeRole);
+	}
+	return attributesElement;
+}
+
+TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex){
+
+	// extract the occurring class labels
+	std::set<std::string> classes;
+	std::set<DecisionDiagram::LeafNode*> leafs = dd->getLeafNodes();
+	std::map<std::string, int> cmap = StringHelper::extractDistribution((*leafs.begin())->getClassification());
+	for (std::map<std::string, int>::iterator classIt = cmap.begin(); classIt != cmap.end(); classIt++){
+		classes.insert(classIt->first);
+	}
+
+	// now we add the special attribute for the classification
+	// <AttributeRole>
+	// |
+	// |---<special>true</special>
+	// |---<specialName>label</specialName>
+	// |---<attribute class="PolynominalMapping">
+	// |---<nominalMapping>
+	// |   |---<symbolToIndexMap>
+	// |       |---<entry>
+	// |       |   |
+	// |       |   |---<string>
+	// |       |   |---<int>
+	// |       |
+	// |       |---<entry>
+	// |       |   |
+	// |       |   |---<string>
+	// |       |   |---<int>
+	// |       |
+	// |       | ...
+	// |
+	// |---<attributeDescription>
+	// |   |
+	// |   |---<name>
+	// |   |---<valueType>
+	// |   |---<blockType>
+	// |   |---<index>
+	// |
+	// |---<transformations/>
+	// |---<statistics/>
+
+	TiXmlElement attributeRole("AttributeRole");
+	attributeRole.SetAttribute("id", ++id);
+	//    it's a special attribute
+	TiXmlElement special("special");
+	special.InsertEndChild(TiXmlText("true"));
+	attributeRole.SetAttribute("id", ++id);
+	attributeRole.InsertEndChild(special);
+	//    its role is "label"
+	TiXmlElement role("specialName");
+	role.InsertEndChild(TiXmlText("label"));
+	attributeRole.InsertEndChild(role);
+
+	//    the attributes' meta-attributes
+	TiXmlElement attribute("attribute");
+	attribute.SetAttribute("class", "PolynominalAttribute");
+	attribute.SetAttribute("id", ++id);
+	TiXmlElement description("attributeDescription");
+	description.SetAttribute("id", ++id);
+	TiXmlElement aName("name");
+	aName.InsertEndChild(TiXmlText("classification"));
+	TiXmlElement aValueType("valueType");
+	aValueType.InsertEndChild(TiXmlText("1"));
+	TiXmlElement aBlockType("blockType");
+	aBlockType.InsertEndChild(TiXmlText("1"));
+	TiXmlElement aDefaultValue("defaultValue");
+	aDefaultValue.InsertEndChild(TiXmlText("0.0"));
+	TiXmlElement aIndex("index");
+	aIndex.InsertEndChild(TiXmlText(StringHelper::toString(++attrIndex).c_str()));
+
+	// add all occurring classes
+	TiXmlElement symbolToIndexMap("symbolToIndexMap");
+	int cIndex = 0;
+	for (std::set<std::string>::iterator cIt = classes.begin(); cIt != classes.end(); cIt++){
+		TiXmlElement entry("entry");
+		TiXmlElement string("string");
+		TiXmlElement _int("int");
+		string.InsertEndChild(TiXmlText(cIt->c_str()));
+		_int.InsertEndChild(TiXmlText(StringHelper::toString(cIndex++).c_str()));
+		entry.InsertEndChild(string);
+		entry.InsertEndChild(_int);
+		symbolToIndexMap.InsertEndChild(entry);
+	}
+
+	// assemble the whole thing
+	description.InsertEndChild(aName);
+	description.InsertEndChild(aValueType);
+	description.InsertEndChild(aBlockType);
+	description.InsertEndChild(aDefaultValue);
+	description.InsertEndChild(aIndex);
+	attribute.InsertEndChild(description);
+	attributeRole.InsertEndChild(attribute);
+	attributeRole.InsertEndChild(symbolToIndexMap);
+
+	return attributeRole;
 }
 
 std::string RmxmlFormat::getXmlCmpAttribute(DecisionDiagram::Condition c){
