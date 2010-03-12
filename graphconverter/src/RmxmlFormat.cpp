@@ -190,7 +190,7 @@ TiXmlElement RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node*
 
 			// add the child itself (recursively)
 			edge.InsertEndChild(condition);
-			newElement->InsertEndChild(getXmlDiag(dd, (*eit)->getTo(), id));
+			edge.InsertEndChild(getXmlDiag(dd, (*eit)->getTo(), id));
 
 			children.InsertEndChild(edge);
 		}
@@ -215,6 +215,7 @@ TiXmlElement RmxmlFormat::getXmlAttributeList(DecisionDiagram* dd, DecisionDiagr
 
 	// some header information
 	TiXmlElement headerExampleSet("headerExampleSet");
+	headerExampleSet.SetAttribute("id", ++id);
 	TiXmlElement simpleAttributes("attributes");
 	simpleAttributes.SetAttribute("class", "SimpleAttributes");
 	simpleAttributes.SetAttribute("id", ++id);
@@ -225,6 +226,13 @@ TiXmlElement RmxmlFormat::getXmlAttributeList(DecisionDiagram* dd, DecisionDiagr
 	attrib.InsertEndChild(getXmlClassificationAttributeList(dd, node, id, attrIndex));
 	simpleAttributes.InsertEndChild(attrib);
 	headerExampleSet.InsertEndChild(simpleAttributes);
+
+	TiXmlElement statisticsMap("statisticsMap");
+	statisticsMap.SetAttribute("id", ++id);
+	TiXmlElement idMap("idMap");
+	idMap.SetAttribute("id", ++id);
+	headerExampleSet.InsertEndChild(statisticsMap);
+	headerExampleSet.InsertEndChild(idMap);
 
 	return headerExampleSet;
 }
@@ -263,6 +271,7 @@ TiXmlElement RmxmlFormat::getXmlNormalAttributeList(DecisionDiagram* dd, Decisio
 	}
 
 	TiXmlElement attributesElement("attributes");
+	attributesElement.SetAttribute("class", "linked-list");
 	attributesElement.SetAttribute("id", ++id);
 
 	// for all (normal) attributes
@@ -334,29 +343,29 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 	// |---<special>true</special>
 	// |---<specialName>label</specialName>
 	// |---<attribute class="PolynominalMapping">
-	// |---<nominalMapping>
-	// |   |---<symbolToIndexMap>
-	// |       |---<entry>
-	// |       |   |
-	// |       |   |---<string>
-	// |       |   |---<int>
-	// |       |
-	// |       |---<entry>
-	// |       |   |
-	// |       |   |---<string>
-	// |       |   |---<int>
-	// |       |
-	// |       | ...
-	// |
-	// |---<attributeDescription>
-	// |   |
-	// |   |---<name>
-	// |   |---<valueType>
-	// |   |---<blockType>
-	// |   |---<index>
-	// |
-	// |---<transformations/>
-	// |---<statistics/>
+	//     |---<nominalMapping>
+	//     |   |---<symbolToIndexMap>
+	//     |       |---<entry>
+	//     |       |   |
+	//     |       |   |---<string>
+	//     |       |   |---<int>
+	//     |       |
+	//     |       |---<entry>
+	//     |       |   |
+	//     |       |   |---<string>
+	//     |       |   |---<int>
+	//     |       |
+	//     |       | ...
+	//     |
+	//     |---<attributeDescription>
+	//     |   |
+	//     |   |---<name>
+	//     |   |---<valueType>
+	//     |   |---<blockType>
+	//     |   |---<index>
+	//     |
+	//     |---<transformations/>
+	//     |---<statistics/>
 
 	TiXmlElement attributeRole("AttributeRole");
 	attributeRole.SetAttribute("id", ++id);
@@ -387,8 +396,14 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 	TiXmlElement aIndex("index");
 	aIndex.InsertEndChild(TiXmlText(StringHelper::toString(++attrIndex).c_str()));
 
-	// add all occurring classes
+	// add all occurring classes: create mappings from indices to symbols and the other way round
+	TiXmlElement nominalMapping("nominalMapping");
+	nominalMapping.SetAttribute("class", "PolynominalMapping");
+	nominalMapping.SetAttribute("id", ++id);
 	TiXmlElement symbolToIndexMap("symbolToIndexMap");
+	symbolToIndexMap.SetAttribute("id", ++id);
+	TiXmlElement indexToSymbolMap("indexToSymbolMap");
+	indexToSymbolMap.SetAttribute("id", ++id);
 	int cIndex = 0;
 	for (std::set<std::string>::iterator cIt = classes.begin(); cIt != classes.end(); cIt++){
 		TiXmlElement entry("entry");
@@ -399,7 +414,15 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 		entry.InsertEndChild(string);
 		entry.InsertEndChild(_int);
 		symbolToIndexMap.InsertEndChild(entry);
+		indexToSymbolMap.InsertEndChild(string);
 	}
+
+	// some dummy elements that RapidMiner expects
+	TiXmlElement transformations("transformations");
+	transformations.SetAttribute("id", ++id);
+	TiXmlElement statistics("statistics");
+	statistics.SetAttribute("id", ++id);
+	statistics.SetAttribute("class", "linked-list");
 
 	// assemble the whole thing
 	description.InsertEndChild(aName);
@@ -407,9 +430,13 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 	description.InsertEndChild(aBlockType);
 	description.InsertEndChild(aDefaultValue);
 	description.InsertEndChild(aIndex);
+	nominalMapping.InsertEndChild(symbolToIndexMap);
+	nominalMapping.InsertEndChild(indexToSymbolMap);
+	attribute.InsertEndChild(nominalMapping);
 	attribute.InsertEndChild(description);
+	attribute.InsertEndChild(transformations);
+	attribute.InsertEndChild(statistics);
 	attributeRole.InsertEndChild(attribute);
-	attributeRole.InsertEndChild(symbolToIndexMap);
 
 	return attributeRole;
 }
