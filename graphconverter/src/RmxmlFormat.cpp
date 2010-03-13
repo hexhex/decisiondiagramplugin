@@ -14,7 +14,7 @@ std::string RmxmlFormat::getNameAbbr(){
 	return "xml";
 }
 
-DecisionDiagram* RmxmlFormat::read(){
+DecisionDiagram* RmxmlFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// load source document
 	TiXmlDocument doc;
 
@@ -23,28 +23,25 @@ DecisionDiagram* RmxmlFormat::read(){
 			DecisionDiagram dd = getDDDiag(&doc);
 			return new DecisionDiagram(dd);
 		}catch(...){
-			std::cerr << "Error: XML document is well-formed, but does not encode a valid decision tree." << std::endl;
-			return NULL;
+			throw DecisionDiagram::InvalidDecisionDiagram("Error: XML document is well-formed, but does not encode a valid decision tree.");
 		}
 	}else{
-		std::cerr << "Error: Could not parse stdin as XML document: " << doc.ErrorDesc() << std::endl;
-		return NULL;
+		throw DecisionDiagram::InvalidDecisionDiagram(std::string("Error: Could not parse stdin as XML document: ") + doc.ErrorDesc());
 	}
 }
 
-bool RmxmlFormat::write(DecisionDiagram* dd){
+void RmxmlFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
 	if (!dd->isTree()){
-		std::cerr << "Error: Could not write diagram. It must be a tree." << std::endl;
-		return false;
+		throw DecisionDiagram::InvalidDecisionDiagram("Error: Could not write diagram. It must be a tree.");
 	}
 
 	try{
 		TiXmlDocument doc = getXmlDiag(dd); 
 		doc.Print();
-		return true;
 	}catch(DecisionDiagram::InvalidDecisionDiagram idd){
-		std::cerr << "Error: " << idd.getMessage() << std::endl;
-		return false;
+		throw idd;
+	}catch(...){
+		throw DecisionDiagram::InvalidDecisionDiagram("Unknown error while writing decision diagram");
 	}
 }
 
@@ -65,6 +62,7 @@ TiXmlDocument RmxmlFormat::getXmlDiag(dlvhex::dd::DecisionDiagram* dd){
 	//             |
 	//             ...
 
+	// some header information
 	TiXmlElement root("object-stream");
 	TiXmlElement treemodel("TreeModel");
 	TiXmlElement source("source");
@@ -72,15 +70,20 @@ TiXmlDocument RmxmlFormat::getXmlDiag(dlvhex::dd::DecisionDiagram* dd){
 	treemodel.InsertEndChild(source);
 	treemodel.SetAttribute("id", ++id);
 
+	// read model
 	treemodel.InsertEndChild(getXmlDiag(dd, dd->getRoot(), id));
+
+	// read attributes of model
 	treemodel.InsertEndChild(getXmlAttributeList(dd, dd->getRoot(), id));
 
+	// assemble the whole thing
 	root.InsertEndChild(treemodel);
 	doc.InsertEndChild(root);
 
 	return doc;
 }
 
+// writes xml code for a decision diagram
 TiXmlElement RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id){
 
 	// add current element
@@ -93,111 +96,127 @@ TiXmlElement RmxmlFormat::getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node*
 	// inner node or leaf node?
 	if (dynamic_cast<DecisionDiagram::LeafNode*>(ddnode) != NULL){
 		// leaf node
-
-		// <root>/<child>
-		// |
-		// |---<label>
-		// |---<children/>
-		// |---<counterMap>
-		// |---<counterMap>
-		//     |
-		//     |---<entry>
-		//     |   |
-		//     |   |---<string>
-		//     |   |---<int>
-		//     |
-		//     |---<entry>
-		//     |   |
-		//     |   |---<string>
-		//     |   |---<int>
-		//     ...
-
-		DecisionDiagram::LeafNode* leaf = dynamic_cast<DecisionDiagram::LeafNode*>(ddnode);
-
-		// store classification at this leaf node
-		TiXmlElement label("label");
-		label.InsertEndChild(TiXmlText(StringHelper::extractClass(leaf->getClassification()).c_str()));
-		newElement->InsertEndChild(label);
-		TiXmlElement children("children");
-		newElement->InsertEndChild(children);
-
-		// built the distribution map
-		TiXmlElement distributionmap("counterMap");
-		std::map<std::string, int> distmap = StringHelper::extractDistribution(leaf->getClassification());
-		for (std::map<std::string, int>::iterator distValue = distmap.begin(); distValue != distmap.end(); distValue++){
-			TiXmlElement entry("entry");
-			TiXmlElement _string("string");
-			TiXmlElement _int("int");
-			_string.InsertEndChild(TiXmlText(distValue->first.c_str()));
-			_int.InsertEndChild(TiXmlText(StringHelper::toString(distValue->second).c_str()));
-			entry.InsertEndChild(_string);
-			entry.InsertEndChild(_int);
-			distributionmap.InsertEndChild(entry);
-		}
-
-		// extract classification from leaf node's label
-		newElement->InsertEndChild(distributionmap);
+		return getXmlLeaf(dd, ddnode, id);
 	}else{
 		// inner node
+		return getXmlInner(dd, ddnode, id);
+	}
+}
 
-		// <root>/<child>
-		// |
-		// |---<children>
-		//     |
-		//     |---<edge>
-		//     |   |
-		//     |   |---<condition>
-		//     |   |   |
-		//     |   |   |---<attributeName>
-		//     |   |   |---<value>
-		//     |   |
-		//     |   |---<child> (recursive call for this node!)
-		//     |
-		//     |---<edge>
-		//     |   |
-		//     |   |---<condition>
-		//     |   |   |
-		//     |   |   |---<attributeName>
-		//     |   |   |---<value>
-		//     |   |
-		//     |   |---<child> (recursive call for this node!)
-		//  	...
+// writes xml code for a leaf node
+TiXmlElement RmxmlFormat::getXmlLeaf(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id){
 
-		// make node for the children
-		TiXmlElement children("children");
-		children.SetAttribute("class", "linked-list");
-		children.SetAttribute("id", ++id);
+	// leaf node
+	TiXmlElement newElement(ddnode == dd->getRoot() ? "root" : "child");
 
-		// add all children
-		std::set<DecisionDiagram::Edge*> outEdges = ddnode->getOutEdges();
-		for (std::set<DecisionDiagram::Edge*>::iterator eit = outEdges.begin(); eit != outEdges.end(); eit++){
+	// <root>/<child>
+	// |
+	// |---<label>
+	// |---<children/>
+	// |---<counterMap>
+	// |---<counterMap>
+	//     |
+	//     |---<entry>
+	//     |   |
+	//     |   |---<string>
+	//     |   |---<int>
+	//     |
+	//     |---<entry>
+	//     |   |
+	//     |   |---<string>
+	//     |   |---<int>
+	//     ...
 
-			// make an edge to this child
-			TiXmlElement edge("com.rapidminer.operator.learner.tree.Edge");
-			edge.SetAttribute("id", ++id);
+	DecisionDiagram::LeafNode* leaf = dynamic_cast<DecisionDiagram::LeafNode*>(ddnode);
 
-			// add the condition
-			TiXmlElement condition("condition");
-			condition.SetAttribute("id", ++id);
-			DecisionDiagram::Condition ddcondition = (*eit)->getCondition();
-			condition.SetAttribute("class", getXmlCmpOperation(ddcondition).c_str());
-			TiXmlElement attribute("attributeName");
-			attribute.InsertEndChild(TiXmlText(getXmlCmpAttribute(ddcondition).c_str()));
-			TiXmlElement value("value");
-			value.InsertEndChild(TiXmlText(getXmlCmpValue(ddcondition).c_str()));
-			condition.InsertEndChild(value);
-			condition.InsertEndChild(attribute);
+	// store classification at this leaf node
+	TiXmlElement label("label");
+	label.InsertEndChild(TiXmlText(StringHelper::extractClass(leaf->getClassification()).c_str()));
+	newElement.InsertEndChild(label);
+	TiXmlElement children("children");
+	newElement.InsertEndChild(children);
 
-			// add the child itself (recursively)
-			edge.InsertEndChild(condition);
-			edge.InsertEndChild(getXmlDiag(dd, (*eit)->getTo(), id));
-
-			children.InsertEndChild(edge);
-		}
-		newElement->InsertEndChild(children);
+	// built the distribution map
+	TiXmlElement distributionmap("counterMap");
+	std::map<std::string, int> distmap = StringHelper::extractDistribution(leaf->getClassification());
+	for (std::map<std::string, int>::iterator distValue = distmap.begin(); distValue != distmap.end(); distValue++){
+		TiXmlElement entry("entry");
+		TiXmlElement _string("string");
+		TiXmlElement _int("int");
+		_string.InsertEndChild(TiXmlText(distValue->first.c_str()));
+		_int.InsertEndChild(TiXmlText(StringHelper::toString(distValue->second).c_str()));
+		entry.InsertEndChild(_string);
+		entry.InsertEndChild(_int);
+		distributionmap.InsertEndChild(entry);
 	}
 
-	return TiXmlElement(*newElement);
+	// extract classification from leaf node's label
+	newElement.InsertEndChild(distributionmap);
+	return newElement;
+}
+
+// writes xml code for an inner node
+TiXmlElement RmxmlFormat::getXmlInner(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id){
+
+	// inner node
+	TiXmlElement newElement(ddnode == dd->getRoot() ? "root" : "child");
+
+	// <root>/<child>
+	// |
+	// |---<children>
+	//     |
+	//     |---<edge>
+	//     |   |
+	//     |   |---<condition>
+	//     |   |   |
+	//     |   |   |---<attributeName>
+	//     |   |   |---<value>
+	//     |   |
+	//     |   |---<child> (recursive call for this node!)
+	//     |
+	//     |---<edge>
+	//     |   |
+	//     |   |---<condition>
+	//     |   |   |
+	//     |   |   |---<attributeName>
+	//     |   |   |---<value>
+	//     |   |
+	//     |   |---<child> (recursive call for this node!)
+	//  	...
+
+	// make node for the children
+	TiXmlElement children("children");
+	children.SetAttribute("class", "linked-list");
+	children.SetAttribute("id", ++id);
+
+	// add all children
+	std::set<DecisionDiagram::Edge*> outEdges = ddnode->getOutEdges();
+	for (std::set<DecisionDiagram::Edge*>::iterator eit = outEdges.begin(); eit != outEdges.end(); eit++){
+
+		// make an edge to this child
+		TiXmlElement edge("com.rapidminer.operator.learner.tree.Edge");
+		edge.SetAttribute("id", ++id);
+
+		// add the condition
+		TiXmlElement condition("condition");
+		condition.SetAttribute("id", ++id);
+		DecisionDiagram::Condition ddcondition = (*eit)->getCondition();
+		condition.SetAttribute("class", getXmlCmpOperation(ddcondition).c_str());
+		TiXmlElement attribute("attributeName");
+		attribute.InsertEndChild(TiXmlText(getXmlCmpAttribute(ddcondition).c_str()));
+		TiXmlElement value("value");
+		value.InsertEndChild(TiXmlText(getXmlCmpValue(ddcondition).c_str()));
+		condition.InsertEndChild(value);
+		condition.InsertEndChild(attribute);
+
+		// add the child itself (recursively)
+		edge.InsertEndChild(condition);
+		edge.InsertEndChild(getXmlDiag(dd, (*eit)->getTo(), id));
+
+		children.InsertEndChild(edge);
+	}
+	newElement.InsertEndChild(children);
+	return newElement;
 }
 
 // Writes the attribute list for a diagram (meta-attributes)
@@ -211,7 +230,6 @@ TiXmlElement RmxmlFormat::getXmlAttributeList(DecisionDiagram* dd, DecisionDiagr
 	//     |---<attributes>
 	//         |
 	//         ...
-
 
 	// some header information
 	TiXmlElement headerExampleSet("headerExampleSet");
@@ -227,6 +245,7 @@ TiXmlElement RmxmlFormat::getXmlAttributeList(DecisionDiagram* dd, DecisionDiagr
 	simpleAttributes.InsertEndChild(attrib);
 	headerExampleSet.InsertEndChild(simpleAttributes);
 
+	// some dummy elements that RapidMiner expects
 	TiXmlElement statisticsMap("statisticsMap");
 	statisticsMap.SetAttribute("id", ++id);
 	TiXmlElement idMap("idMap");
@@ -270,6 +289,7 @@ TiXmlElement RmxmlFormat::getXmlNormalAttributeList(DecisionDiagram* dd, Decisio
 		}
 	}
 
+	// some header information
 	TiXmlElement attributesElement("attributes");
 	attributesElement.SetAttribute("class", "linked-list");
 	attributesElement.SetAttribute("id", ++id);
@@ -288,6 +308,7 @@ TiXmlElement RmxmlFormat::getXmlNormalAttributeList(DecisionDiagram* dd, Decisio
 		TiXmlElement attribute("attribute");
 		attribute.SetAttribute("class", "NumericalAttribute");
 		attribute.SetAttribute("id", ++id);
+
 		//    fill in the meta-attributes of the current attribute: name, valueType, blockType, defaultValue, index
 		TiXmlElement constructiondescription("constructionDescription");
 		constructiondescription.InsertEndChild(TiXmlText(attrIt->c_str()));
@@ -331,10 +352,14 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 
 	// extract the occurring class labels
 	std::set<std::string> classes;
-	std::set<DecisionDiagram::LeafNode*> leafs = dd->getLeafNodes();
-	std::map<std::string, int> cmap = StringHelper::extractDistribution((*leafs.begin())->getClassification());
-	for (std::map<std::string, int>::iterator classIt = cmap.begin(); classIt != cmap.end(); classIt++){
-		classes.insert(classIt->first);
+	try{
+		std::set<DecisionDiagram::LeafNode*> leafs = dd->getLeafNodes();
+		std::map<std::string, int> cmap = StringHelper::extractDistribution((*leafs.begin())->getClassification());
+		for (std::map<std::string, int>::iterator classIt = cmap.begin(); classIt != cmap.end(); classIt++){
+			classes.insert(classIt->first);
+		}
+	}catch(StringHelper::NotContainedException nce){
+		throw DecisionDiagram::InvalidDecisionDiagram("At least one of the leaf nodes does not contain a class frequency distribution. This is mandatory for RapidMiner.");
 	}
 
 	// now we add the special attribute for the classification
@@ -441,6 +466,7 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 	return attributeRole;
 }
 
+// Finds out the attribute of the two operands and returns it
 std::string RmxmlFormat::getXmlCmpAttribute(DecisionDiagram::Condition c){
 	try{
 		// check if the first operand is a number
@@ -459,6 +485,7 @@ std::string RmxmlFormat::getXmlCmpAttribute(DecisionDiagram::Condition c){
 	}
 }
 
+// Finds out the numeric value of the two operands and returns it
 std::string RmxmlFormat::getXmlCmpValue(DecisionDiagram::Condition c){
 	try{
 		// check if the first operand is a number
@@ -506,16 +533,18 @@ std::string RmxmlFormat::getXmlCmpOperation(DecisionDiagram::Condition c){
 DecisionDiagram RmxmlFormat::getDDDiag(TiXmlDocument* ce){
 
 	TiXmlHandle hDoc(ce);
-
 	DecisionDiagram dd;
-
 	DecisionDiagram::Node* rootnode = getDDnode(&dd, hDoc.FirstChild("object-stream").FirstChild("TreeModel").FirstChild("root").ToElement());
 
-	dd.setRoot(rootnode);
-
-	return dd;
+	if (rootnode){
+		dd.setRoot(rootnode);
+		return dd;
+	}else{
+		throw DecisionDiagram::InvalidDecisionDiagram("Could not detect the root node of the decision diagram");
+	}
 }
 
+// translates a node-element into a DD-node
 DecisionDiagram::Node* RmxmlFormat::getDDnode(DecisionDiagram* dd, TiXmlElement* elem){
 
 	// enumerate children
@@ -604,6 +633,7 @@ DecisionDiagram::Node* RmxmlFormat::getDDnode(DecisionDiagram* dd, TiXmlElement*
 	}
 }
 
+// Translates an edge-element into a DD-edge
 DecisionDiagram::Edge* RmxmlFormat::getDDedge(DecisionDiagram* dd, DecisionDiagram::Node* parent, DecisionDiagram::Node* child, TiXmlElement* con){
 	// extract operands
 	std::string op = con->Attribute("class");

@@ -1,4 +1,5 @@
 #include <HexFormat.h>
+#include <StringHelper.h>
 
 #include <dlvhex/HexParserDriver.h>
 #include <dlvhex/DLVresultParserDriver.h>
@@ -17,7 +18,7 @@ std::string HexFormat::getNameAbbr(){
 	return "hex";
 }
 
-DecisionDiagram* HexFormat::read(){
+DecisionDiagram* HexFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// parse the hex program (a set of facts)
 	HexParserDriver hexparser;
 	Program prog;
@@ -26,8 +27,7 @@ DecisionDiagram* HexFormat::read(){
 
 	// check if the program consists of facts only
 	for (Program::iterator rule = prog.begin(); rule != prog.end(); ++rule){
-		std::cerr << "Error: A rule was found. The input program must not contain rules, but facts only." << std::endl;
-		return NULL;
+		throw DecisionDiagram::InvalidDecisionDiagram("Error: A rule was found. The input program must not contain rules, but facts only.");
 	}
 
 	// check if the program contains only legal predicates with legal arities
@@ -38,20 +38,18 @@ DecisionDiagram* HexFormat::read(){
 		if (atom->getPredicate().getString() == std::string("conditionaledge") && atom->getArity() == 5) continue;
 		if (atom->getPredicate().getString() == std::string("elseedge") && atom->getArity() == 2) continue;
 
-		std::cerr << "Error: An illegal atom was found: " << atom->getPredicate().getString() << "/" << atom->getArity() << "." << std::endl << std::endl << "Input programs must only contain atoms over root/1, innernode/1, leafnode/2, conditionaledge/5 and elseedge/2." << std::endl;
-		return NULL;
+		throw DecisionDiagram::InvalidDecisionDiagram(std::string("Error: An illegal atom was found: ") + atom->getPredicate().getString() + std::string("/") + StringHelper::toString((int)atom->getArity()) + std::string("Input programs must only contain atoms over root/1, innernode/1, leafnode/2, conditionaledge/5 and elseedge/2."));
 	}
 
-	// create a diagram
+	// create a diagram (can throw exceptions)
 	DecisionDiagram* dd = new dlvhex::dd::DecisionDiagram(atoms);
 	return dd;
 }
 
-bool HexFormat::write(DecisionDiagram* dd){
+void HexFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
 	// create an answer-set
 	AtomSet as = dd->toAnswerSet();
 	// print it as dlv program
 	DLVPrintVisitor pv(std::cout);
 	pv.visit(&as);
-	return true;
 }

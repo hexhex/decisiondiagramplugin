@@ -15,6 +15,8 @@ private:
 	// DD --> XML
 	TiXmlDocument getXmlDiag(DecisionDiagram* dd);
 	TiXmlElement getXmlDiag(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id);
+	TiXmlElement getXmlLeaf(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id);
+	TiXmlElement getXmlInner(DecisionDiagram* dd, DecisionDiagram::Node* ddnode, int& id);
 	TiXmlElement getXmlAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id);
 	TiXmlElement getXmlNormalAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex);
 	TiXmlElement getXmlClassificationAttributeList(DecisionDiagram* dd, DecisionDiagram::Node* node, int& id, int& attrIndex);
@@ -24,8 +26,8 @@ private:
 public:
 	virtual std::string getName();
 	virtual std::string getNameAbbr();
-	virtual DecisionDiagram* read();
-	virtual bool write(DecisionDiagram* dd);
+	virtual DecisionDiagram* read() throw (DecisionDiagram::InvalidDecisionDiagram);
+	virtual void write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram);
 };
 
 #endif

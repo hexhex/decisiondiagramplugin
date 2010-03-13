@@ -11,7 +11,7 @@ std::string DotFormat::getName(){
 	return "dot";
 }
 
-DecisionDiagram* DotFormat::read(){
+DecisionDiagram* DotFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// Let graphviz lib parse the standard input
 	GVC_t *gvc;
 	graph_t *g;
@@ -21,8 +21,7 @@ DecisionDiagram* DotFormat::read(){
 	g = agread(stdin);
 
 	if (!g){
-		std::cerr << "Error: Error while graphviz was reading the diagram. It seems that the file does not contain a valid dot graph.";
-		return NULL;
+		throw DecisionDiagram::InvalidDecisionDiagram("Error: Error while graphviz was reading the diagram. It seems that the file does not contain a valid dot graph.");
 	}else{
 		DecisionDiagram* dd = new DecisionDiagram();
 		Agnode_t *v;
@@ -42,17 +41,45 @@ DecisionDiagram* DotFormat::read(){
 				}
 			}
 		}catch(dlvhex::dd::DecisionDiagram::InvalidDecisionDiagram idd){
-			std::cerr << idd.getMessage();
 			delete dd;
-			return NULL;
+			throw idd;
 		}
 		return dd;
 	}
 }
 
-bool DotFormat::write(DecisionDiagram* dd){
-	std::cout << dd->toDotFileString();
-	return true;
+void DotFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
+	// retrieve components of decision diagram
+	std::set<DecisionDiagram::Node*> nodes = dd->getNodes();
+	std::set<DecisionDiagram::Edge*> edges = dd->getEdges();
+
+	std::cout << "digraph {" << std::endl;
+
+	// Create list of edges
+	for (std::set<DecisionDiagram::Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
+		DecisionDiagram::Edge* e = *it;
+		if (dynamic_cast<DecisionDiagram::ElseEdge*>(e) != NULL){
+			std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"else\"];" << std::endl;
+		}else{
+			std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
+		}
+	}
+
+	// Create a list of leaf nodes
+	for (std::set<DecisionDiagram::Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
+		DecisionDiagram::Node* n = *it;
+
+		// extract a reasonable label for this node
+		std::string lab = n->getLabel();
+		if (lab.find_first_of("_") != std::string::npos) lab = lab.substr(0, lab.find_first_of("_"));
+		if (dynamic_cast<DecisionDiagram::LeafNode*>(n) != NULL){
+			std::cout << "     " << n->getLabel() << " [label=\"" << lab << " [" << dynamic_cast<DecisionDiagram::LeafNode*>(n)->getClassification() << "]\"];" << std::endl;
+		}else{
+			std::cout << "     " << n->getLabel() << " [label=\"" << lab << "\"];" << std::endl;
+		}
+	}
+
+	std::cout << "}" << std::endl;
 }
 
 /**
@@ -139,13 +166,20 @@ void DotFormat::makeDDEdge(dlvhex::dd::DecisionDiagram* dd, graph_t *g, Agedge_t
 		if (operatorPos < 0 && edgeLabel.find("<") != std::string::npos) { operatorPos = edgeLabel.find_first_of("<"); operatorLength = 1; }
 		if (operatorPos < 0 && edgeLabel.find(">") != std::string::npos) { operatorPos = edgeLabel.find_first_of(">"); operatorLength = 1; }
 		if (operatorPos < 0 && edgeLabel.find("=") != std::string::npos) { operatorPos = edgeLabel.find_first_of("="); operatorLength = 1; }
-		std::string firstOperand = edgeLabel.substr(0, operatorPos);
-		std::string secondOperand = edgeLabel.substr(operatorPos + operatorLength);
-		std::string operator_ = edgeLabel.substr(operatorPos, operatorLength);
-		boost::trim(firstOperand);
-		boost::trim(secondOperand);
 
-		// Generate code for this conditional edge
-		dd->addEdge(dd->getNodeByLabel(e->tail->name), dd->getNodeByLabel(e->head->name), dlvhex::dd::DecisionDiagram::Condition(firstOperand, secondOperand, operator_));
+		// check if operator was found
+		if (operatorLength != -1){
+			// extract operands and operator
+			std::string firstOperand = edgeLabel.substr(0, operatorPos);
+			std::string secondOperand = edgeLabel.substr(operatorPos + operatorLength);
+			std::string operator_ = edgeLabel.substr(operatorPos, operatorLength);
+			boost::trim(firstOperand);
+			boost::trim(secondOperand);
+
+			// Generate code for this conditional edge
+			dd->addEdge(dd->getNodeByLabel(e->tail->name), dd->getNodeByLabel(e->head->name), dlvhex::dd::DecisionDiagram::Condition(firstOperand, secondOperand, operator_));
+		}else{
+			throw DecisionDiagram::InvalidDecisionDiagram(std::string("Comparison operator in expression \"") + edgeLabel + std::string("\" could not be detected"));
+		}
 	}
 }

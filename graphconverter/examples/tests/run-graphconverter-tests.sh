@@ -63,7 +63,7 @@ do
 		$GRAPHCONVERTER $PARAMETERS $ADDDCPARM < $INPUT > $TMPFILE_DOT
 
 		# compare with reference output
-		$CMPSCRIPT $TMPFILE_DOT $REFOUTPUT "dot" &> /dev/null
+		$CMPSCRIPT $TMPFILE_DOT $REFOUTPUT "dot" #&> /dev/null
 		succ=$?
 	else
 		# to answer-set file

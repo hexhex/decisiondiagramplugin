@@ -12,8 +12,8 @@ public:
 	virtual std::string getName() = 0;
 	virtual std::string getNameAbbr();
 
-	virtual DecisionDiagram* read() = 0;
-	virtual bool write(DecisionDiagram* dd) = 0;
+	virtual DecisionDiagram* read() throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
+	virtual void write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
 };
 
 #endif

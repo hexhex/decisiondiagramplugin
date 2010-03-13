@@ -16,8 +16,8 @@ private:
 public:
 	virtual std::string getName();
 
-	virtual DecisionDiagram* read();
-	virtual bool write(DecisionDiagram* dd);
+	virtual DecisionDiagram* read() throw (DecisionDiagram::InvalidDecisionDiagram);
+	virtual void write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram);
 };
 
 #endif

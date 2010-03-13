@@ -1,4 +1,5 @@
 #include <AsFormat.h>
+#include <StringHelper.h>
 
 #include <dlvhex/HexParserDriver.h>
 #include <dlvhex/DLVresultParserDriver.h>
@@ -20,26 +21,24 @@ std::string AsFormat::getNameAbbr(){
 	return "as";
 }
 
-DecisionDiagram* AsFormat::read(){
+DecisionDiagram* AsFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// parse the answerset
 	DLVresultParserDriver answersetParser;
 	vector<AtomSet> answersets;
 	answersetParser.parse(std::cin, answersets);
 	if (answersets.size() != 1){
-		std::cerr << "Error: " << answersets.size() << "answer-sets were passed, but exactly one is expected" << std::endl;
-		return NULL;
+		throw DecisionDiagram::InvalidDecisionDiagram(std::string("Error: ") + StringHelper::toString((int)answersets.size()) + std::string("answer-sets were passed, but exactly one is expected"));
 	}else{
-		// translate atomset into the internal data structure
+		// translate atomset into the internal data structure (can throw exceptions)
 		DecisionDiagram* dd = new DecisionDiagram(answersets[0]);
 		return dd;
 	}
 }
 
-bool AsFormat::write(DecisionDiagram* dd){
+void AsFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
 	// create an answer-set
 	AtomSet as = dd->toAnswerSet();
 	// print it atom by atom with separator ','
 	DLVPrintVisitor pv(std::cout);
 	pv.PrintVisitor::visit(&as);
-	return true;
 }

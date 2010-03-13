@@ -35,27 +35,28 @@ void unloadFormats(vector<IFormat*> formats){
 dlvhex::dd::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::string inputformat){
 	dlvhex::dd::DecisionDiagram* dd = NULL;
 
+	// search and apply the appropriate format interpretation
 	for (vector<IFormat*>::iterator fit = formats.begin(); fit != formats.end(); fit++){
 		if (inputformat == (*fit)->getName() || inputformat == (*fit)->getNameAbbr()){
 			return (*fit)->read();
 		}
 	}
 
-	std::cerr << "Input format \"" << inputformat << "\" was not recognized" << std::endl;
-	return NULL;
+	throw DecisionDiagram::InvalidDecisionDiagram(std::string("Input format \"") + inputformat + std::string("\" was not recognized"));
 }
 
 // Writes a diagram in the given format to standard out. Returns a boolean value to notify the caller about the success.
-bool writeDiagram(vector<IFormat*> formats, dlvhex::dd::DecisionDiagram* dd, std::string outputformat){
+void writeDiagram(vector<IFormat*> formats, dlvhex::dd::DecisionDiagram* dd, std::string outputformat){
 
+	// search and apply the appropriate format interpretation
 	for (vector<IFormat*>::iterator fit = formats.begin(); fit != formats.end(); fit++){
 		if (outputformat == (*fit)->getName() || outputformat == (*fit)->getNameAbbr()){
-			return (*fit)->write(dd);
+			(*fit)->write(dd);
+			return;
 		}
 	}
 
-	std::cerr << "Output format \"" << outputformat << "\" was not recognized" << std::endl;
-	return false;
+	throw DecisionDiagram::InvalidDecisionDiagram(std::string("Output format \"") + outputformat + std::string("\" was not recognized"));
 }
 
 // prints a help message
@@ -135,16 +136,20 @@ int main(int argc, char **argv){
 	}
 
 	// actual translation
-	dd = readDiagram(formats, inputformat);
-	if (!dd){
-		// error
-		unloadFormats(formats);
-		return 1;
-	}else{
+	try{
+		dd = readDiagram(formats, inputformat);
+
 		// reading succeeded: write it
-		int result = writeDiagram(formats, dd, outputformat) ? 0 : 1;
+		writeDiagram(formats, dd, outputformat);
+
+		// writing successful
 		delete dd;
 		unloadFormats(formats);
-		return result;
+		return 0;
+	}catch(DecisionDiagram::InvalidDecisionDiagram idd){
+		// error
+		unloadFormats(formats);
+		std::cerr << idd.getMessage() << std::endl;
+		return 1;
 	}
 }
