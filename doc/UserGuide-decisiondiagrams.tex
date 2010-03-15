@@ -1,0 +1,459 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[ngerman,english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{qtree}
+\usepackage{appendix}
+\usepackage{float}
+\usepackage{boxedminipage}
+\usepackage{xspace}
+\usepackage{tabularx}
+\usepackage{amsthm}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{verbatim}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{color}
+
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+
+\lstdefinelanguage{dlvhex}{
+	keywords={not},
+	otherkeywords={:-,[,],(,),{,},&,.,\,},
+	keywordstyle=\textbf,
+	sensitive=true,
+	comment=[l]{\%},
+	string=[b]",
+	stringstyle=\color{gray}\textsf,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false
+}
+
+\newenvironment{mathprogram}[1][P]
+	{
+		% align at implication character
+		\renewcommand{\ruleimplication}{&\leftarrow&}
+		\newcommand{\ruledelimiter}{1}
+		\begin{eqnarray*}
+		#1 = \{
+	}
+	{
+		\}
+		\end{eqnarray*}
+	}
+
+\lstnewenvironment{program}[3][dlvhex]
+	{
+		\lstset{
+			language=#1,
+			basicstyle=\footnotesize,
+			numberstyle=\footnotesize,
+			caption={#2},
+			captionpos=b,
+			label={#3},
+			%frame=single,
+			emph={:=,(,),\{,\}},
+			emphstyle=\textbf,
+			mathescape=true
+		}
+	}
+	{
+	}
+
+\lstnewenvironment{exampleprogram}[1][dlvhex]
+	{
+		\lstset{
+			language=#1,
+			basicstyle=\footnotesize,
+			numberstyle=\footnotesize,
+			captionpos=b,
+			emph={:=,(,),\{,\}},
+			emphstyle=\textbf,
+			mathescape=true
+		}
+	}
+	{
+	}
+
+\newcommand{\defneg}{not\xspace}
+\newcommand{\ruleimplication}{\ensuremath{\leftarrow}}
+\DeclareMathOperator{\OpDefNeg}{not}
+\newcommand{\dlv}{\textsf{DLV}\xspace }
+\newcommand{\hex}{\textsf{HEX}\xspace }
+\newcommand{\dlvhex}{\textsf{dlvhex}\xspace }
+\newcommand{\dotff}{\textsf{dot}\xspace }
+\newcommand{\inlinecode}[1]{\textsf{#1}\xspace }
+\newcommand{\true}{\emph{true}\xspace }
+\newcommand{\false}{\emph{false}\xspace }
+\newcommand*{\bigtimes}{\mathop{\raisebox{-.5ex}{\hbox{\huge{$\times$}}}}}
+
+\lstdefinelanguage{dot}{
+	keywords={digraph,graph},
+	otherkeywords={->,;},
+	keywordstyle=\textbf,
+	sensitive=false,
+	string=[b]",
+	stringstyle=\color{gray}\textsf,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false
+}
+
+\newcommand{\DrawDD}
+	{
+		\tikzset{edge from parent/.style=
+		  {draw,
+		  ->,
+		   edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}}} 
+		\tikzset{every node/.style={draw, rectangle, rounded corners=1mm, minimum width=1cm}}
+		\tikzset{every leaf node/.style={draw, rectangle, rounded corners=0mm}}
+		\tikzset{level distance=1.2cm}
+		\tikzset{el/.style={auto,draw=none}}	% edge labels
+	}
+	
+
+\begin{document}
+
+	\title{decisiondiagramsplugin - User Guide}
+	\date{March 13, 2010}
+	\author{Christoph Redl}
+	\maketitle
+
+	The decisiondiagramsplugin adds support for working with decision diagrams to \dlvhex. In consists of a tool for conversion between the \dotff format and sets of facts as well as
+	several operators for decision diagram modification and merging.
+	
+	The plugin was developed as part of the master's thesis \emph{Merging of Biomedical Decision Diagrams} \cite{CR10DD}.
+
+	
+	\section{File Format Conversions}
+	\label{sec:Conversion}
+
+		Decision diagrams can be stored in different file formats. While some of them are human-readable, others are better for automatic processing.
+		
+		\subsection{Supported Formats}
+
+			\subsubsection{\dotff}
+
+				The \dotff file format\footnote{\url{http://www.graphviz.org}} is intuitively readable and thus fit for being used as human readable format for representing decision diagrams.
+				Additionally it is well suited for being visualized using the \emph{\dotff tools}.
+			
+				Consider the following decision diagram.
+				
+				\begin{minipage}[t]{1.00\textwidth}
+					\label{fig:DecisionDiagram}
+					\center
+					\begin{tikzpicture}	
+						\DrawDD
+						\Tree
+						[.\node{root};
+							\edge node[el,auto=right]{$A < 10$};
+							[.\node{$\mathit{case}_1$};
+								\edge node[el,auto=right]{$B < 10$};
+								\node{$\mathit{Class}_A$};
+								\edge node[el]{else};
+								\node{$\mathit{Class}_B$};
+							]
+							\edge node[el,auto=right]{$A > 20$};
+							[.\node{$\mathit{case}_2$};
+								\edge node[el,auto=right]{$B < 16$};
+								\node{$\mathit{Class}_A$};
+								\edge node[el]{else};
+								\node{$\mathit{Class}_B$};
+							]
+							\edge node[el]{else};
+							\node{$\mathit{Class}_C$};
+						]
+					\end{tikzpicture}
+				\end{minipage}
+				
+				\noindent Then the following snippet shows a it's implementation as \dotff file.
+
+				\begin{program}[dot]{the above decision diagram in \dotff format}{lst:DotDD}
+	digraph G {
+		root -> case1 ["A<10"];
+		root -> case2 ["A>20"];
+		root -> elsecase ["else"];
+		root -> case3 ["else"];
+		case1 -> case1a ["B<10"];
+		case1 -> case1b ["else"];
+		case2 -> case2a ["B<16"];
+		case2 -> case2b ["else"];
+		case1a ["ClassA"];
+		case1b ["ClassB"];
+		case2a ["ClassA"];
+		case2b ["ClassB"];
+		case3 ["ClassC"];
+	}
+				\end{program}
+
+				Valid decision diagrams must
+				\begin{itemize}
+					\item have exactly one root node (which does not need to be explicitly mentioned, but which is implicitly identified by the fact that it has no ingoing edges)
+					\item use only directed edges
+					\item use only edges that are labeled either with
+							$$\mathit{else}$$
+						or with conditions of form
+							$$X \circ Y$$
+						where $X$ and $Y$ can be arbitrary strings and $\circ \in \{ <, <=, =, >, >= \}$ is an operator
+					\item have leaf nodes that are labeled with arbitrary strings that encode the classification in this node
+				\end{itemize}
+
+
+			\subsubsection{Sets of Facts}
+
+				However, \dlvhex cannot directly load this format because it's input must be a logic program. Thus a diagram must be represented using predicates.
+				
+				We define the following predicates:
+				\begin{itemize}
+					\item $\textit{root}(X)$ \\
+						To define that some constant $X$ is defined as the root node
+					\item $\textit{innernode}(X)$ \\
+						To define some constant $X$ to be an inner node
+					\item $\textit{leafnode}(X, Y)$ \\
+						To define that some constant $X$ is a leaf node with label $Y$
+					\item $\textit{conditionaledge}(X, Y, A, C, B)$ \\
+						To define that a conditional edge with condition $A \circ B$ (where the operation $\circ$ is given by $C$) leads from node $X$ to $Y$
+					\item $\textit{elseedge}(X, Y)$ \\
+						To define that an unconditional edge goes from $X$ to $Y$
+				\end{itemize}
+				
+				The above diagram can therefore be implemented as follows.
+				
+				\begin{program}[dlvhex]{the above decision diagram as \hex program}{lst:HexDD}
+root(root).
+innernode(case1).
+innernode(case2).
+leafnode(case3, "ClassC").
+leafnode(case1a, "ClassA").
+leafnode(case1b, "ClassB").
+leafnode(case2a, "ClassA").
+leafnode(case2b, "ClassB").
+conditionaledge(root, case1, "A", "<", "10").
+conditionaledge(root, case2, "A", ">", "20").
+elseedge(root, case3).
+conditionaledge(case1, case1a, "B", "<", "10").
+elseedge(case1, case1b).
+conditionaledge(case2, case2a, "B", "<", "16").
+elseedge(case2, case2b).
+				\end{program}
+				
+				
+			\subsubsection{Answer-Sets}
+
+				A very simple and obvious translation from \hex programs into answer-sets is to to put all the facts simply as atoms into the answer-set. The above diagram can therefore
+				also be implemented as:
+			
+				\begin{program}[dlvhex]{the above decision diagram as answer-set}{lst:ASDD}
+{root(root),
+innernode(case1),
+innernode(case2),
+leafnode(case3, "ClassC"),
+leafnode(case1a, "ClassA"),
+leafnode(case1b, "ClassB"),
+leafnode(case2a, "ClassA"),
+leafnode(case2b, "ClassB"),
+conditionaledge(root, case1, "A", "<", "10"),
+conditionaledge(root, case2, "A", ">", "20"),
+elseedge(root, case3),
+conditionaledge(case1, case1a, "B", "<", "10"),
+elseedge(case1, case1b),
+conditionaledge(case2, case2a, "B", "<", "16"),
+elseedge(case2, case2b)}
+				\end{program}
+
+				
+			\subsubsection{RapidMiner XML Format}
+			
+				Rapidminer\footnote{\url{http://www.rapidminer.com}} is an open-source data mining tool. It uses a priprietary XML file format to store decision trees. This format is also
+				supported by the tool introduced in~\ref{sec:Conversion:Converstion}. The details are not relevant for practical work and are skipped therefore. It is only important
+				to know that the import and export functionality for this file format is necessary to process RapidMiner classifiers by the \inlinecode{decisiondiagramplugin}.
+
+
+		\subsection{Conversion}
+		\label{sec:Conversion:Converstion}
+
+			For the conversion between the introduced file formats, the plugin installs a tool called \inlinecode{graphconverter}.
+			It can be used to translate diagrams in any of the supported file formats into semantically equivalent versions in another format.
+			Assume that the diagram is stored in file ``mydiagram.dot". Then the conversion into the according \hex program is done by entering:
+			\begin{center}
+				\inlinecode{graphconverter dot hex \textless mydiagram.dot \textgreater mydiagram.hex}
+			\end{center}
+
+			The result is a set of facts that can be loaded by \dlvhex. After \dlvhex has done it's job, the output will be an answer-set, which is ill-suited for begin read by humans. Thus the plugin
+			also supports conversions in the other direction. Assume that \dlvhex' output is stored in file ``answerset.as" (using the \emph{silent mode} such that the output contains
+			the \emph{pure} answer-set without any additional information about \dlvhex). Then the conversion is done by:
+			\begin{center}
+				\inlinecode{graphconverter as dot \textless answerset.dot \textgreater out\_diagram.dot}
+			\end{center}
+
+			Between the two converter calls, the diagram is diven as \hex program ``mydiagram.hex" that can be processed by \dlvhex. Even though one can essentially do anything
+			with this program that is computable, it is strongly intended to be used as part of the input for a revision task.
+
+			Note that \inlinecode{graphconverter} reads from standard input and writes to standard output.
+			The \inlinecode{graphconverter} expects either one or two parameters. If one parameter is passed, it can be anything of:
+			\begin{itemize}
+				\item $--toas$ \\
+					Converts a \dotff file into a \hex program.
+				\item $--todot$ \\
+					Converts an answer-set into a \dotff file.
+				\item $--help$ \\
+					Displays an online help message.
+			\end{itemize}
+
+			Note that $--toas$ and $--todot$ are only abbreviations for commonly used conversions. The more general program call passes two parameters, where the first one
+			states the source format and the second one the desired destination format. Both parameters can be anything from the following list.
+			\begin{tabularx}{\textwidth}{|X|X|}
+				\hline
+				Format		& parameter name \\
+				\hline
+				\dotff graph & \inlinecode{dot} \\
+				\hex program & \inlinecode{hexprogram} or \inlinecode{hex} \\
+				answer-set & \inlinecode{answerset} or \inlinecode{as} \\
+				RapidMiner XML & \inlinecode{rmxml} or \inlinecode{xml} \\
+				\hline
+			\end{tabularx}
+			
+
+	\section{Applying Operators}
+	\label{sec:Operators}
+	
+		This section presupposes familarity with the \textit{mergingplugin}, especially the usage of revision plans and operators. For a detailled description see the according
+		documentation.
+		
+		Listing~\ref{lst:RevisionPlan} shows a typical revision task definition that uses the operators \emph{unfold} and \emph{tobinarydecisiontree}. Note that the decision diagram
+		encoded as logic program was directly pasted into the mapping rules. This was only done in order to give the program as one self-contained example. In practice, the mapping
+		rules would rather access an external source by the use of external atoms.
+		
+		\begin{program}[dlvhex]{demonstration of the plugin usage}{lst:RevisionPlan}
+[common signature]
+predicate: root/1;
+predicate: innernode/1;
+predicate: leafnode/2;
+predicate: conditionaledge/5;
+predicate: elseedge/2;
+
+[belief base]
+name: kb1;
+mapping: "
+	root(root).
+	innernode(root).
+	innernode(v1).
+	innernode(v2).
+	innernode(v3).
+	leafnode(leaf1, class1).
+	leafnode(leaf2, class2).
+	leafnode(leaf3, class3).
+	conditionaledge(root, v1, x, \'<\', y).
+	conditionaledge(root, v2, z, \'<\', y).
+	elseedge(root, v3).
+	conditionaledge(v1, leaf1, a, \'<\', y).
+	conditionaledge(v1, leaf2, b, \'<\', y).
+	elseedge(v1, leaf3).
+	conditionaledge(v2, leaf1, aa, \'<\', y).
+	conditionaledge(v2, leaf2, bb, \'<\', y).
+	elseedge(v2, leaf3).
+	conditionaledge(v3, leaf1, aaa, \'<\', y).
+	conditionaledge(v3, leaf2, bbb, \'<\', y).
+	elseedge(v3, leaf3).
+";
+
+[revision plan]
+{
+	operator: tobinarydecisiontree;
+	{
+		operator: unfold;
+		{
+			kb1
+		};
+	};
+}
+		\end{program}
+		
+		The decisiondiagramplugin ships with several special merging and modification operators for decision diagrams. They expect the belief bases to be sets of facts which were
+		generated out of decision diagrams using the \inlinecode{graphconverter} (see~\ref{sec:Conversion:Converstion}). The output will again be a set of facts that encodes a diagram,
+		which can be back-converted into a \dotff file. Intermediate results are sets of answer-sets.
+
+		The following subsections describe the operators that are included in the plugin. Note that this is just a very quick and informal description that should enable the user
+		to explore the capabilities or adapt operators according to individual needs. For a more detailled and formal description, see the cited thesis.
+
+		\subsection{Modification Operators}
+		\label{sec:Operators:Modification}
+
+			\subsubsection{unfold}
+			
+				The input can be any number of general decision diagrams. The output will contain the same number of diagrams, where each of them has (independently) been converted
+				into a tree. This is done by duplication of subtrees if necessary.
+			
+
+			\subsubsection{tobinarydecisiondiagram}
+			
+				The operator is unary, i.e. it works on a single belief base. It expects the input to encode a diagram that is a \emph{tree}, i.e. it contains no sharing of subnodes.
+				
+				Then the output is again a tree where each node has at most two successors (\emph{binary} tree). This is done by introduction of intermediate nodes.
+
+				
+			\subsubsection{orderbinarydecisiontree}
+			
+				The operator is again unary. It expects it's input to be a \emph{binary} decision \emph{tree}. It's output will a semantically equivalent binary decision tree, where
+				on each path from the root to a leaf node, the variables are only queried in lexical ordering.
+
+
+			\subsubsection{simplify}
+			
+				The input can be any number of decision diagrams. Each of them is (independently) simplified by some algorithms that will leave the semantics of the diagram unchanged.
+				That is, only the structure of the diagram will be modified, which makes them more readable.
+			
+		
+		\subsection{Merging Operators}
+		\label{sec:Operators:Merging}
+		
+			\subsubsection{userpreferences}
+
+				This operator is $n$-ary, i.e. arbitrary many diagrams can be passed. Additionally it expects arbitrary many key-value pairs as parameters, where the keys are ignored
+				and the values are of form:
+				\begin{center}
+					\inlinecode{X \textgreater \textgreater Y} or \inlinecode{X \textgreater n\textgreater Y}
+				\end{center}
+				where $X$ and $Y$ are the names of class labels (as used in leaf nodes) and $n$ is an integer $\ge 0$. A rule of form \inlinecode{X \textgreater \textgreater Y}
+				expresses that ``in doubt, $X$ is preferred to $Y$", whereas \inlinecode{X \textgreater n\textgreater Y} states ``$X$ is preferred to $Y$ if there are at least $n$
+				more input diagrams that vote for $X$ than for $Y$".
+
+				The output is a diagram where each domain element is classified according to this rules. Note that the rules are evaluated in top-down manner. That is, the result of
+				of a prior rule can be overwritten by a later (applicable!) rule.
+
+
+			\subsubsection{majorityvoting}
+			
+				The input can be any number of (general) decision diagrams. The output is a diagram where each domain element is automatically classified by each of the inputs. Then the
+				final class label is determined by majority decision. In case that this does not lead to a unique result, the input diagram with the least index forces it's decision.
+			
+
+			\subsubsection{avg}
+
+				The operator expects exactly two \emph{ordered binary trees} as input parameter. The result will again be an ordered binary tree of the following form.
+				
+				For each node from the root to the leafs, if one of the input trees contains condition $X \circ c_1$ and the other one $X \circ c_2$, the resulting tree will contain
+				$X \circ \frac{c_1 + c_2}{2}$, i.e. the mean of the comparison value is computed. In case that one of the inputs contains $X \circ c_1$ and the other one $Y \circ c_2$, the
+				result will contain $X \circ c_1$ at this position (since $X$ is lexically smaller than $Y$), and the second diagram is incorporated recursivly in both subtrees.
+				
+				In case of contradicting leaf nodes or incompatible comparison operators (e.g. $X < c_1$ and $X > c_2$), the result is ``unknown".
+
+	\section{Conclusion}
+	\label{sec:Conclusion}
+
+		For a more detailed and formal description of the operators see \cite{CR10DD}. For an introduction to the belief merging framework see \cite{CR10BMF}.
+
+	\addcontentsline{toc}{chapter}{References}
+	\bibliography{Bibliography}
+	\bibliographystyle{plain}
+
+\end{document}
