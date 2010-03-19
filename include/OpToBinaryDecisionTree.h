@@ -20,7 +20,7 @@ namespace dlvhex{
 		 */
 		class OpToBinaryDecisionTree : public IOperator{
 		private:
-			void toBinary(DecisionDiagram* dd, DecisionDiagram::Node* root);
+			void toBinary(DecisionDiagram& dd, DecisionDiagram::Node* root);
 		public:
 			virtual std::string getName();
 			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);

@@ -16,14 +16,17 @@ namespace dlvhex{
 		 * The result will be another decision diagram which delivers the same answer as the input, iff the two diagrams agree upon the classification of an element. Otherwise
 		 * the classification will be "unknown".
 		 * Usage:
-		 * &operator["majorityvoting", DD](A)
-		 *	DD	... predicate with handles to exactly 2 answers containing one decision diagram each
+		 * &operator["majorityvoting", DD, K](A)
+		 *	DD	... predicate with indices and handles to exactly 2 answers containing one decision diagram each
 		 *	A	... answer to the operator result
 		 */
 		class OpMajorityVoting : public IOperator{
 		protected:
 			typedef std::map<std::string, int> Votings;
-			void insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings);
+			struct Votes : public DecisionDiagram::LeafNode::Data{
+				Votings v;
+			};
+			void insert(DecisionDiagram& input, DecisionDiagram& output);
 		public:
 			virtual std::string getName();
 			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);

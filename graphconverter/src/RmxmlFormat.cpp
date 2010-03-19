@@ -203,9 +203,9 @@ TiXmlElement RmxmlFormat::getXmlInner(DecisionDiagram* dd, DecisionDiagram::Node
 		DecisionDiagram::Condition ddcondition = (*eit)->getCondition();
 		condition.SetAttribute("class", getXmlCmpOperation(ddcondition).c_str());
 		TiXmlElement attribute("attributeName");
-		attribute.InsertEndChild(TiXmlText(getXmlCmpAttribute(ddcondition).c_str()));
+		attribute.InsertEndChild(TiXmlText(ddcondition.getAttribute().c_str()));
 		TiXmlElement value("value");
-		value.InsertEndChild(TiXmlText(getXmlCmpValue(ddcondition).c_str()));
+		value.InsertEndChild(TiXmlText(StringHelper::toString(ddcondition.getCmpValue()).c_str()));
 		condition.InsertEndChild(value);
 		condition.InsertEndChild(attribute);
 
@@ -285,7 +285,7 @@ TiXmlElement RmxmlFormat::getXmlNormalAttributeList(DecisionDiagram* dd, Decisio
 	for (std::set<DecisionDiagram::Edge*>::iterator edgeIt = edges.begin(); edgeIt != edges.end(); edgeIt++){
 		// only conditional edges contain conditions
 		if (!dynamic_cast<DecisionDiagram::ElseEdge*>(*edgeIt)){
-			attributes.insert(getXmlCmpAttribute((*edgeIt)->getCondition()));
+			attributes.insert((*edgeIt)->getCondition().getAttribute());
 		}
 	}
 
@@ -466,47 +466,9 @@ TiXmlElement RmxmlFormat::getXmlClassificationAttributeList(DecisionDiagram* dd,
 	return attributeRole;
 }
 
-// Finds out the attribute of the two operands and returns it
-std::string RmxmlFormat::getXmlCmpAttribute(DecisionDiagram::Condition c){
-	try{
-		// check if the first operand is a number
-		StringHelper::atof(c.getOperand1());
-
-		// yes: then the second operand is the attribute (check if it is NO number!)
-		try{
-			StringHelper::atof(c.getOperand2());
-			throw DecisionDiagram::InvalidDecisionDiagram(std::string("None of the operands in condition \"") + c.toString() + "\" is an attribute (both are numbers)");
-		}catch(StringHelper::NotContainedException nce){}
-
-		return c.getOperand2();
-	}catch(StringHelper::NotContainedException nce){
-		// no, then it's the attribute
-		return c.getOperand1();
-	}
-}
-
-// Finds out the numeric value of the two operands and returns it
-std::string RmxmlFormat::getXmlCmpValue(DecisionDiagram::Condition c){
-	try{
-		// check if the first operand is a number
-		StringHelper::atof(c.getOperand1());
-
-		// yes: then it's the compare value
-		return c.getOperand1();
-	}catch(StringHelper::NotContainedException nce){
-		// no, then it's the second operand (must be a float value - check this!)
-		try{
-			StringHelper::atof(c.getOperand2());
-			return c.getOperand2();
-		}catch(StringHelper::NotContainedException nce2){
-			throw DecisionDiagram::InvalidDecisionDiagram(std::string("None of the operands in condition \"") + c.toString() + "\" is a float value");
-		}
-	}
-}
-
 std::string RmxmlFormat::getXmlCmpOperation(DecisionDiagram::Condition c){
 	// Check if the first or the second operand is the attribute
-	std::string attribute = getXmlCmpAttribute(c);
+	std::string attribute = c.getAttribute();
 	bool negate = false;
 	if (c.getOperand1() == attribute){
 		// just take the comparison operator as it is

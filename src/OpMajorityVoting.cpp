@@ -11,14 +11,16 @@ std::string OpMajorityVoting::getName(){
 	return "majorityvoting";
 }
 
-void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings){
+void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output){
 
 	// Merge the decision diagrams
-	// Extract all leaf nodes of dd1
+	// Extract all leaf nodes of the intermediate result
 	std::set<DecisionDiagram::LeafNode*> outputLeafs = output.getLeafNodes();
 
-	// Make a copy of ddInput for each leaf node
+	// Make a copy of the new input diagram for each leaf node
 	for (std::set<DecisionDiagram::LeafNode*>::iterator formerLeafIt = outputLeafs.begin(); formerLeafIt != outputLeafs.end(); formerLeafIt++){
+		Votes* formerVotes = dynamic_cast<Votes*>((*formerLeafIt)->getData());
+
 		// Make a copy of the input diagram
 		DecisionDiagram inputCopy(input);
 
@@ -33,19 +35,21 @@ void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output, s
 		std::set<DecisionDiagram::LeafNode*> newoutputLeafs = output.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator newLeafIt = newoutputLeafs.begin(); newLeafIt != newoutputLeafs.end(); newLeafIt++){
 			// Check if this is a new leaf node
-			if (votings.find(*newLeafIt) == votings.end()){
+			if ((*newLeafIt)->getData() == NULL){
 				// The new entry is equal to the entry of the former leaf, except that the counter for the classification of the new leaf is incremented by 1
-				votings[*newLeafIt] = votings[*formerLeafIt];
-				if (votings[*newLeafIt].find((*newLeafIt)->getClassification()) == votings[*newLeafIt].end()){
-					votings[*newLeafIt][(*newLeafIt)->getClassification()] = 1;
+				Votes* newVotes = new Votes();
+				newVotes->v = formerVotes->v;
+				if (newVotes->v.find((*newLeafIt)->getClassification()) == newVotes->v.end()){
+					newVotes->v[(*newLeafIt)->getClassification()] = 1;
 				}else{
-					votings[*newLeafIt][(*newLeafIt)->getClassification()]++;
+					newVotes->v[(*newLeafIt)->getClassification()]++;
 				}
+				(*newLeafIt)->setData(newVotes);
 			}
 		}
 
 		//	Remove the votings for the former leaf node
-		votings.erase(*formerLeafIt);
+		delete formerVotes;
 
 		// Redirect all in-edges to the former leaf node to the root element of ddInput
 		std::set<DecisionDiagram::Edge*> inEdges = (*formerLeafIt)->getInEdges();
@@ -79,23 +83,18 @@ HexAnswer OpMajorityVoting::apply(int arity, std::vector<HexAnswer*>& arguments,
 			}
 		}
 
-		// Prepare a data structure for votings:
-		// 	Each leaf node needs a set of string/int pairs. The string is a classification and the integer value the number of diagrams that voted for this class
-		//	at this point of the diagram.
-		std::map<DecisionDiagram::LeafNode*, Votings> votings;
-
 		// Construct final decision diagram (=copy of the first input diagram for now)
 		DecisionDiagram output((*arguments[0])[0]);
 		if (!output.isTree()){
 			throw IOperator::OperatorException("All input diagrams are expected to be trees.");
 		}
 
-		// Initialize the votings structure
+		// Initialize the votings structure for the leafs of the startup diagram
 		std::set<DecisionDiagram::LeafNode*> leafs = output.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator it = leafs.begin(); it != leafs.end(); it++){
-			Votings uv;
-			uv[(*it)->getClassification()] = 1;
-			votings[*it] = uv;
+			Votes* votings = new Votes();
+			votings->v[(*it)->getClassification()] = 1;
+			(*it)->setData(votings);
 		}
 
 		// Insert all input decision diagrams
@@ -104,21 +103,25 @@ HexAnswer OpMajorityVoting::apply(int arity, std::vector<HexAnswer*>& arguments,
 			if (!ddInput.isTree()){
 				throw IOperator::OperatorException("All input diagrams are expected to be trees.");
 			}
-			insert(ddInput, output, votings);
+			insert(ddInput, output);
 		}
 
 		// Finally, for all remaining leaf nodes, take the classification with the highest votes
 		std::set<DecisionDiagram::LeafNode*> outputLeafs = output.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = outputLeafs.begin(); leafIt != outputLeafs.end(); leafIt++){
-			Votings v = votings[*leafIt];
 			int highestVotes = 0;
 			std::string highestVotedClass("unknown");
-			for (Votings::iterator vIt = v.begin(); vIt != v.end(); vIt++){
+
+			// search for the highest voted classification
+			Votes* votes = dynamic_cast<Votes*>((*leafIt)->getData());
+			for (Votings::iterator vIt = votes->v.begin(); vIt != votes->v.end(); vIt++){
 				if ((*vIt).second > highestVotes || ((*vIt).second == highestVotes && (*vIt).first.compare(highestVotedClass) < 0)){
 					highestVotes = (*vIt).second;
 					highestVotedClass = (*vIt).first;
 				}
 			}
+			delete (*leafIt)->getData();
+
 			// Take the highest voted classification as the final one
 			(*leafIt)->setClassification(highestVotedClass);
 		}

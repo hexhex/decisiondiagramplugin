@@ -3,7 +3,6 @@
 
 #include <StringHelper.h>
 
-#include <iostream>
 #include <sstream>
 #include <set>
 
@@ -13,7 +12,7 @@ std::string OpDistributionMapVoting::getName(){
 	return "distributionmapvoting";
 }
 
-void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings){
+void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& output){
 
 	// Merge the decision diagrams
 	// Extract all leaf nodes of dd1
@@ -21,6 +20,8 @@ void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& ou
 
 	// Make a copy of ddInput for each leaf node
 	for (std::set<DecisionDiagram::LeafNode*>::iterator formerLeafIt = outputLeafs.begin(); formerLeafIt != outputLeafs.end(); formerLeafIt++){
+		Votes* formerVotes = dynamic_cast<Votes*>((*formerLeafIt)->getData());
+
 		// Make a copy of the input diagram
 		DecisionDiagram inputCopy(input);
 
@@ -35,14 +36,16 @@ void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& ou
 		std::set<DecisionDiagram::LeafNode*> newoutputLeafs = output.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator newLeafIt = newoutputLeafs.begin(); newLeafIt != newoutputLeafs.end(); newLeafIt++){
 			// Check if this is a new leaf node
-			if (votings.find(*newLeafIt) == votings.end()){
+			if ((*newLeafIt)->getData() == NULL){
 				try{
 					// The new entry for a certain classification is equal to the sum of the former entries
-					votings[*newLeafIt] = votings[*formerLeafIt];
 					Votings uv = StringHelper::extractDistribution((*newLeafIt)->getClassification());
-					for (Votings::iterator vIt = votings[*newLeafIt].begin(); vIt != votings[*newLeafIt].end();  vIt++){
-						votings[*newLeafIt][vIt->first] +=uv[vIt->first]; 
+					Votes* newVotes = new Votes();
+					newVotes->v = formerVotes->v;
+					for (Votings::iterator vIt = newVotes->v.begin(); vIt != newVotes->v.end();  vIt++){
+						newVotes->v[vIt->first] +=uv[vIt->first]; 
 					}
+					(*newLeafIt)->setData(newVotes);
 				}catch(StringHelper::NotContainedException nce){
 					throw OperatorException(std::string("Leaf node with label \"") + (*newLeafIt)->getClassification() + std::string("\" does not contain a distribution map"));
 				}
@@ -50,7 +53,7 @@ void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& ou
 		}
 
 		//	Remove the votings for the former leaf node
-		votings.erase(*formerLeafIt);
+		delete formerVotes;
 
 		// Redirect all in-edges to the former leaf node to the root element of ddInput
 		std::set<DecisionDiagram::Edge*> inEdges = (*formerLeafIt)->getInEdges();
@@ -63,7 +66,6 @@ void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& ou
 
 		// Remove the former leaf node
 		output.removeNode(*formerLeafIt);
-
 	}
 }
 
@@ -100,30 +102,35 @@ HexAnswer OpDistributionMapVoting::apply(int arity, std::vector<HexAnswer*>& arg
 		std::set<DecisionDiagram::LeafNode*> leafs = diag1.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator it = leafs.begin(); it != leafs.end(); it++){
 			try{
-				Votings uv = StringHelper::extractDistribution((*it)->getClassification());
-				votings[*it] = uv;
+				Votes* v = new Votes();
+				v->v = StringHelper::extractDistribution((*it)->getClassification());
+				(*it)->setData(v);
 			}catch(StringHelper::NotContainedException nce){
 				throw OperatorException(std::string("Leaf node with label \"") + (*it)->getClassification() + std::string("\" does not contain a distribution map"));
 			}
 		}
 
 		// Insert the second decision diagram into the first one
-		insert(diag2, diag1, votings);
+		insert(diag2, diag1);
 
 		// Finally, for all remaining leaf nodes, take the classification with the highest number of votes
 		std::set<DecisionDiagram::LeafNode*> outputLeafs = diag1.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = outputLeafs.begin(); leafIt != outputLeafs.end(); leafIt++){
-			Votings v = votings[*leafIt];
 			int highestVotes = 0;
 			std::string highestVotedClass("unknown");
-			for (Votings::iterator vIt = v.begin(); vIt != v.end(); vIt++){
+
+			// search for the highest voted classification
+			Votes* votes = dynamic_cast<Votes*>((*leafIt)->getData());
+			for (Votings::iterator vIt = votes->v.begin(); vIt != votes->v.end(); vIt++){
 				if ((*vIt).second > highestVotes || ((*vIt).second == highestVotes && (*vIt).first.compare(highestVotedClass) < 0)){
 					highestVotes = (*vIt).second;
 					highestVotedClass = (*vIt).first;
 				}
 			}
+
 			// Take the highest voted classification as the final one
-			(*leafIt)->setClassification(highestVotedClass + StringHelper::encodeDistributionMap(v));
+			(*leafIt)->setClassification(highestVotedClass + StringHelper::encodeDistributionMap(votes->v));
+			delete votes;
 		}
 
 		// Convert the final decision diagram into a hex answer

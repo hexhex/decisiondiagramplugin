@@ -189,16 +189,28 @@ namespace dlvhex{
 			 * A class representing one leaf node of a decision diagram.
 			 */
 			class LeafNode : public Node{
+			public:
+				/*
+				 * A class that - when derived - stores arbitrary data structures that can be appended to leaf nodes
+				 */
+				class Data{
+				public:
+					virtual ~Data();	// just to make this type polymorphic
+				};
 			private:
 				std::string classification;
+				Data* data;
 
 				// The following methods are only called by members of DecisionDiagram in order to maintain the decision diagram's integrity
 				friend class DecisionDiagram;
 				LeafNode(std::string l, std::string c);
+				LeafNode(std::string l, std::string c, Data* d);
 			public:
 				virtual ~LeafNode();
 				std::string getClassification();
+				Data* getData();
 				void setClassification(std::string c);
+				void setData(Data* d);
 
 				virtual std::string toString() const;
 
@@ -212,6 +224,13 @@ namespace dlvhex{
 			 *  \param c The classification of the leaf node
 			 */
 
+			/*! \fn DecisionDiagram::LeafNode::LeafNode(std::string l, std::string c, Data* d)
+			 *  \brief Construct a new leaf node with a certain label and classification plus an additional data entry.
+			 *  \param l The label of the leaf node
+			 *  \param c The classification of the leaf node
+			 *  \param d The data field of this leaf node
+			 */
+
 			/*! \fn DecisionDiagram::LeafNode::~LeafNode()
 			 *  \brief Destructor
 			 */
@@ -221,10 +240,21 @@ namespace dlvhex{
 			 *  \return std::string The classification of this leaf node.
 			 */
 
+			/*! \fn Data* DecisionDiagram::LeafNode::getData()
+			 *  \brief Returns the data appended to this leaf node. Will be NULL by default.
+			 *  \return Data* Data pointer
+			 */
+
 			/*! \fn void DecisionDiagram::LeafNode::setClassification(std::string c)
 			 *  \brief Sets a new classification for this leaf node.
 			 *  \param c The new classification
 			 *  \return void
+			 */
+
+			/*! \fn void DecisionDiagram::LeafNode::setData(Data* d)
+			 *  \brief Appends a data instance to this leaf node.
+			 *  \param d A pointer to some data structure. Note: This class will _not_ overtake memory management for this pointer!
+			 *  \param d A pointer to some instance of Data or a subclass.
 			 */
 
 			/*! \fn std::string DecisionDiagram::LeafNode::toString()
@@ -271,6 +301,8 @@ namespace dlvhex{
 				std::string getOperand1() const;
 				std::string getOperand2() const;
 				CmpOp getOperation() const;
+				std::string getAttribute() const;
+				float getCmpValue() const;
 
 				static CmpOp stringToCmpOp(std::string operation_);
 				static std::string cmpOpToString(CmpOp op);
@@ -313,6 +345,16 @@ namespace dlvhex{
 			/*! \fn CmpOp DecisionDiagram::Condition::getOperation() const
 			 *  \brief Returns the operation of the range query.
 			 *  \return CmpOp The operation of the range query
+			 */
+
+			/*! \fn std::string DecisionDiagram::Condition::getAttribute() const
+			 *  \brief Figures out the alphanumeric comparison attribute. If both operands are attributes (i.e. no numbers), operand1 will be returned. If none is an attribute, an exception is thrown.
+			 *  \return std::string The alphanumeric attribute. In the expression "X <= 10", "X" will be returned.
+			 */
+
+			/*! \fn float DecisionDiagram::Condition::getCmpValue() const
+			 *  \brief Figures out the numeric comparison value. If both operands are numbers (i.e. no attributes), operand2 will be returned. If none is a number, an exception is thrown.
+			 *  \return std::string The alphanumeric attribute. In the expression "X <= 10", "10" will be returned.
 			 */
 
 			/*! \fn static CmpOp DecisionDiagram::Condition::stringToCmpOp(std::string operation_)
@@ -521,7 +563,6 @@ namespace dlvhex{
 
 			// Output generation
 			AtomSet toAnswerSet() const;
-			std::string toDotFileString() const;
 			std::string toString() const;
 		};
 	}
@@ -743,11 +784,6 @@ namespace dlvhex{
 /*! \fn AtomSet DecisionDiagram::toAnswerSet() const
  * Creates an answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), edge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
  *  \return AtomSet An answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), edge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
- */
-
-/*! \fn std::string DecisionDiagram::toDotFileString() const
- * Returns a string representation of this decision diagram in dot file format.
- *  \return A string representation of this decision diagram in dot file format.
  */
 
 /*! \fn std::string DecisionDiagram::toString() const

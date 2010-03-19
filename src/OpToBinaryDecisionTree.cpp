@@ -4,22 +4,22 @@
 #include <sstream>
 #include <set>
 
-#include <iostream>
-
 using namespace dlvhex::dd;
 
 std::string OpToBinaryDecisionTree::getName(){
 	return "tobinarydecisiontree";
 }
 
-void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node* root){
+void OpToBinaryDecisionTree::toBinary(DecisionDiagram& dd, DecisionDiagram::Node* root){
 
 	// Check arity of root node
 	if (root->getOutEdgesCount() > 2){
+		// greater than 2 --> needs to be transformed
+
 		bool firstOutEdge = true;
 		
 		// Create a new intermediate node (with a label similar to the original name)
-		DecisionDiagram::Node* intermediateNode = dd->addNode(dd->getUniqueLabel(root->getLabel()));
+		DecisionDiagram::Node* intermediateNode = dd.addNode(dd.getUniqueLabel(root->getLabel()));
 
 		std::set<DecisionDiagram::Edge*> oedges = root->getOutEdges();
 		DecisionDiagram::Edge* selectedEdge = NULL;
@@ -33,18 +33,20 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 				selectedEdge = *it;
 			}
 		}
+
+		// unfold all child nodes
 		for (std::set<DecisionDiagram::Edge*>::iterator it = oedges.begin(); it != oedges.end(); it++){
 			if (*it == selectedEdge){
 				firstOutEdge = false;
 				// Convert the sub decision diagram into a binary one
 				toBinary(dd, (*it)->getTo());
 			}else{
-				// All other edges are redirected to the intermediate node
+				// All other edges are redirected such that the start at the intermediate node
 				DecisionDiagram::Node *currentSubNode = (*it)->getTo();
-				dd->addEdge(intermediateNode, currentSubNode, (*it)->getCondition());
+				dd.addEdge(intermediateNode, currentSubNode, (*it)->getCondition());
 
 				// Remove the original edge
-				dd->removeEdge(*it);
+				dd.removeEdge(*it);
 
 				// Convert the sub decision diagram into a binary one
 				toBinary(dd, (*it)->getTo());
@@ -52,7 +54,19 @@ void OpToBinaryDecisionTree::toBinary(DecisionDiagram* dd, DecisionDiagram::Node
 		}
 
 		// Let the intermediate node be the root's else child
-		DecisionDiagram::Edge *e = dd->addElseEdge(root, intermediateNode);
+		DecisionDiagram::Edge *e = dd.addElseEdge(root, intermediateNode);
+	}else if(root->getOutEdgesCount() == 2){
+		// leave it as it is --> just transform the child nodes
+		std::set<DecisionDiagram::Edge*> oedges = root->getOutEdges();
+		for (std::set<DecisionDiagram::Edge*>::iterator it = oedges.begin(); it != oedges.end(); it++){
+			toBinary(dd, (*it)->getTo());
+		}
+	}else{
+		// either a leaf node --> leave it as it is
+		// or: an inner node with an illegal arity
+		if (!dynamic_cast<DecisionDiagram::LeafNode*>(root)){
+			throw IOperator::OperatorException(std::string("Discovered an inner node with an illegal arity (must be >= 2): ") + root->getLabel());
+		}
 	}
 }
 
@@ -65,12 +79,8 @@ HexAnswer OpToBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answ
 			msg << "tobinarydecisiontree is a unary operator. " << arity << " answers were passed.";
 			throw IOperator::OperatorException(msg.str());
 		}
-		if (answers[0]->size() != 1){
-			std::stringstream msg;
-			msg << "majorityvoting expects the answer to contain exactly one answer set.";
-			throw IOperator::OperatorException(msg.str());
-		}
 
+		// execute operator for each input decision diagram
 		HexAnswer answer;
 		for (int answerSetNr = 0; answerSetNr < answers[0]->size(); answerSetNr++){
 			// Construct input decision diagram
@@ -82,7 +92,7 @@ HexAnswer OpToBinaryDecisionTree::apply(int arity, std::vector<HexAnswer*>& answ
 			}
 
 			// Convert it into a binary one
-			toBinary(&dd, dd.getRoot());
+			toBinary(dd, dd.getRoot());
 
 			// Convert the final decision diagram into a hex answer
 			answer.push_back(dd.toAnswerSet());

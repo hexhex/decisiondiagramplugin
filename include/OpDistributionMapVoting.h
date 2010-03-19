@@ -22,13 +22,16 @@ namespace dlvhex{
 		 * to the (combined) distribution map.
 		 * Usage:
 		 * &operator["majorityvoting", DD](A)
-		 *	DD	... predicate with handles to exactly 2 answers containing one decision diagram each
+		 *	DD	... predicate with indices 0-1 and handles to exactly 2 answers containing one decision diagram each
 		 *	A	... answer to the operator result
 		 */
 		class OpDistributionMapVoting : public IOperator{
 		protected:
 			typedef std::map<std::string, int> Votings;
-			void insert(DecisionDiagram& input, DecisionDiagram& output, std::map<DecisionDiagram::LeafNode*, Votings>& votings);
+			struct Votes : public DecisionDiagram::LeafNode::Data{
+				Votings v;
+			};
+			void insert(DecisionDiagram& input, DecisionDiagram& output);
 		public:
 			virtual std::string getName();
 			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);

@@ -9,4 +9,5 @@ noinst_HEADERS = OpUnfold.h \
 		 OpUserPreferences.h \
 		 OpSimplify.h \
 		 OpDistributionMapVoting.h \
-		 DecisionDiagram.h
+		 DecisionDiagram.h \
+		 StringHelper.h

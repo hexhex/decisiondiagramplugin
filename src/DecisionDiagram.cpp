@@ -1,4 +1,5 @@
 #include <DecisionDiagram.h>
+#include <StringHelper.h>
 
 #include <map>
 #include <stack>
@@ -153,7 +154,13 @@ bool DecisionDiagram::Node::operator!=(const DecisionDiagram::LeafNode &n2) cons
 
 // ------------------------------ LeafNode ------------------------------
 
-DecisionDiagram::LeafNode::LeafNode(std::string l, std::string c) : Node(l), classification(c){
+DecisionDiagram::LeafNode::Data::~Data(){
+}
+
+DecisionDiagram::LeafNode::LeafNode(std::string l, std::string c) : Node(l), classification(c), data(NULL){
+}
+
+DecisionDiagram::LeafNode::LeafNode(std::string l, std::string c, Data* d) : Node(l), classification(c), data(d){
 }
 
 DecisionDiagram::LeafNode::~LeafNode(){
@@ -163,9 +170,16 @@ std::string DecisionDiagram::LeafNode::getClassification(){
 	return classification;
 }
 
+DecisionDiagram::LeafNode::Data* DecisionDiagram::LeafNode::getData(){
+	return data;
+}
 
 void DecisionDiagram::LeafNode::setClassification(std::string c){
 	classification = c;
+}
+
+void DecisionDiagram::LeafNode::setData(Data* d){
+	data = d;
 }
 
 std::string DecisionDiagram::LeafNode::toString() const{
@@ -210,6 +224,39 @@ std::string DecisionDiagram::Condition::getOperand2() const{
 
 DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::getOperation() const{
 	return operation;
+}
+
+std::string DecisionDiagram::Condition::getAttribute() const{
+	try{
+		// check if the first operand is a number
+		StringHelper::atof(getOperand1());
+
+		// yes: then the second operand is the attribute (check if it is NO number!)
+		try{
+			StringHelper::atof(getOperand2());
+			throw DecisionDiagram::InvalidDecisionDiagram(std::string("None of the operands in condition \"") + toString() + "\" is an attribute (both are numbers)");
+		}catch(StringHelper::NotContainedException nce){}
+
+		return getOperand2();
+	}catch(StringHelper::NotContainedException nce){
+		// no, then it's the attribute
+		return getOperand1();
+	}
+}
+
+float DecisionDiagram::Condition::getCmpValue() const{
+	try{
+		// check if the first operand is a number
+		// if this is the case, then it's the compare value
+		return StringHelper::atof(getOperand1());
+	}catch(StringHelper::NotContainedException nce){
+		// no, then it's the second operand (must be a float value - check this!)
+		try{
+			return StringHelper::atof(getOperand2());
+		}catch(StringHelper::NotContainedException nce2){
+			throw DecisionDiagram::InvalidDecisionDiagram(std::string("None of the operands in condition \"") + toString() + "\" is a float value");
+		}
+	}
 }
 
 DecisionDiagram::Condition::CmpOp DecisionDiagram::Condition::stringToCmpOp(std::string operation_){
@@ -875,40 +922,6 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 		as.insert(AtomPtr(new Atom("root", arg)));
 	}
 	return as;
-}
-
-std::string DecisionDiagram::toDotFileString() const{
-
-	std::stringstream output;
-	output << "digraph {" << std::endl;
-
-	// Create list of edges
-	for (std::set<Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
-		Edge* e = *it;
-		if (dynamic_cast<ElseEdge*>(e) != NULL){
-			output << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"else\"];" << std::endl;
-		}else{
-			output << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
-		}
-	}
-
-	// Create a list of leaf nodes
-	for (std::set<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
-		Node* n = *it;
-
-		// extract a reasonable label for this node
-		std::string lab = n->getLabel();
-		if (lab.find_first_of("_") != std::string::npos) lab = lab.substr(0, lab.find_first_of("_"));
-		if (dynamic_cast<LeafNode*>(n) != NULL){
-			output << "     " << n->getLabel() << " [label=\"" << lab << " [" << dynamic_cast<LeafNode*>(n)->getClassification() << "]\"];" << std::endl;
-		}else{
-			output << "     " << n->getLabel() << " [label=\"" << lab << "\"];" << std::endl;
-		}
-	}
-
-	output << "}" << std::endl;
-
-	return output.str();
 }
 
 std::string DecisionDiagram::toString() const{

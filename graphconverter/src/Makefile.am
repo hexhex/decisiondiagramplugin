@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = gnu
 
 bin_PROGRAMS = graphconverter
-graphconverter_SOURCES = GraphConverter.cpp tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp IFormat.cpp DotFormat.cpp RmxmlFormat.cpp HexFormat.cpp AsFormat.cpp StringHelper.cpp
-graphconverter_LDADD = @LIBCURL@ $(top_srcdir)/src/DecisionDiagram.o
+graphconverter_SOURCES = GraphConverter.cpp tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp IFormat.cpp DotFormat.cpp RmxmlFormat.cpp HexFormat.cpp AsFormat.cpp
+graphconverter_LDADD = @LIBCURL@ $(top_srcdir)/src/DecisionDiagram.o $(top_srcdir)/src/StringHelper.o
 
 AM_YFLAGS = -d
 AM_CPPFLAGS = \
