@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sstream>
 
+using namespace dlvhex::dd::util;
 
 std::string StringHelper::unquote(std::string rs){
 	if (rs.length() >= 2 && rs[0] == '\"' && rs[rs.length() - 1] == '\"') return rs.substr(1, rs.length() - 2);

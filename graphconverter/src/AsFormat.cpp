@@ -12,6 +12,7 @@
 #include <vector>
 
 using namespace std;
+using namespace dlvhex::dd::tools::graphconverter;
 
 std::string AsFormat::getName(){
 	return "answerset";

@@ -10,6 +10,8 @@
 #include <string>
 #include <sstream>
 
+using namespace dlvhex::dd::tools::graphconverter;
+
 std::string HexFormat::getName(){
 	return "hexprogram";
 }
@@ -42,7 +44,7 @@ DecisionDiagram* HexFormat::read() throw (DecisionDiagram::InvalidDecisionDiagra
 	}
 
 	// create a diagram (can throw exceptions)
-	DecisionDiagram* dd = new dlvhex::dd::DecisionDiagram(atoms);
+	DecisionDiagram* dd = new DecisionDiagram(atoms);
 	return dd;
 }
 

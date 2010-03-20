@@ -6,6 +6,8 @@
 #include "features/f12.h"
 #include "features/f15.h"
 
+using namespace dlvhex::dd::tools::dna;
+
 float f18::extract(string& sequence){
 	f9 _f9;
 	f12 _f12;

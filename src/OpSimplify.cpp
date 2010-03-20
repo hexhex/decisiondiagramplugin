@@ -5,7 +5,8 @@
 #include <sstream>
 #include <set>
 
-using namespace dlvhex::dd;
+using namespace dlvhex::dd::util;
+using namespace dlvhex::dd::plugin;
 
 std::string OpSimplify::getName(){
 	return "simplify";
@@ -23,13 +24,14 @@ void OpSimplify::removeConnectiveComponent(DecisionDiagram& dd, DecisionDiagram:
 	std::vector<DecisionDiagram::Node*> neighbors;
 
 	// remove all neighbor nodes
+	//	out-edges
 	for (std::set<DecisionDiagram::Edge*>::iterator it = outEdges.begin(); it != outEdges.end(); it++){
 		DecisionDiagram::Node* neighbor = (*it)->getTo();
 		// first remove the edge to the neighbor (to avoid infinite recursion)
 		dd.removeEdge(*it);
 		neighbors.push_back(neighbor);
 	}
-
+	//	in-edges
 	for (std::set<DecisionDiagram::Edge*>::iterator it = inEdges.begin(); it != inEdges.end(); it++){
 		DecisionDiagram::Node* neighbor = (*it)->getFrom();
 		// first remove the edge to the neighbor (to avoid infinite recursion)
@@ -37,7 +39,7 @@ void OpSimplify::removeConnectiveComponent(DecisionDiagram& dd, DecisionDiagram:
 		neighbors.push_back(neighbor);
 	}
 
-	// now remove the neighboring connective component recursivly
+	// now remove the neighbor connective components recursivly
 	for (std::vector<DecisionDiagram::Node*>::iterator it = neighbors.begin(); it != neighbors.end(); it++){
 		removeConnectiveComponent(dd, *it);
 	}
@@ -51,35 +53,36 @@ void OpSimplify::removeConnectiveComponent(DecisionDiagram& dd, DecisionDiagram:
 }
 
 // reduces the subgraph with root "n" to a single leaf node if this is possible, i.e. if all branches lead to the same final classification
-// the return value will be a pointer to the new root node (a leaf node), which is equivalent to "n" if the subgraph could not be reduced
+// the return value will be a pointer to the new root node (a leaf node), or "n" itself if the subgraph could not be reduced
 DecisionDiagram::Node* OpSimplify::reduceSubgraph(DecisionDiagram& dd, DecisionDiagram::Node* n){
 
 	// leafs can never be reduced (since they are already minimal)
 	if (dynamic_cast<DecisionDiagram::LeafNode*>(n)){
 		return n;
 	}else{
-		// reduce all subgraphs
+		// reduce all subgraphs recursively
 		std::set<DecisionDiagram::Edge*> outedges = n->getOutEdges();
 		for (std::set<DecisionDiagram::Edge*>::iterator outEdgeIt = outedges.begin(); outEdgeIt != outedges.end(); outEdgeIt++){
 			DecisionDiagram::Node* newSubroot = reduceSubgraph(dd, (*outEdgeIt)->getTo());
-			if (newSubroot != n){
 
-				// add new edge
-				dd.addEdge(n, newSubroot, (*outEdgeIt)->getCondition());
+			// changed?
+			if (newSubroot != n){
 
 				// remember the former to-node of this edge
 				DecisionDiagram::Node* removeComponent = (*outEdgeIt)->getTo();
 
 				// redirect the inedge from n to newSubroot
+				dd.addEdge(n, newSubroot, (*outEdgeIt)->getCondition());
 				dd.removeEdge(*outEdgeIt);
 
-				// if this was part of the last path from the root to this connective component (i.e. the edge's to-node is now unreachible), it can be removed
+				// if this edge was part of the last path from the root to this connective component (i.e. the edge's to-node is now unreachible), it can be removed
 				if (!dd.containsPath(dd.getRoot(), removeComponent)){
 					removeConnectiveComponent(dd, removeComponent);
 				}
 			}
 		}
 
+		// check if all out-edges of n lead to the same node
 		outedges = n->getOutEdges();
 		DecisionDiagram::Node* commonSubgraph;
 		for (std::set<DecisionDiagram::Edge*>::iterator outEdgeIt = outedges.begin(); outEdgeIt != outedges.end(); outEdgeIt++){
@@ -96,40 +99,40 @@ DecisionDiagram::Node* OpSimplify::reduceSubgraph(DecisionDiagram& dd, DecisionD
 	}
 }
 
+// applies two simplification strategies. First, unnecessary branches are removed (if all edges lead to the same node). Second, equivalent subdiagrams are fused. Both strategies are
+// applied alternating as long as changes occur.
 DecisionDiagram OpSimplify::simplify(DecisionDiagram dd){
-
-	// -------------------- strategy 1: remove unnecessary conditions  --------------------
-	// conditions are unnecessary if all branches lead to the same final classification
-	std::set<DecisionDiagram::Edge*> outedges = dd.getRoot()->getOutEdges();
-	DecisionDiagram::Node* oldRoot = dd.getRoot();
-	DecisionDiagram::Node* newRoot = reduceSubgraph(dd, oldRoot);
-	if (newRoot != oldRoot){
-		dd.setRoot(newRoot);
-		removeConnectiveComponent(dd, oldRoot);
-	}
 
 	bool restart = true;
 	while (restart){
 		restart = false;
+
+		// -------------------- strategy 1: remove unnecessary conditions  --------------------
+		// conditions are unnecessary if all branches lead to the same final classification
+		std::set<DecisionDiagram::Edge*> outedges = dd.getRoot()->getOutEdges();
+		DecisionDiagram::Node* oldRoot = dd.getRoot();
+		DecisionDiagram::Node* newRoot = reduceSubgraph(dd, oldRoot);
+		if (newRoot != oldRoot){
+			dd.setRoot(newRoot);
+			removeConnectiveComponent(dd, oldRoot);
+		}
 		std::set<DecisionDiagram::Node*> nodes = dd.getNodes();
 
 		// -------------------- strategy 2: combine equivalent subdiagrams --------------------
 		// for each node of the diagram, check if there is another node that is equal to it
 		for (std::set<DecisionDiagram::Node*>::iterator it1 = nodes.begin(); it1 != nodes.end() && !restart; it1++){
-
 			for (std::set<DecisionDiagram::Node*>::iterator it2 = nodes.begin(); it2 != nodes.end() && !restart; it2++){
+
 				// iterators must point to different nodes that are semantically equivalent
 				if ((*it1) != (*it2) && (**it1) == (**it2)){
-					// replace one of the nodes by the other one, that is, redirect all in-edges into *it2 to *it1
+					// replace one of the nodes (*it1) by the other one (*it2), that is, redirect all in-edges into *it2 to *it2
 					std::set<DecisionDiagram::Edge*> inedges = (*it1)->getInEdges();
 					for (std::set<DecisionDiagram::Edge*>::iterator inEdgeIt = inedges.begin(); inEdgeIt != inedges.end(); inEdgeIt++){
-						// Add new edge
-						dd.addEdge((*inEdgeIt)->getFrom(), *it2, (*inEdgeIt)->getCondition());
-
 						// remember the former to-node of this edge
 						DecisionDiagram::Node* removeComponent = (*inEdgeIt)->getTo();
 
-						// Remove the old edge
+						// Redirect the edge
+						dd.addEdge((*inEdgeIt)->getFrom(), *it2, (*inEdgeIt)->getCondition());
 						dd.removeEdge(*inEdgeIt);
 
 						// if this was part of the last path from the root to this connective component (i.e. the edge's to-node is now unreachible), it can be removed
@@ -154,10 +157,11 @@ HexAnswer OpSimplify::apply(int arity, std::vector<HexAnswer*>& answers, Operato
 		// Check arity
 		if (arity != 1){
 			std::stringstream msg;
-			msg << " " << arity << " answers were passed.";
+			msg << " " << arity << " answers were passed, but simplify is a unary operator.";
 			throw IOperator::OperatorException(msg.str());
 		}
 
+		// simplify all diagrams
 		HexAnswer output;
 		for (int answer = 0; answer < arity; answer++){
 			for (int answerset = 0; answerset < answers[answer]->size(); answerset++){

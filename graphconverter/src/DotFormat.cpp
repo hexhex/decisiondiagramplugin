@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 
+using namespace dlvhex::dd::tools::graphconverter;
+
 std::string DotFormat::getName(){
 	return "dot";
 }
@@ -40,7 +42,7 @@ DecisionDiagram* DotFormat::read() throw (DecisionDiagram::InvalidDecisionDiagra
 					makeDDEdge(dd, g, e);
 				}
 			}
-		}catch(dlvhex::dd::DecisionDiagram::InvalidDecisionDiagram idd){
+		}catch(DecisionDiagram::InvalidDecisionDiagram idd){
 			delete dd;
 			throw idd;
 		}
@@ -110,7 +112,7 @@ std::string DotFormat::getNodeLabel(graph_t *g, Agnode_t *v){
  * \param g Pointer to a graphviz graph
  * \param v Pointer to a node of graph g
  */
-void DotFormat::makeDDNode(dlvhex::dd::DecisionDiagram* dd, graph_t *g, Agnode_t *v){
+void DotFormat::makeDDNode(DecisionDiagram* dd, graph_t *g, Agnode_t *v){
 
 	bool hasInEdges = false;
 	bool hasOutEdges = false;
@@ -150,7 +152,7 @@ void DotFormat::makeDDNode(dlvhex::dd::DecisionDiagram* dd, graph_t *g, Agnode_t
  * \param g Pointer to a graphviz graph
  * \param e Pointer to an edge of graph g
  */
-void DotFormat::makeDDEdge(dlvhex::dd::DecisionDiagram* dd, graph_t *g, Agedge_t *e){
+void DotFormat::makeDDEdge(DecisionDiagram* dd, graph_t *g, Agedge_t *e){
 	std::string edgeLabel = std::string(agget(e, (char*)"label"));
 	std::stringstream ss;
 
@@ -177,7 +179,7 @@ void DotFormat::makeDDEdge(dlvhex::dd::DecisionDiagram* dd, graph_t *g, Agedge_t
 			boost::trim(secondOperand);
 
 			// Generate code for this conditional edge
-			dd->addEdge(dd->getNodeByLabel(e->tail->name), dd->getNodeByLabel(e->head->name), dlvhex::dd::DecisionDiagram::Condition(firstOperand, secondOperand, operator_));
+			dd->addEdge(dd->getNodeByLabel(e->tail->name), dd->getNodeByLabel(e->head->name), DecisionDiagram::Condition(firstOperand, secondOperand, operator_));
 		}else{
 			throw DecisionDiagram::InvalidDecisionDiagram(std::string("Comparison operator in expression \"") + edgeLabel + std::string("\" could not be detected"));
 		}

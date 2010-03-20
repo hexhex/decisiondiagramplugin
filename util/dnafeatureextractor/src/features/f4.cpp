@@ -1,5 +1,7 @@
 #include "features/f4.h"
 
+using namespace dlvhex::dd::tools::dna;
+
 float f4::extract(string& sequence){
 	string taa("taa");
 	string tag("tag");

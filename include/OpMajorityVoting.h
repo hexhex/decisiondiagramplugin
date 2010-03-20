@@ -6,31 +6,37 @@
 
 DLVHEX_NAMESPACE_USE
 
-using namespace dlvhex::merging;
+using namespace dlvhex::merging::plugin;
+using namespace dlvhex::dd::util;
 
 namespace dlvhex{
 	namespace dd{
-
-		/**
-		 * This class implements the majority voting operator. It assumes that 2 answers are passed to the operator (binary operator) with one decision diagram each.
-		 * The result will be another decision diagram which delivers the same answer as the input, iff the two diagrams agree upon the classification of an element. Otherwise
-		 * the classification will be "unknown".
-		 * Usage:
-		 * &operator["majorityvoting", DD, K](A)
-		 *	DD	... predicate with indices and handles to exactly 2 answers containing one decision diagram each
-		 *	A	... answer to the operator result
-		 */
-		class OpMajorityVoting : public IOperator{
-		protected:
-			typedef std::map<std::string, int> Votings;
-			struct Votes : public DecisionDiagram::LeafNode::Data{
-				Votings v;
+		namespace plugin{
+			/**
+			 * \brief
+			 * This class implements the majority voting operator. It assumes that 2 answers are passed to the operator (binary operator) with one decision diagram each.
+			 * The result will be another decision diagram which delivers the same answer as the input, iff the two diagrams agree upon the classification of an element. Otherwise
+			 * the classification will be "unknown".
+			 * Usage:
+			 * &operator["majorityvoting", DD, K](A)
+			 *	DD	... predicate with indices and handles to exactly 2 answers containing one decision diagram each
+			 *	A	... answer to the operator result
+			 */
+			class OpMajorityVoting : public IOperator{
+			protected:
+				typedef std::map<std::string, int> Votings;
+				/**
+				 * Stores a map containing labels (strings) paired with their voting counts (integers).
+				 */
+				struct Votes : public DecisionDiagram::LeafNode::Data{
+					Votings v;
+				};
+				virtual void insert(DecisionDiagram& input, DecisionDiagram& output);
+			public:
+				virtual std::string getName();
+				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
 			};
-			void insert(DecisionDiagram& input, DecisionDiagram& output);
-		public:
-			virtual std::string getName();
-			virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
-		};
+		}
 	}
 }
 

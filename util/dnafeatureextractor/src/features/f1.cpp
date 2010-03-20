@@ -1,5 +1,7 @@
 #include "features/f1.h"
 
+using namespace dlvhex::dd::tools::dna;
+
 float f1::extract(string& sequence){
 	string atg("atg");
 	// count number of ATG occurrances

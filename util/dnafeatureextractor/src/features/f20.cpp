@@ -1,5 +1,7 @@
 #include "features/f20.h"
 
+using namespace dlvhex::dd::tools::dna;
+
 float f20::extract(string& sequence){
 	float Pin, Pout1, Pout2;
 	float abs = 0.0f;

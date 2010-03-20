@@ -17,6 +17,8 @@
 ../OpUserPreferences3.rp OpUserPreferences3.dot
 ../OpAvg1.rp OpAvg1.dot
 ../OpAvg2.rp OpAvg2.dot
+../OpAvg3.rp OpAvg3.dot
+../OpAvg4.rp OpAvg4.dot
 ../OpSimplify1.rp OpSimplify1.dot
 ../OpSimplify2.rp OpSimplify2.dot
 ../OpSimplify3.rp OpSimplify3.dot

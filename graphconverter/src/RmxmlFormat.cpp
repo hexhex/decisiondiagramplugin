@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 
+using namespace dlvhex::dd::tools::graphconverter;
+
 std::string RmxmlFormat::getName(){
 	return "rmxml";
 }
@@ -47,7 +49,7 @@ void RmxmlFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDeci
 
 // ============================== DD --> XML ==============================
 
-TiXmlDocument RmxmlFormat::getXmlDiag(dlvhex::dd::DecisionDiagram* dd){
+TiXmlDocument RmxmlFormat::getXmlDiag(DecisionDiagram* dd){
 	TiXmlDocument doc;
 
 	int id = 0;
@@ -612,5 +614,5 @@ DecisionDiagram::Edge* RmxmlFormat::getDDedge(DecisionDiagram* dd, DecisionDiagr
 	else throw DecisionDiagram::InvalidDecisionDiagram(std::string("Operator \"") + op + std::string("\" was not recognized"));
 
 	// insert edge
-	return dd->addEdge(parent, child, dlvhex::dd::DecisionDiagram::Condition(attr, value, _op));
+	return dd->addEdge(parent, child, DecisionDiagram::Condition(attr, value, _op));
 }

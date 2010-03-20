@@ -1,5 +1,7 @@
 #include "features/f7.h"
 
+using namespace dlvhex::dd::tools::dna;
+
 float f7::extract(string& sequence){
 	float fbr[4][3];
 	fbr[0][0] = fbr[0][1] = fbr[0][2] = 0.0f;

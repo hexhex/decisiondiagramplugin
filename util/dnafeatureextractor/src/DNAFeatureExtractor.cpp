@@ -30,6 +30,8 @@
 #include "features/f22.h"
 
 using namespace std;
+using namespace dlvhex::dd::tools::dna;
+
 
 int main(int argc, char* argv[])
 {

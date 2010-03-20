@@ -1,13 +1,13 @@
 digraph {
+     c -> d [label="z<10"];
+     a -> b [label="x<y"];
+     b -> d [label="z<20"];
+     a -> c [label="else"];
+     b -> e [label="else"];
+     c -> e [label="else"];
+     d [label="d [class1]"];
+     c [label="c"];
+     e [label="e [class2]"];
      a [label="a"];
      b [label="b"];
-     c [label="c"];
-     d [label="d [class1]"];
-     e [label="e [class2]"];
-     a -> b [label="x<y"];
-     a -> c [label="else"];
-     b -> d [label="z<20"];
-     b -> e [label="else"];
-     c -> d [label="z<10"];
-     c -> e [label="else"];
 }

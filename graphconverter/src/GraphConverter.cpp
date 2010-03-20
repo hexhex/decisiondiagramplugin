@@ -14,6 +14,7 @@
 #include <RmxmlFormat.h>
 
 using namespace dlvhex;
+using namespace dlvhex::dd::tools::graphconverter;
 using namespace std;
 
 vector<IFormat*> loadFormats(){
@@ -32,8 +33,8 @@ void unloadFormats(vector<IFormat*> formats){
 }
 
 // Will read a diagram in the given format and return a pointer (or NULL if the format is not recognized or the diagram is illegal)
-dlvhex::dd::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::string inputformat){
-	dlvhex::dd::DecisionDiagram* dd = NULL;
+dlvhex::dd::util::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::string inputformat){
+	dlvhex::dd::util::DecisionDiagram* dd = NULL;
 
 	// search and apply the appropriate format interpretation
 	for (vector<IFormat*>::iterator fit = formats.begin(); fit != formats.end(); fit++){
@@ -46,7 +47,7 @@ dlvhex::dd::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::string i
 }
 
 // Writes a diagram in the given format to standard out. Returns a boolean value to notify the caller about the success.
-void writeDiagram(vector<IFormat*> formats, dlvhex::dd::DecisionDiagram* dd, std::string outputformat){
+void writeDiagram(vector<IFormat*> formats, dlvhex::dd::util::DecisionDiagram* dd, std::string outputformat){
 
 	// search and apply the appropriate format interpretation
 	for (vector<IFormat*>::iterator fit = formats.begin(); fit != formats.end(); fit++){
@@ -104,7 +105,7 @@ int main(int argc, char **argv){
 	vector<IFormat*> formats = loadFormats();
 
 	// will point to the input decision diagram
-	dlvhex::dd::DecisionDiagram* dd = NULL;
+	dlvhex::dd::util::DecisionDiagram* dd = NULL;
 
 	std::string inputformat;
 	std::string outputformat;

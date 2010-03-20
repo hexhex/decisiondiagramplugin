@@ -6,7 +6,8 @@
 #include <sstream>
 #include <set>
 
-using namespace dlvhex::dd;
+using namespace dlvhex::dd::util;
+using namespace dlvhex::dd::plugin;
 
 std::string OpDistributionMapVoting::getName(){
 	return "distributionmapvoting";

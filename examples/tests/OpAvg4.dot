@@ -1,0 +1,23 @@
+digraph {
+     a -> a_2 [label="else"];
+     b -> leaf3 [label="else"];
+     a_2 -> leaf1_1 [label="x<10"];
+     a -> a_1 [label="u<20"];
+     b -> leaf2 [label="y<100"];
+     a_1 -> leaf1 [label="x<10"];
+     b_1 -> leaf2_1 [label="y<100"];
+     a_1 -> b [label="else"];
+     b_1 -> leaf3_1 [label="else"];
+     a_2 -> b_1 [label="else"];
+     a_2 [label="a"];
+     a_1 [label="a"];
+     b_1 [label="b"];
+     a [label="a"];
+     b [label="b"];
+     leaf2_1 [label="leaf2 [unknown]"];
+     leaf1 [label="leaf1 [class1]"];
+     leaf1_1 [label="leaf1 [unknown]"];
+     leaf3 [label="leaf3 [unknown]"];
+     leaf3_1 [label="leaf3 [class3]"];
+     leaf2 [label="leaf2 [unknown]"];
+}

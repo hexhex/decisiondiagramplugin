@@ -7,7 +7,7 @@
 #include <sstream>
 #include <typeinfo>
 
-using namespace dlvhex::dd;
+using namespace dlvhex::dd::util;
 
 
 // ------------------------------ InvalidDecisionDiagram ------------------------------
@@ -466,13 +466,21 @@ DecisionDiagram& DecisionDiagram::operator=(const DecisionDiagram &dd2){
 	std::set<Node*> dd2nodes = dd2.getNodes();
 	std::set<Edge*> dd2edges = dd2.getEdges();
 
+	// add all nodes of dd2 into dd1
+	std::map<Node*, Node*> nodemapping;
 	for (std::set<Node*>::iterator it = dd2nodes.begin(); it != dd2nodes.end(); it++){
-		addNode(*it);
+		// remember the equivalence of *it and the new node in dd2; this can be exploited for performance enhancements during edge insertion
+		nodemapping[*it] = addNode(*it);
 	}
+
+	// insert all edges
 	for (std::set<Edge*>::iterator it = dd2edges.begin(); it != dd2edges.end(); it++){
-		addEdge(*it);
+		addEdge(nodemapping[(*it)->getFrom()], nodemapping[(*it)->getTo()], (*it)->getCondition());
 	}
-	if (dd2.getRoot() != NULL) this->root = getNodeByLabel(dd2.getRoot()->getLabel());
+
+	// set root of the new diagram
+	if (dd2.getRoot() != NULL) this->root = nodemapping[dd2.getRoot()];
+
 	return *this;
 }
 

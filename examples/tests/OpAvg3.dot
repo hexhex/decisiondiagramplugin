@@ -1,11 +1,11 @@
 digraph {
      b -> leaf3 [label="else"];
-     b -> leaf2 [label="y<150"];
+     b -> leaf2 [label="y<100"];
      a -> b [label="else"];
      a -> leaf1 [label="x<15"];
      a [label="a"];
      b [label="b"];
-     leaf2 [label="leaf2 [class2]"];
+     leaf2 [label="leaf2 [unknown]"];
      leaf3 [label="leaf3 [class3]"];
      leaf1 [label="leaf1 [class1]"];
 }
