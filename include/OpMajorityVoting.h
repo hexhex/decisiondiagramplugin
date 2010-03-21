@@ -18,9 +18,11 @@ namespace dlvhex{
 			 * The result will be another decision diagram which delivers the same answer as the input, iff the two diagrams agree upon the classification of an element. Otherwise
 			 * the classification will be "unknown".
 			 * Usage:
+			 * <pre>
 			 * &operator["majorityvoting", DD, K](A)
 			 *	DD	... predicate with indices and handles to exactly 2 answers containing one decision diagram each
 			 *	A	... answer to the operator result
+			 * </pre>
 			 */
 			class OpMajorityVoting : public IOperator{
 			protected:

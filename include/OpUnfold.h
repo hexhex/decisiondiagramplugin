@@ -16,9 +16,11 @@ namespace dlvhex{
 			 * \brief
 			 * This class implements the unfolding operator. It assumes each answer to represent a general decision diagram and translates it into a tree-like one .
 			 * Usage:
+			 * <pre>
 			 * &operator["unfold", DD, K](A)
 			 *	DD	... predicate with index 0 and handle to exactly 1 answer containing arbitrary many decision diagram
 			 *	A	... answer to the operator result
+			 * </pre>
 			 */
 			class OpUnfold : public IOperator{
 			private:

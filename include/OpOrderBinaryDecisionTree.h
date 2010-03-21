@@ -16,9 +16,11 @@ namespace dlvhex{
 			 * \brief
 			 * This class implements the tree ordering operator. It assumes each answer to represent a binary decision tree and translates it into an ordered one.
 			 * Usage:
+			 * <pre>
 			 * &operator["orderbinarydecisiontree", DD, K](A)
 			 *	DD	... predicate with index 0 and handle to exactly 1 answer containing arbitrary many decision diagram
 			 *	A	... answer to the operator result (answer containing ordered binary decision diagrams)
+			 * </pre>
 			 */
 			class OpOrderBinaryDecisionTree : public IOperator{
 			private:

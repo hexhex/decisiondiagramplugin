@@ -16,9 +16,11 @@ namespace dlvhex{
 			 * \brief
 			 * This class implements the simplification operator.
 			 * Usage:
+			 * <pre>
 			 * &operator["simplify", DD, K](A)
 			 *	DD	... handle to an answer containing arbitrary many binary decision diagrams
 			 *	A	... answer to the operator result (answer containing simplified decision diagrams)
+			 * </pre>
 			 */
 			class OpSimplify : public IOperator{
 			private:

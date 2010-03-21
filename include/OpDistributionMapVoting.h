@@ -24,9 +24,11 @@ namespace dlvhex{
 			 * The result will be another decision diagram which combines diagrams by inserting the second into all leaf nodes of the first one, and recomputing the classification according
 			 * to the (combined) distribution map.
 			 * Usage:
+			 * <pre>
 			 * &operator["majorityvoting", DD, K](A)
 			 *	DD	... predicate with indices 0-1 and handles to exactly 2 answers containing one decision diagram each
 			 *	A	... answer to the operator result
+			 * </pre>
 			 */
 			class OpDistributionMapVoting : public OpMajorityVoting{
 			protected:

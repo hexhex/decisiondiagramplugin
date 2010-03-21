@@ -5,24 +5,25 @@
 #include <map>
 #include <vector>
 
-/**
- * \brief
- * This class is designed to extract certain parts of strings as they are used to represent inner and leaf nodes of a decision diagram.
- * The supported file formats (dot, answer-sets, xml, etc.) provide different possibilities how the information of a node can be encoded. Some of them are stronger and others are weaker.
- * Therefore it is sometimes necessary to "compress" the information into a single string value. For instance, the dot format does only allow a node name and a label, but we need to store
- * maps of key/value pairs. This can only be done by combining them into a single value such that it can be decomposed again later.
- * The most general format, where all the information is put into one string value, is as follows:
- *        nodename [class {c1:n1,c2:n2,...,cm:nm}]
- * nodename is an arbitrary string (without squared brackets or braces)
- * class is the classification in this node (a leaf node), without curly braces
- * c_i/n_i represent the class value distribution. For instance, a legal label is: "class2 {class1:3,class2:5}", meaning that in this node we have 3 samples of class1 and 5 of class2,
- * thus the classification is class2.
- * Node that parts of this general syntax can be skipped as needed. For instance, inner nodes will not need to store any label. Further, some decision diagrams will not store a distribution map.
- * This class will always try to figure out the intention and return the string parts respectvely
- */
 namespace dlvhex{
 	namespace dd{
 		namespace util{
+
+			/**
+			 * \brief
+			 * This class is designed to extract certain parts of strings as they are used to represent inner and leaf nodes of a decision diagram.
+			 * The supported file formats (dot, answer-sets, xml, etc.) provide different possibilities how the information of a node can be encoded. Some of them are stronger and others are weaker.
+			 * Therefore it is sometimes necessary to "compress" the information into a single string value. For instance, the dot format does only allow a node name and a label, but we need to store
+			 * maps of key/value pairs. This can only be done by combining them into a single value such that it can be decomposed again later.
+			 * The most general format, where all the information is put into one string value, is as follows:
+			 *        nodename [class {c1:n1,c2:n2,...,cm:nm}]
+			 * nodename is an arbitrary string (without squared brackets or braces)
+			 * class is the classification in this node (a leaf node), without curly braces
+			 * c_i/n_i represent the class value distribution. For instance, a legal label is: "class2 {class1:3,class2:5}", meaning that in this node we have 3 samples of class1 and 5 of class2,
+			 * thus the classification is class2.
+			 * Node that parts of this general syntax can be skipped as needed. For instance, inner nodes will not need to store any label. Further, some decision diagrams will not store a distribution map.
+			 * This class will always try to figure out the intention and return the string parts respectvely
+			 */
 			class StringHelper{
 			public:
 				/**

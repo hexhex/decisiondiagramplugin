@@ -17,9 +17,11 @@ namespace dlvhex{
 			 * This class implements the average operator. It assumes that 2 answers are passed to the operator (binary operator) with one ordered binary diagram tree each.
 			 * The result will be another ordered binary diagram tree where all constants in range queries are averaged if the input decision trees differ.
 			 * Usage:
+			 * <pre>
 			 * &operator["average", DD, K](A)
 			 *	DD	... predicate with handles to exactly 2 answers containing one ordered binary decision tree each
 			 *	A	... answer to the operator result
+			 * </pre>
 			 */
 			class OpAvg : public IOperator{
 				DecisionDiagram::Condition getCondition(DecisionDiagram::Node* node);

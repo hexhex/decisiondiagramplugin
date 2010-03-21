@@ -6,14 +6,15 @@ namespace dlvhex {
   namespace dd {
 	/// contains the external atoms defined in this dlvhex plugin
 	namespace plugin{}
+	/// contains command line tools that are installed with the decisiondiagramplugin
 	namespace tools{
 		/// contains a converter between different graph file formats
 		namespace graphconverter{}
 		/// contains an extractor for dna features from sequences
 		namespace dna{}
-		/// contains some helper classes
-		namespace util{}
 	}
+	/// contains some helper classes
+	namespace util{}
   }
 }
 
@@ -26,19 +27,323 @@ namespace dlvhex {
 This is the documentation for the dlvhex decisiondiagrams
 Plugin.
 
+Basically the plugin consists of a shared object library that defines some merging operators for decision diagrams as well as some command line tools. The library is an operator plugin for
+the <i>mergingplugin</i>. See \link Operators \endlink
 
-@defgroup PluginOverview Overview decisiondiagrams Plugin
+The command line tools are useful for decision diagram convertion (graphconverter, see \link graphconverter \endlink) and for DNA feature extraction (dnafeatureextractor, see \link dnafeatureextractor \endlink).
 
-This is a brief overview of the decisiondiagrams plugin
+
+@defgroup Operators Merging operators in decisiondiagramsplugin
+
+This is a brief overview about the merging operators that are implemented in the decisiondiagrams plugin. This section presupposes familarity with the <i>mergingplugin</i>, especially the usage of revision plans and operators. For a detailled description see the according documentation.
+
+	<h1>Applying Operators</h1>
+		
+		The following listing shows a typical revision task definition that uses the operators <i>unfold</i> and <i>tobinarydecisiontree</i>. Note that the decision diagram
+		encoded as logic program was directly pasted into the mapping rules. This was only done in order to give the program as one self-contained example. In practice, the mapping
+		rules would rather access an external source by the use of external atoms.
+
+		<pre>
+[common signature]
+predicate: root/1;
+predicate: innernode/1;
+predicate: leafnode/2;
+predicate: conditionaledge/5;
+predicate: elseedge/2;
+
+[belief base]
+name: kb1;
+mapping: &quot;root(root).
+         innernode(root).
+         innernode(v1).
+         innernode(v2).
+         innernode(v3).
+         leafnode(leaf1, class1).
+         leafnode(leaf2, class2).
+         leafnode(leaf3, class3).
+         conditionaledge(root, v1, x, /&lsquo;</&rsquo;, y).	// see remark below!
+         conditionaledge(root, v2, z, /&lsquo;</&rsquo;, y).
+         elseedge(root, v3).
+         conditionaledge(v1, leaf1, a, /&lsquo;</&rsquo;, y).
+         conditionaledge(v1, leaf2, b, /&lsquo;</&rsquo;, y).
+         elseedge(v1, leaf3).
+         conditionaledge(v2, leaf1, aa, /&lsquo;</&rsquo;, y).
+         conditionaledge(v2, leaf2, bb, /&lsquo;</&rsquo;, y).
+         elseedge(v2, leaf3).
+         conditionaledge(v3, leaf1, aaa, /&lsquo;</&rsquo;, y).
+         conditionaledge(v3, leaf2, bbb, /&lsquo;</&rsquo;, y).
+         elseedge(v3, leaf3).&quot;
+
+[revision plan]
+{
+         operator: tobinarydecisiontree;
+         {
+                  operator: unfold;
+                  {
+                           kb1
+                  };
+         };
+}
+		</pre>
+(<b>Remark:</b> The /&rsquo; should rather be \\&rsquo;, which is the escaped version of &quot;. However, because of technical reasons concerning doxygen, \\&rsquo; cannot be embedded in listings.)
+		
+		The decisiondiagramplugin ships with several special merging and modification operators for decision diagrams. They expect the belief bases to be sets of facts which were
+		generated out of decision diagrams using the <i>graphconverter</i>. The output will again be a set of facts that encodes a diagram,
+		which can be back-converted into a DOT file. Intermediate results are sets of answer-sets.
+
+		The following subsections describe the operators that are included in the plugin. Note that this is just a very quick and informal description that should enable the user
+		to explore the capabilities or adapt operators according to individual needs. For a more detailled and formal description, see the cited thesis.
+
+		<h2>Modification Operators</h2>
+
+			<h3>unfold</h3>
+			
+				The input can be any number of general decision diagrams. The output will contain the same number of diagrams, where each of them has (independently) been converted
+				into a tree. This is done by duplication of subtrees if necessary.
+			
+
+			<h3>tobinarydecisiondiagram</h3>
+			
+				The operator is unary, i.e. it works on a single belief base. It expects the input to encode a diagram that is a <i>tree</i>, i.e. it contains no sharing of subnodes.
+				
+				Then the output is again a tree where each node has at most two successors (<i>binary</i> tree). This is done by introduction of intermediate nodes.
+
+				
+			<h3>orderbinarydecisiontree</h3>
+			
+				The operator is again unary. It expects it's input to be a <i>binary</i> decision <i>tree</i>. It's output will a semantically equivalent binary decision tree, where
+				on each path from the root to a leaf node, the variables are only queried in lexical ordering.
+
+
+			<h3>simplify</h3>
+			
+				The input can be any number of decision diagrams. Each of them is (independently) simplified by some algorithms that will leave the semantics of the diagram unchanged.
+				That is, only the structure of the diagram will be modified, which makes them more readable.
+			
+		
+		<h2>Merging Operators</h2>
+		
+			<h3>userpreferences</h3>
+
+				This operator is n-ary, i.e. arbitrary many diagrams can be passed. Additionally it expects arbitrary many key-value pairs as parameters, where the keys are ignored
+				and the values are of form:
+				<div align="center">
+					<pre><i>X &gt;&gt; Y</i> or <i>X &gt;n&gt; Y</i></pre>
+				</div>
+				where <i>X</i> and <i>Y</i> are the names of class labels (as used in leaf nodes) and <i>n</i> is an integer &gt; 0. A rule of form <i>X &gt;&gt; Y</i>
+				expresses that &quot;in doubt, <i>X</i> is preferred over <i>Y</i>&quot;, whereas <i>X &gt;n&gt; Y</i> states &quot;<i>X</i> is preferred over <i>Y</i> if there are at least <i>n</i>
+				more input diagrams that vote for <i>X</i> than for <i>Y</i>&quot;.
+
+				The output is a diagram where each domain element is classified according to this rules. Note that the rules are evaluated in top-down manner. That is, the result of
+				of a prior rule can be overwritten by a later (applicable!) rule.
+
+
+			<h3>majorityvoting</h3>
+			
+				The input can be any number of (general) decision diagrams. The output is a diagram where each domain element is automatically classified by each of the inputs. Then the
+				final class label is determined by majority decision. In case that this does not lead to a unique result, the input diagram with the least index forces it's decision.
+			
+
+			<h3>avg</h3>
+
+				The operator expects exactly two <i>ordered binary trees</i> as input parameter. The result will again be an ordered binary tree of the following form.
+				
+				For each node from the root to the leafs, if one of the input trees contains condition \f$X \circ c_1\f$ and the other one \f$X \circ c_2\f$, the resulting tree will contain
+				\f$X \circ \frac{c_1 + c_2}{2}\f$, i.e. the mean of the comparison value is computed. In case that one of the inputs contains \f$X \circ c_1\f$ and the other one \f$Y \circ c_2\f$, the
+				result will contain \f$X \circ c_1\f$ at this position (since \f$X\f$ is lexically smaller than \f$Y\f$), and the second diagram is incorporated recursivly in both subtrees.
+				
+				In case of contradicting leaf nodes or incompatible comparison operators (e.g. \f$X < c_1\f$ and \f$X > c_2\f$), the result is &quot;unknown&quot;.
+
 
 
 @defgroup graphconverter The graphconverter tool
 
 Translates decision diagrams between several file formats
 
+	<h1>File Format Conversions</h1>
+
+		Decision diagrams can be stored in different file formats. While some of them are human-readable, others are better for automatic processing.
+		
+		<h2>Supported Formats</h2>
+
+			<h3>DOT</h3>
+
+				The DOT file format (http://www.graphviz.org) is intuitively readable and thus fit for being used as human readable format for representing decision diagrams.
+				Additionally it is well suited for being visualized using the <i>DOT tools</i>.
+			
+				Consider the following decision diagram. It is given in the intuitively readable DOT forrmat.				
+
+				<pre>
+	digraph G {
+		root -> case1 ["A<10"];
+		root -> case2 ["A>20"];
+		root -> elsecase ["else"];
+		root -> case3 ["else"];
+		case1 -> case1a ["B<10"];
+		case1 -> case1b ["else"];
+		case2 -> case2a ["B<16"];
+		case2 -> case2b ["else"];
+		case1a ["ClassA"];
+		case1b ["ClassB"];
+		case2a ["ClassA"];
+		case2b ["ClassB"];
+		case3 ["ClassC"];
+	}
+				</pre>
+
+				Valid decision diagrams must
+				<ul>
+					<li> have exactly one root node (which does not need to be explicitly mentioned, but which is implicitly identified by the fact that it has no ingoing edges)</li>
+					<li> use only directed edges</li>
+					<li> use only edges that are labeled either with <br/>
+							<i>else</i> <br/>
+						or with conditions of form <br/>
+							\f$X \circ Y\f$ <br/>
+						where <i>X</i> and <i>Y</i> can be arbitrary strings and \f$\circ \in \{ <, <=, =, >, >= \}\f$ is an operator</li>
+					<li> have leaf nodes that are labeled with arbitrary strings that encode the classification in this node</li>
+				</ul>
+
+
+			<h3>Sets of Facts</h3>
+
+				However, dlvhex cannot directly load this format because it's input must be a logic program. Thus a diagram must be represented using predicates.
+				
+				We define the following predicates:
+				<ul>
+					<li> <i>root(X)</i> <br/>
+						To define that some constant <i>X</i> is defined as the root node</li>
+					<li> <i>innernode(X)</i> <br/>
+						To define some constant <i>X</i> to be an inner node</li>
+					<li> <i>leafnode(X, Y)</i> <br/>
+						To define that some constant <i>X</i> is a leaf node with label <i>Y</i></li>
+					<li> <i>conditionaledge(X, Y, A, C, B)</i> <br/>
+						To define that a conditional edge with condition <i>A \circ B</i> (where the operation \f$\circ\f$ is given by <i>C</i>) leads from node <i>X</i> to <i>Y</i></li>
+					<li> <i>elseedge(X, Y)</i> <br/>
+						To define that an unconditional edge goes from <i>X</i> to <i>Y</i></li>
+				</ul>
+				
+				The above diagram can therefore be implemented as follows.
+
+				<pre>
+root(root).
+innernode(case1).
+innernode(case2).
+leafnode(case3, "ClassC").
+leafnode(case1a, "ClassA").
+leafnode(case1b, "ClassB").
+leafnode(case2a, "ClassA").
+leafnode(case2b, "ClassB").
+conditionaledge(root, case1, "A", "<", "10").
+conditionaledge(root, case2, "A", ">", "20").
+elseedge(root, case3).
+conditionaledge(case1, case1a, "B", "<", "10").
+elseedge(case1, case1b).
+conditionaledge(case2, case2a, "B", "<", "16").
+elseedge(case2, case2b).
+				</pre>
+				
+				
+			<h3>Answer-Sets</h3>
+
+				A very simple and obvious translation from HEX programs into answer-sets is to to put all the facts simply as atoms into the answer-set. The above diagram can therefore
+				also be implemented as:
+
+				<pre>
+{root(root),
+innernode(case1),
+innernode(case2),
+leafnode(case3, "ClassC"),
+leafnode(case1a, "ClassA"),
+leafnode(case1b, "ClassB"),
+leafnode(case2a, "ClassA"),
+leafnode(case2b, "ClassB"),
+conditionaledge(root, case1, "A", "<", "10"),
+conditionaledge(root, case2, "A", ">", "20"),
+elseedge(root, case3),
+conditionaledge(case1, case1a, "B", "<", "10"),
+elseedge(case1, case1b),
+conditionaledge(case2, case2a, "B", "<", "16"),
+elseedge(case2, case2b)}
+				</pre>
+				
+			<h3>RapidMiner XML Format</h3>
+			
+				Rapidminer (http://www.rapidminer.com) is an open-source data mining tool. It uses a priprietary XML file format to store decision trees. This format is also
+				supported by the graphconverter tool. The details are not relevant for practical work and are skipped therefore. It is only important
+				to know that the import and export functionality for this file format is necessary to process RapidMiner classifiers by the <i>decisiondiagramplugin</i>.
+
+
+		<h2>Conversion</h2>
+
+			For the conversion between the introduced file formats, the plugin installs a tool called <i>graphconverter</i>.
+			It can be used to translate diagrams in any of the supported file formats into semantically equivalent versions in another format.
+			Assume that the diagram is stored in file ``mydiagram.dot". Then the conversion into the according HEX program is done by entering:
+			<div align="center">
+				graphconverter dot hex &lt; mydiagram.dot &gt; mydiagram.hex
+			</div>
+
+			The result is a set of facts that can be loaded by dlvhex. After dlvhex has done it's job, the output will be an answer-set, which is ill-suited for begin read by humans. Thus the plugin
+			also supports conversions in the other direction. Assume that dlvhex' output is stored in file &quote;answerset.as&quote; (using the <i>silent mode</i> such that the output contains
+			the <i>pure</i> answer-set without any additional information about dlvhex). Then the conversion is done by:
+			<div align="center">
+				graphconverter as dot &lt; answerset.dot &gt; out_diagram.dot
+			</div>
+
+			Between the two converter calls, the diagram is diven as HEX program &quote;mydiagram.hex&quote; that can be processed by dlvhex. Even though one can essentially do anything
+			with this program that is computable, it is strongly intended to be used as part of the input for a revision task.
+
+			Note that <i>graphconverter</i> reads from standard input and writes to standard output.
+			The <i>graphconverter</i> expects either one or two parameters. If one parameter is passed, it can be anything of:
+			<ul>
+				<li> <i>--toas</i> <br/>
+					Converts a DOT file into a HEX program.
+				<li> <i>--todot</i> <br/>
+					Converts an answer-set into a DOT file.
+				<li> <i>--help</i> <br/>
+					Displays an online help message.
+			</ul>
+
+			Note that <i>--toas</i> and <i>--todot</i> are only abbreviations for commonly used conversions. The more general program call passes two parameters, where the first one
+			states the source format and the second one the desired destination format. Both parameters can be anything from the following list.
+			\htmlonly
+			<table>
+				<tr>
+					<td><b>Format</b></td><td><b>parameter name</b></td>
+				<tr>
+				<tr>
+					<td>dotff graph</td><td><i>dot</i></td>
+				<tr>
+				<tr>
+					<td>HEX program</td><td><i>hex</i> or <i>hexprogram</i></td>
+				<tr>
+				<tr>
+					<td>answer-set</td><td><i>answerset</i> or <i>as</i></td>
+				<tr>
+				<tr>
+					<td>RapidMiner XML</td><td><i>rmxml</i> or <i>rmxml</i></td>
+				<tr>
+			</table>
+			\endhtmlonly
+			\latexonly
+			\begin{tabularx}{\textwidth}{|X|X|}
+				\hline
+				Format		& parameter name \\
+				\hline
+				DOT graph & \textit{dot} \\
+				HEX program & \textit{hexprogram} or \textit{hex} \\
+				answer-set & \textit{answerset} or \textit{as} \\
+				RapidMiner XML & \textit{rmxml} or \textit{xml} \\
+				\hline
+			\end{tabularx}
+			\endlatexonly
+
 
 @defgroup dnafeatureextractor The DNA extractor tool
 
-Extracts DNA features from sequences
+\brief Extracts DNA features from sequences
+
+The tools expects exactly one argument, namely the name a textfile containing DNA sequences. The sequences (one sequence per line) must be built upon the alphabet A, C, G, T.
+
+the output will be a list of annotated sequences. Each line contains the input sequence followed by 20 DNA features that were computed. Separation character is a whitespace.
 
 */

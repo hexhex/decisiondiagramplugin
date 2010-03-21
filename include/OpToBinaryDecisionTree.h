@@ -16,9 +16,11 @@ namespace dlvhex{
 			 * \brief
 			 * This class implements the to-binary operator. It assumes each answer to represent a general decision tree and translates it into a binary one.
 			 * Usage:
+			 * <pre>
 			 * &operator["tobinarydecisiontree", DD](A)
 			 *	DD	... handle to an answer containing arbitrary many general decision trees
 			 *	A	... answer to the operator result (answer containing binary decision diagrams)
+			 * </pre>
 			 */
 			class OpToBinaryDecisionTree : public IOperator{
 			private:
