@@ -11,16 +11,13 @@ mapping: "
 	root(root).
 	innernode(root).
 	leafnode(leaf1, class1).
-	leafnode(leaf2, class2).
-	leafnode(leaf3, class3).
 	conditionaledge(root, leaf1, x, \'<\', y).
-	conditionaledge(root, leaf2, z, \'<\', y).
-	elseedge(root, leaf3).
+	elseedge(root, leaf1).
 ";
 
-[revision plan]
+[merging plan]
 {
-	operator: tobinarydecisiontree;
+	operator: unfold;
 	{
 		kb1
 	};

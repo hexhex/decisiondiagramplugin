@@ -27,10 +27,10 @@ mapping: "
 	elseedge(rootB, leaf2B).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: userpreferences;
-	key: "class1 >> class2";
+	key: "class2 >> class1";
 	{
 		kb1
 	};

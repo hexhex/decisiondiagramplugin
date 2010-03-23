@@ -32,7 +32,7 @@ mapping: "
 	elseedge(v2, leaf4).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: simplify;
 	{

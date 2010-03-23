@@ -31,7 +31,7 @@ mapping: "
 	elseedge(a, leaf2).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: avg;
 	{

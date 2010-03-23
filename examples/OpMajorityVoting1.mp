@@ -21,28 +21,13 @@ name: kb2;
 mapping: "
 	root(rootB).
 	innernode(rootB).
-	leafnode(leaf1B, class2).
-	leafnode(leaf2B, class3).
+	leafnode(leaf1B, class3).
+	leafnode(leaf2B, class2).
 	conditionaledge(rootB, leaf1B, b, \'<\', x).
 	elseedge(rootB, leaf2B).
 ";
 
-[belief base]
-name: kb3;
-mapping: "
-	root(rootC).
-	innernode(rootC).
-	innernode(v).
-	leafnode(leaf1C, class3).
-	leafnode(leaf2C, class1).
-	leafnode(leaf3C, class2).
-	conditionaledge(rootC, v, c, \'<\', x).
-	elseedge(rootC, leaf1C).
-	conditionaledge(v, leaf2C, cc, \'<\', x).
-	elseedge(v, leaf3C).
-";
-
-[revision plan]
+[merging plan]
 {
 	operator: majorityvoting;
 	{
@@ -50,8 +35,5 @@ mapping: "
 	};
 	{
 		kb2
-	};
-	{
-		kb3
 	};
 }

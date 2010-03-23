@@ -8,30 +8,22 @@ predicate: elseedge/2;
 [belief base]
 name: kb1;
 mapping: "
-	root(c).
-	innernode(c).
+	root(b).
 	innernode(b).
 	innernode(a).
 	leafnode(leaf1, class1).
 	leafnode(leaf2, class2).
-	conditionaledge(c, a, c, \'<\', x).
-	elseedge(c, b).
-	conditionaledge(b, leaf2, b, \'<\', x).
-	elseedge(b, leaf1).
-	conditionaledge(a, leaf1, a, \'<\', x).
-	elseedge(a, leaf2).
+	leafnode(leaf3, class2).
+	conditionaledge(b, leaf1, b, \'<\', x).
+	elseedge(b, a).
+	conditionaledge(a, leaf2, a, \'<\', x).
+	elseedge(a, leaf3).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: orderbinarydecisiontree;
 	{
-		operator: tobinarydecisiontree;
-		{
-			operator: unfold;
-			{
-				kb1
-			};
-		};
+		kb1
 	};
 }

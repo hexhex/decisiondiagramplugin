@@ -10,10 +10,14 @@ name: kb1;
 mapping: "
 	root(a).
 	innernode(a).
+	innernode(b).
 	leafnode(leaf1, class1).
 	leafnode(leaf2, class2).
-	conditionaledge(a, leaf1, a, \'<\', \'10\').
-	elseedge(a, leaf2).
+	leafnode(leaf3, class3).
+	conditionaledge(a, leaf1, x, \'<\', \'10\').
+	elseedge(a, b).
+	conditionaledge(b, leaf2, y, \'<\', \'100\').
+	elseedge(b, leaf3).
 ";
 
 [belief base]
@@ -22,12 +26,12 @@ mapping: "
 	root(a).
 	innernode(a).
 	leafnode(leaf1, class1).
-	leafnode(leaf2, class2).
-	conditionaledge(a, leaf1, a, \'<\', \'20\').
+	leafnode(leaf2, class3).
+	conditionaledge(a, leaf1, x, \'<\', \'20\').
 	elseedge(a, leaf2).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: avg;
 	{

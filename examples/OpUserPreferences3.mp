@@ -42,7 +42,7 @@ mapping: "
 	elseedge(v, leaf3C).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: userpreferences;
 	a: "class3 >> class1";

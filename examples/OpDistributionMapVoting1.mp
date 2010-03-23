@@ -10,8 +10,8 @@ name: kb1;
 mapping: "
 	root(rootA).
 	innernode(rootA).
-	leafnode(leaf1A, class1).
-	leafnode(leaf2A, class2).
+	leafnode(leaf1A, \'x {x:5,y:2}\').
+	leafnode(leaf2A, \'y {x:1,y:2}\').
 	conditionaledge(rootA, leaf1A, a, \'<\', x).
 	elseedge(rootA, leaf2A).
 ";
@@ -21,15 +21,15 @@ name: kb2;
 mapping: "
 	root(rootB).
 	innernode(rootB).
-	leafnode(leaf1B, class3).
-	leafnode(leaf2B, class2).
+	leafnode(leaf1B, \'y {x:1,y:2}\').
+	leafnode(leaf2B, \'x {x:2,y:0}\').
 	conditionaledge(rootB, leaf1B, b, \'<\', x).
 	elseedge(rootB, leaf2B).
 ";
 
-[revision plan]
+[merging plan]
 {
-	operator: majorityvoting;
+	operator: distributionmapvoting;
 	{
 		kb1
 	};

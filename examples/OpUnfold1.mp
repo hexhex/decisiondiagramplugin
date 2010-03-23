@@ -10,12 +10,19 @@ name: kb1;
 mapping: "
 	root(root).
 	innernode(root).
+	innernode(v1).
+	innernode(v2).
 	leafnode(leaf1, class1).
-	conditionaledge(root, leaf1, x, \'<\', y).
-	elseedge(root, leaf1).
+	leafnode(leaf2, class2).
+	conditionaledge(root, v1, x, \'<\', y).
+	elseedge(root, v2).
+	conditionaledge(v1, leaf1, z, \'<\', w).
+	elseedge(v1, leaf2).
+	conditionaledge(v2, leaf1, z, \'<\', w).
+	elseedge(v2, leaf2).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: unfold;
 	{

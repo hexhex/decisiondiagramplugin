@@ -9,25 +9,29 @@ predicate: elseedge/2;
 name: kb1;
 mapping: "
 	root(c).
+	innernode(c).
 	innernode(b).
 	innernode(a).
-	innernode(c).
 	leafnode(leaf1, class1).
 	leafnode(leaf2, class2).
-	leafnode(leaf3, class2).
-	leafnode(leaf4, class3).
-	conditionaledge(c, leaf1, c, \'<\', x).
+	conditionaledge(c, a, c, \'<\', x).
 	elseedge(c, b).
 	conditionaledge(b, leaf2, b, \'<\', x).
-	elseedge(b, a).
-	conditionaledge(a, leaf3, a, \'<\', x).
-	elseedge(a, leaf4).
+	elseedge(b, leaf1).
+	conditionaledge(a, leaf1, a, \'<\', x).
+	elseedge(a, leaf2).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: orderbinarydecisiontree;
 	{
-		kb1
+		operator: tobinarydecisiontree;
+		{
+			operator: unfold;
+			{
+				kb1
+			};
+		};
 	};
 }

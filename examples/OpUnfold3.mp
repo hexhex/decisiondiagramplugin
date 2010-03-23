@@ -28,7 +28,7 @@ mapping: "
 	elseedge(v4, leaf2).
 ";
 
-[revision plan]
+[merging plan]
 {
 	operator: unfold;
 	{

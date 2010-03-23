@@ -29,7 +29,7 @@ mapping: "
 	elseedge(checkT, stage1).
 ";
 
-[revision plan]
+[merging plan]
 {
 
 				tnm

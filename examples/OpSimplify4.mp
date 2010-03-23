@@ -12,23 +12,21 @@ mapping: "
 	innernode(root).
 	innernode(v1).
 	innernode(v2).
-	innernode(v3).
 	leafnode(leaf1, class1).
 	leafnode(leaf2, class2).
-	conditionaledge(root, v1, x, \'<\', y).
-	conditionaledge(root, v3, xx, \'<\', y).
+	leafnode(leaf3, class2).
+	leafnode(leaf4, class3).
+	conditionaledge(root, v1, v, \'<\', y).
 	elseedge(root, v2).
-	conditionaledge(v1, leaf1, z, \'<\', w).
-	elseedge(v1, leaf2).
-	conditionaledge(v2, leaf1, z, \'<\', w).
-	elseedge(v2, leaf2).
-	conditionaledge(v3, leaf1, zz, \'<\', w).
-	elseedge(v3, leaf2).
+	conditionaledge(v1, leaf1, x, \'<\', a).
+	elseedge(v1, leaf2, y, \'<\', b).
+	conditionaledge(v2, leaf3, x, \'<\', a).
+	elseedge(v2, leaf4, y, \'<\', b).
 ";
 
-[revision plan]
+[merging plan]
 {
-	operator: unfold;
+	operator: simplify;
 	{
 		kb1
 	};
