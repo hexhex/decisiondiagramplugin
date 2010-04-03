@@ -124,8 +124,8 @@
 \begin{document}
 
 	\title{decisiondiagramsplugin - User Guide}
-	\date{March 13, 2010}
-	\author{Christoph Redl\footnote{e0525250@mail.student.tuwien.ac.at}}
+	\date{April 03, 2010}
+	\author{Christoph Redl\footnote{christoph.redl@student.tuwien.ac.at}}
 	\maketitle
 
 	The decisiondiagramsplugin adds support for working with decision diagrams to \dlvhex. In consists of a tool for conversion between the \dotff format and sets of facts as well as
@@ -299,17 +299,17 @@ elseedge(case2, case2b)}
 			with this program that is computable, it is strongly intended to be used as part of the input for a revision task.
 
 			Note that \inlinecode{graphconverter} reads from standard input and writes to standard output.
-			The \inlinecode{graphconverter} expects either one or two parameters. If one parameter is passed, it can be anything of:
+			It expects either one or two parameters. If one parameter is passed, it can be anything of:
 			\begin{itemize}
-				\item $--toas$ \\
-					Converts a \dotff file into a \hex program.
-				\item $--todot$ \\
+				\item \verb+--toas+ \\
+					Converts a \dotff file into an answer-set.
+				\item \verb+--todot+ \\
 					Converts an answer-set into a \dotff file.
-				\item $--help$ \\
+				\item \verb+--help+ \\
 					Displays an online help message.
 			\end{itemize}
 
-			Note that $--toas$ and $--todot$ are only abbreviations for commonly used conversions. The more general program call passes two parameters, where the first one
+			Note that \verb+--toas+ and \verb+--todot+ are only abbreviations for commonly used conversions. The more general program call passes two parameters, where the first one
 			states the source format and the second one the desired destination format. Both parameters can be anything from the following list.
 			\begin{tabularx}{\textwidth}{|X|X|}
 				\hline

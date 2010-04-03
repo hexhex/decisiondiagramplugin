@@ -66,7 +66,7 @@ DecisionDiagram::Node* OpSimplify::reduceSubgraph(DecisionDiagram& dd, DecisionD
 			DecisionDiagram::Node* newSubroot = reduceSubgraph(dd, (*outEdgeIt)->getTo());
 
 			// changed?
-			if (newSubroot != n){
+			if (newSubroot != (*outEdgeIt)->getTo()){
 
 				// remember the former to-node of this edge
 				DecisionDiagram::Node* removeComponent = (*outEdgeIt)->getTo();
@@ -109,16 +109,15 @@ DecisionDiagram OpSimplify::simplify(DecisionDiagram dd){
 
 		// -------------------- strategy 1: remove unnecessary conditions  --------------------
 		// conditions are unnecessary if all branches lead to the same final classification
-		std::set<DecisionDiagram::Edge*> outedges = dd.getRoot()->getOutEdges();
 		DecisionDiagram::Node* oldRoot = dd.getRoot();
 		DecisionDiagram::Node* newRoot = reduceSubgraph(dd, oldRoot);
 		if (newRoot != oldRoot){
 			dd.setRoot(newRoot);
 			removeConnectiveComponent(dd, oldRoot);
 		}
-		std::set<DecisionDiagram::Node*> nodes = dd.getNodes();
 
 		// -------------------- strategy 2: combine equivalent subdiagrams --------------------
+		std::set<DecisionDiagram::Node*> nodes = dd.getNodes();
 		// for each node of the diagram, check if there is another node that is equal to it
 		for (std::set<DecisionDiagram::Node*>::iterator it1 = nodes.begin(); it1 != nodes.end() && !restart; it1++){
 			for (std::set<DecisionDiagram::Node*>::iterator it2 = nodes.begin(); it2 != nodes.end() && !restart; it2++){

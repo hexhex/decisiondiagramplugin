@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <tinyxml.h>
+#include <assert.h>
 
 // Supported file formats
 #include <DotFormat.h>
