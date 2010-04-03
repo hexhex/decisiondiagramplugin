@@ -29,6 +29,7 @@ namespace dlvhex{
 				DecisionDiagram simplify(DecisionDiagram dd);
 			public:
 				virtual std::string getName();
+				virtual std::string getInfo();
 				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
 			};
 		}

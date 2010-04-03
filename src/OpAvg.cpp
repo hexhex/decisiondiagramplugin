@@ -12,6 +12,20 @@ std::string OpAvg::getName(){
 	return "avg";
 }
 
+std::string OpAvg::getInfo(){
+	std::stringstream ss;
+	ss <<	"   avg" << std::endl <<
+		"   ---"  << std::endl << std::endl <<
+		"This class implements the average operator. It assumes that 2 answers are passed to the operator (binary operator) with one ordered binary diagram tree each." << std::endl <<
+	 	"The result will be another ordered binary diagram tree where all constants in range queries are averaged if the input decision trees differ." << std::endl <<
+	 	"Usage:" << std::endl <<
+		"   &operator[\"average\", DD, K](A)" << std::endl <<
+		"     DD     ... predicate with handles to exactly 2 answers containing one ordered binary decision tree each" << std::endl <<
+	 	"     A      ... answer to the operator result";
+	return ss.str();
+
+}
+
 // retrieves the condition tested in a node; in strict sense, conditions are assigned to edges and not to nodes. but if we have only one conditional edge that origins in a certain node,
 // we can also consider the condition to be assigned to that node
 DecisionDiagram::Condition OpAvg::getCondition(DecisionDiagram::Node* node){

@@ -1,7 +1,6 @@
 #include <OpSimplify.h>
 #include <DecisionDiagram.h>
 
-#include <iostream>
 #include <sstream>
 #include <set>
 
@@ -10,6 +9,19 @@ using namespace dlvhex::dd::plugin;
 
 std::string OpSimplify::getName(){
 	return "simplify";
+}
+
+std::string OpSimplify::getInfo(){
+	std::stringstream ss;
+	ss <<	"   simplify" << std::endl <<
+		"   --------"  << std::endl << std::endl <<
+		 "This class implements the simplification operator." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"simplify\", DD, K](A)" << std::endl <<
+		 "   DD     ... handle to an answer containing arbitrary many binary decision diagrams" << std::endl <<
+		 "   A      ... answer to the operator result (answer containing simplified decision diagrams)";
+	return ss.str();
+
 }
 
 // removes the connective component that "n" is part of

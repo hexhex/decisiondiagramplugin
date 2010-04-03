@@ -11,6 +11,19 @@ std::string OpToBinaryDecisionTree::getName(){
 	return "tobinarydecisiontree";
 }
 
+std::string OpToBinaryDecisionTree::getInfo(){
+	std::stringstream ss;
+	ss <<	"   tobinarydecisiontree" << std::endl <<
+		"   --------------------"  << std::endl << std::endl <<
+		 "This class implements the to-binary operator. It assumes each answer to represent a general decision tree and translates it into a binary one." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"tobinarydecisiontree\", DD](A)" << std::endl <<
+		 "   DD	    ... handle to an answer containing arbitrary many general decision trees" << std::endl <<
+		 "   A      ... handle to the answer of the operator" << std::endl;
+	return ss.str();
+
+}
+
 void OpToBinaryDecisionTree::toBinary(DecisionDiagram& dd, DecisionDiagram::Node* root){
 
 	// Check arity of root node

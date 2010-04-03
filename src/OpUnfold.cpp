@@ -11,6 +11,19 @@ std::string OpUnfold::getName(){
 	return "unfold";
 }
 
+std::string OpUnfold::getInfo(){
+	std::stringstream ss;
+	ss <<	"   unfold" << std::endl <<
+		"   ------"  << std::endl << std::endl <<
+		 "This class implements the unfolding operator. It assumes each answer to represent a general decision diagram and translates it into a tree-like one." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"unfold\", DD, K](A)" << std::endl <<
+		 "   DD     ... predicate with index 0 and handle to exactly 1 answer containing arbitrary many decision diagram" << std::endl <<
+		 "   A      ... answer to the operator result";
+	return ss.str();
+
+}
+
 DecisionDiagram OpUnfold::unfold(DecisionDiagram::Node* root, DecisionDiagram& ddin){
 
 	DecisionDiagram ddResult;

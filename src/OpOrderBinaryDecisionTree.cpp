@@ -11,6 +11,19 @@ std::string OpOrderBinaryDecisionTree::getName(){
 	return "orderbinarydecisiontree";
 }
 
+std::string OpOrderBinaryDecisionTree::getInfo(){
+	std::stringstream ss;
+	ss <<	"   orderbinarydecisiontree" << std::endl <<
+		"   -----------------------"  << std::endl << std::endl <<
+		 "This class implements the tree ordering operator. It assumes each answer to represent a binary decision tree and translates it into an ordered one." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"orderbinarydecisiontree\", DD, K](A)" << std::endl <<
+		 "   DD     ... predicate with index 0 and handle to exactly 1 answer containing arbitrary many decision diagram" << std::endl <<
+		 "   A      ... answer to the operator result (answer containing ordered binary decision diagrams)";
+	return ss.str();
+
+}
+
 std::string OpOrderBinaryDecisionTree::getCompareAttribute(DecisionDiagram::Node* node){
 	// Search for the requested attribute in the outgoing edges of this node
 	std::string attr;

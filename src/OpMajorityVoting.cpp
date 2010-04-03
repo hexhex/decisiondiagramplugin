@@ -1,7 +1,6 @@
 #include <OpMajorityVoting.h>
 #include <DecisionDiagram.h>
 
-#include <iostream>
 #include <sstream>
 #include <set>
 
@@ -10,6 +9,21 @@ using namespace dlvhex::dd::plugin;
 
 std::string OpMajorityVoting::getName(){
 	return "majorityvoting";
+}
+
+std::string OpMajorityVoting::getInfo(){
+	std::stringstream ss;
+	ss <<	"   majorityvoting" << std::endl <<
+		"   --------------"  << std::endl << std::endl <<
+		 "This class implements the majority voting operator. It assumes that 2 answers are passed to the operator (binary operator) with one decision diagram each." << std::endl <<
+		 "The result will be another decision diagram which delivers the same answer as the input, iff the two diagrams agree upon the classification of an element. Otherwise" << std::endl <<
+		 "the classification will be \"unknown\"." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"majorityvoting\", DD, K](A)" << std::endl <<
+		 "   DD     ... predicate with indices and handles to exactly 2 answers containing one decision diagram each" << std::endl <<
+		 "   A      ... answer to the operator result";
+	return ss.str();
+
 }
 
 void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output){

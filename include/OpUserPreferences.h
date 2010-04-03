@@ -47,6 +47,7 @@ namespace dlvhex{
 				UserPreferences getUserPreferences(OperatorArguments& parameters);
 			public:
 				virtual std::string getName();
+				virtual std::string getInfo();
 				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException);
 			};
 		}

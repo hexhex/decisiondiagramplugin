@@ -15,6 +15,27 @@ std::string OpUserPreferences::getName(){
 	return "userpreferences";
 }
 
+std::string OpUserPreferences::getInfo(){
+	std::stringstream ss;
+	ss <<	"   userpreferences" << std::endl <<
+		"   ---------------"  << std::endl << std::endl <<
+		 "This class implements the user preferences operator. It assumes that arbitrary many input decision trees are passed to the operator. Further it assumes" << std::endl <<
+		 "user preferences about the decision classes to be specified in the parameters structure (as values in the key-value pairs)." << std::endl <<
+		 "The preferences are evaluated in top-down manner (in the sourcecode). Thus, earlier decisions can be overwritten by later ones." << std::endl <<
+		 "Rules are expected in the following format:" << std::endl <<
+		 "	class1 >> class2	or	class1 >Nr> class2" << std::endl <<
+		 "The first expression states that class1 is _always_ preferred to class2. Thus, if at least one diagram delivers class1, it is selected." << std::endl <<
+		 "The second expression states that class1 is preferred to class2 if the voting difference (i.e. the number of diagrams) is at least Nr." << std::endl <<
+		 "In cases where these rules are not sufficient, the lexically smaller class label will be selected" << std::endl <<
+		 "The result will be another decision diagram which gives preference to one of the classes in case of different classifications from the diagrams." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "&operator[\"userpreferences\", DD](A)" << std::endl <<
+		 "   DD     ... predicate with handles to arbitrary many decision diagrams" << std::endl <<
+		 "   A      ... answer to the operator result";
+	return ss.str();
+
+}
+
 OpUserPreferences::UserPreference::UserPreference(std::string definition){
 	// extract compared classes
 	int c1 = definition.find_first_of('>');

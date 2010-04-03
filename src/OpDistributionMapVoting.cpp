@@ -13,6 +13,27 @@ std::string OpDistributionMapVoting::getName(){
 	return "distributionmapvoting";
 }
 
+std::string OpDistributionMapVoting::getInfo(){
+	std::stringstream ss;
+	ss <<	"   distributionmapvoting" << std::endl <<
+		"   ---------------------"  << std::endl << std::endl <<
+		 "This class implements an operator that merged diagrams according to the distribution maps in their leaf nodes." << std::endl <<
+		 "It assumes that 2 answers are passed to the operator (binary operator) with one decision diagram each. The leaf nodes do not only need to contain the classification, but also" << std::endl <<
+		 "the distribution of training examples over the classes which ended in this leaf. For instance, if 4 training examples belong to class1 and 2 to class2, the classification is" << std::endl <<
+		 "\"class1\" and the distribution map is \"class1:4,class2:2\"." << std::endl <<
+		 "The syntax is as follows:" << std::endl <<
+		 " 	\"classification {c1:n1,c2:n2,...,cn:nm}\"" << std::endl <<
+		 "The result will be another decision diagram which combines diagrams by inserting the second into all leaf nodes of the first one, and recomputing the classification according" << std::endl <<
+		 "to the (combined) distribution map." << std::endl <<
+		 "Usage:" << std::endl <<
+		 "   &operator[\"majorityvoting\", DD, K](A)" << std::endl <<
+		 "     DD     ... predicate with indices 0-1 and handles to exactly 2 answers containing one decision diagram each" << std::endl <<
+		 "     A      ... answer to the operator result";
+
+	return ss.str();
+
+}
+
 void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& output){
 
 	// Merge the decision diagrams

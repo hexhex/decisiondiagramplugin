@@ -35,6 +35,7 @@ namespace dlvhex{
 				virtual void insert(DecisionDiagram& input, DecisionDiagram& output);
 			public:
 				virtual std::string getName();
+				virtual std::string getInfo();
 				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
 			};
 		}
