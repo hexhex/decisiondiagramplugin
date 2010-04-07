@@ -24,6 +24,11 @@ std::string OpSimplify::getInfo(){
 
 }
 
+std::set<std::string> OpSimplify::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 // removes the connective component that "n" is part of
 // this method has a built-in security check: it won't remove components that are reachable from the root
 void OpSimplify::removeConnectiveComponent(DecisionDiagram& dd, DecisionDiagram::Node* n){

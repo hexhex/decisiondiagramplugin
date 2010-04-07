@@ -24,6 +24,11 @@ std::string OpToBinaryDecisionTree::getInfo(){
 
 }
 
+std::set<std::string> OpToBinaryDecisionTree::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 void OpToBinaryDecisionTree::toBinary(DecisionDiagram& dd, DecisionDiagram::Node* root){
 
 	// Check arity of root node

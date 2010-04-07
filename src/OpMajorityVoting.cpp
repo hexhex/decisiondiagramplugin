@@ -26,6 +26,11 @@ std::string OpMajorityVoting::getInfo(){
 
 }
 
+std::set<std::string> OpMajorityVoting::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 void OpMajorityVoting::insert(DecisionDiagram& input, DecisionDiagram& output){
 
 	// Merge the decision diagrams

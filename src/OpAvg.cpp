@@ -26,6 +26,11 @@ std::string OpAvg::getInfo(){
 
 }
 
+std::set<std::string> OpAvg::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 // retrieves the condition tested in a node; in strict sense, conditions are assigned to edges and not to nodes. but if we have only one conditional edge that origins in a certain node,
 // we can also consider the condition to be assigned to that node
 DecisionDiagram::Condition OpAvg::getCondition(DecisionDiagram::Node* node){

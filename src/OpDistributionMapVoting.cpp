@@ -34,6 +34,11 @@ std::string OpDistributionMapVoting::getInfo(){
 
 }
 
+std::set<std::string> OpDistributionMapVoting::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& output){
 
 	// Merge the decision diagrams

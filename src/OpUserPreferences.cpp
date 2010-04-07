@@ -20,7 +20,7 @@ std::string OpUserPreferences::getInfo(){
 	ss <<	"   userpreferences" << std::endl <<
 		"   ---------------"  << std::endl << std::endl <<
 		 "This class implements the user preferences operator. It assumes that arbitrary many input decision trees are passed to the operator. Further it assumes" << std::endl <<
-		 "user preferences about the decision classes to be specified in the parameters structure (as values in the key-value pairs)." << std::endl <<
+		 "user preferences about the decision classes to be specified in the parameters structure (as values in the key-value pairs with key \"preferencerule\")." << std::endl <<
 		 "The preferences are evaluated in top-down manner (in the sourcecode). Thus, earlier decisions can be overwritten by later ones." << std::endl <<
 		 "Rules are expected in the following format:" << std::endl <<
 		 "	class1 >> class2	or	class1 >Nr> class2" << std::endl <<
@@ -33,7 +33,12 @@ std::string OpUserPreferences::getInfo(){
 		 "   DD     ... predicate with handles to arbitrary many decision diagrams" << std::endl <<
 		 "   A      ... answer to the operator result";
 	return ss.str();
+}
 
+std::set<std::string> OpUserPreferences::getRecognizedParameters(){
+	std::set<std::string> list;
+	list.insert("preferencerule");
+	return list;
 }
 
 OpUserPreferences::UserPreference::UserPreference(std::string definition){

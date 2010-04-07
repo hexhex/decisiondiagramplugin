@@ -45,10 +45,10 @@ mapping: "
 [merging plan]
 {
 	operator: userpreferences;
-	a: "class3 >> class1";
-	b: "class3 >> class2";
-	c: "class1 >> class2";
-	d: "class2 >2> class1";
+	preferencerule: "class3 >> class1";
+	preferencerule: "class3 >> class2";
+	preferencerule: "class1 >> class2";
+	preferencerule: "class2 >2> class1";
 	{
 		kb1
 	};

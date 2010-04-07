@@ -30,7 +30,7 @@ mapping: "
 [merging plan]
 {
 	operator: userpreferences;
-	key: "class1 >> class2";
+	preferencerule: "class1 >> class2";
 	{
 		kb1
 	};

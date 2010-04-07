@@ -24,6 +24,11 @@ std::string OpUnfold::getInfo(){
 
 }
 
+std::set<std::string> OpUnfold::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 DecisionDiagram OpUnfold::unfold(DecisionDiagram::Node* root, DecisionDiagram& ddin){
 
 	DecisionDiagram ddResult;

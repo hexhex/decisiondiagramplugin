@@ -24,6 +24,11 @@ std::string OpOrderBinaryDecisionTree::getInfo(){
 
 }
 
+std::set<std::string> OpOrderBinaryDecisionTree::getRecognizedParameters(){
+	std::set<std::string> list;
+	return list;
+}
+
 std::string OpOrderBinaryDecisionTree::getCompareAttribute(DecisionDiagram::Node* node){
 	// Search for the requested attribute in the outgoing edges of this node
 	std::string attr;

@@ -17,7 +17,7 @@ namespace dlvhex{
 			/**
 			 * \brief
 			 * This class implements the user preferences operator. It assumes that arbitrary many input decision trees are passed to the operator. Further it assumes
-			 * user preferences about the decision classes to be specified in the parameters structure (as values in the key-value pairs).
+			 * user preferences about the decision classes to be specified in the parameters structure (as values in the key-value pairs with key "preferencerule").
 			 * The preferences are evaluated in top-down manner (in the sourcecode). Thus, earlier decisions can be overwritten by later ones.
 			 * Rules are expected in the following format:
 			 *	class1 >> class2	or	class1 >Nr> class2
@@ -48,6 +48,7 @@ namespace dlvhex{
 			public:
 				virtual std::string getName();
 				virtual std::string getInfo();
+				virtual std::set<std::string> getRecognizedParameters();
 				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException);
 			};
 		}
