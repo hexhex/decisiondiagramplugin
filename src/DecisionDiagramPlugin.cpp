@@ -114,8 +114,8 @@ PLUGINIMPORTFUNCTION()
 {
 
   dlvhex::dd::plugin::theDDPlugin.setPluginName("dlvhex-DecisionDiagramPlugin");
-  dlvhex::dd::plugin::theDDPlugin.setVersion(	0,
-						9,
+  dlvhex::dd::plugin::theDDPlugin.setVersion(	1,
+						0,
 						0);
   return &dlvhex::dd::plugin::theDDPlugin;
 }

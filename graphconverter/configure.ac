@@ -1,5 +1,5 @@
 AC_PREREQ(2.64)
-AC_INIT([DotConverter],[0.9.0],[christoph.redl@tuwien.ac.at])
+AC_INIT([DotConverter],[1.0.0],[christoph.redl@tuwien.ac.at])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIR([m4])
 
