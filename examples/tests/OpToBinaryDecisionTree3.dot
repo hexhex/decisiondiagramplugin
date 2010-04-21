@@ -1,0 +1,23 @@
+digraph {
+     root -> v1 [label="x<y"];
+     root -> v2 [label="else"];
+     v1 -> v1_1 [label="else"];
+     v1_1 -> leaf2 [label="b<y"];
+     v2 -> v2_1 [label="else"];
+     v1_1 -> leaf3 [label="else"];
+     v2_1 -> leaf3_1 [label="else"];
+     v2_1 -> leaf2_1 [label="bb<y"];
+     v1 -> leaf1 [label="a<y"];
+     v2 -> leaf1_1 [label="aa<y"];
+     root [label="root"];
+     v1_1 [label="v1"];
+     v2_1 [label="v2"];
+     leaf1 [label="leaf1 [class1]"];
+     leaf1_1 [label="leaf1 [class1]"];
+     leaf2 [label="leaf2 [class2]"];
+     leaf2_1 [label="leaf2 [class2]"];
+     leaf3 [label="leaf3 [class3]"];
+     leaf3_1 [label="leaf3 [class3]"];
+     v1 [label="v1"];
+     v2 [label="v2"];
+}
