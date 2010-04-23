@@ -1,3 +1,1 @@
-AUTOMAKE_OPTIONS = gnu
-
 noinst_HEADERS = DNAFeature.h features/f1.h features/f2.h features/f3.h features/f4.h features/f5.h features/f6.h features/f7.h features/f8.h features/f9.h features/f10.h features/f11.h features/f12.h features/f13.h features/f14.h features/f15.h features/f16.h features/f17.h features/f18.h features/f19.h features/f20.h
