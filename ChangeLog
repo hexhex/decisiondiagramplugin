@@ -1,3 +1,11 @@
+2010-04-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* AUTHORS: Fix content.
+	* NEWS: Likewise.
+	* README: Likewise.
+	* util/dnafeatureextractor/AUTHORS: Likewise.
+	* util/dnafeatureextractor/NEWS: Likewise.
+
 2010-04-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* util/dnafeatureextractor/src/Makefile.am (AUTOMAKE_OPTIONS): Remove.
