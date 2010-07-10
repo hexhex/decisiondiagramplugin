@@ -1,11 +1,11 @@
 digraph {
-     y -> leaf22 [label="else"];
-     y -> leaf21 [label="xx<c"];
-     root -> leaf4 [label="w<y"];
-     root -> y [label="v<y"];
-     leaf4 [label="leaf4 [commonclass]"];
-     leaf22 [label="leaf22 [class2]"];
-     leaf21 [label="leaf21 [class1]"];
-     y [label="y"];
+     root -> x [label="v<y"];
+     root -> leaf3 [label="w<y"];
+     x -> leaf11 [label="xx<c"];
+     x -> leaf12 [label="else"];
      root [label="root"];
+     x [label="x"];
+     leaf3 [label="leaf3 [commonclass]"];
+     leaf11 [label="leaf11 [class1]"];
+     leaf12 [label="leaf12 [class2]"];
 }
