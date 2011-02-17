@@ -447,6 +447,21 @@ mapping: "
 				
 				In case of contradicting leaf nodes or incompatible comparison operators (e.g. $X < c_1$ and $X > c_2$), the result is ``unknown".
 
+	\section{Control Script}
+	\label{sec:ControlScript}
+
+		The merging process may be considerably simplified by the use of our control script. It will automatically call graphconverter and MELD in the right order.
+		
+		This allows you to specify arbitrary input formats (DOT, HEX, Answer Set, RapidMiner XML) in your merging tasks, using the source-Attribute of belief bases.
+
+		A call of
+
+		\begin{center}
+			\inlinecode{./merge.sh mergingplan.mp}
+		\end{center}
+
+		will automatically do the conversion of the input and output diagrams, as well as the call of MELD. The script will print the name of the file with the final result. 
+
 	\section{Conclusion}
 	\label{sec:Conclusion}
 
