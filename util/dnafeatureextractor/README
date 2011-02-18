@@ -1,1 +1,6 @@
-This is dlvhex-stringplugin, a plugin for `dlvhex'.
+dnafeatureextractor
+-------------------
+
+This commandline tool computes numeric features of DNA sequences.
+
+The input is either read from a file (if a filename is passed as argument), or from standard in (otherwise). It is expected to contain one sequence per line. The output will be in CSV format.
