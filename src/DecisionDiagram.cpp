@@ -323,7 +323,7 @@ DecisionDiagram::Node* DecisionDiagram::Edge::getTo(){
 	return to;
 }
 
-DecisionDiagram::Condition::Condition DecisionDiagram::Edge::getCondition() const{
+DecisionDiagram::Condition DecisionDiagram::Edge::getCondition() const{
 	return condition;
 }
 
@@ -882,7 +882,7 @@ DecisionDiagram::Node* DecisionDiagram::getNodeByLabel(std::string label) const{
 }
 
 AtomSet DecisionDiagram::toAnswerSet() const{
-	return toAnswerSet(false, 0):
+	return toAnswerSet(false, 0);
 }
 
 AtomSet DecisionDiagram::toAnswerSet(bool addIndex, int index) const{
@@ -897,13 +897,13 @@ AtomSet DecisionDiagram::toAnswerSet(bool addIndex, int index) const{
 			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(n->getLabel()));
 			args.push_back(Term(dynamic_cast<struct LeafNode*>(n)->getClassification(), true));
-			as.insert(AtomPtr(new Atom(std::string("leafnode"), args)));
+			as.insert(AtomPtr(new Atom(std::string("leafnode") + (addIndex ? std::string("In") : std::string("")), args)));
 		}else{
 			// inner node
 			Tuple args;
 			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(n->getLabel()));
-			as.insert(AtomPtr(new Atom(std::string("innernode"), args)));
+			as.insert(AtomPtr(new Atom(std::string("innernode") + (addIndex ? std::string("In") : std::string("")), args)));
 		}
 	}
 
@@ -920,23 +920,23 @@ AtomSet DecisionDiagram::toAnswerSet(bool addIndex, int index) const{
 			args.push_back(Term(e->getCondition().getOperand1(), true));
 			args.push_back(Term(DecisionDiagram::Condition::cmpOpToString(e->getCondition().getOperation()), true));
 			args.push_back(Term(e->getCondition().getOperand2(), true));
-			as.insert(AtomPtr(new Atom(std::string("conditionaledge"), args)));
+			as.insert(AtomPtr(new Atom(std::string("conditionaledge") + (addIndex ? std::string("In") : std::string("")), args)));
 		}else{
 			// else edge
 			Tuple args;
 			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(e->getFrom()->getLabel()));
 			args.push_back(Term(e->getTo()->getLabel()));
-			as.insert(AtomPtr(new Atom(std::string("elseedge"), args)));
+			as.insert(AtomPtr(new Atom(std::string("elseedge") + (addIndex ? std::string("In") : std::string("")), args)));
 		}
 	}
 
 	// Root node
 	if (root != NULL){
 		Tuple arg;
-		if (addIndex) args.push_back(Term(index));
+		if (addIndex) arg.push_back(Term(index));
 		arg.push_back(Term(root->getLabel()));
-		as.insert(AtomPtr(new Atom("root", arg)));
+		as.insert(AtomPtr(new Atom(std::string("root") + (addIndex ? std::string("In") : std::string("")), arg)));
 	}
 	return as;
 }

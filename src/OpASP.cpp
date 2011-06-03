@@ -8,7 +8,7 @@
 #include <dlvhex/HexParserDriver.h>
 
 #include <dlvhex/PrintVisitor.h>
-#include <DLVHexProcess.h>
+#include <dlvhex/DLVProcess.h>
 
 #include <iostream>
 #include <sstream>
@@ -20,7 +20,8 @@
 
 using namespace dlvhex;
 using namespace dlvhex::merging;
-using namespace dlvhex::merging::plugin;
+using namespace dlvhex::dd;
+using namespace dlvhex::dd::plugin;
 
 std::string OpASP::getName(){
 	return "asp";
@@ -30,11 +31,29 @@ std::string OpASP::getInfo(){
 	std::stringstream ss;
 	ss <<	"     asp" << std::endl <<
 		"     ---" << std::endl << std::endl <<
-		 " &operator[\"asp\", A, K](A)" << std::endl <<
-		 "	A(H1), ..., A(Hn)	... Handles to n decision diagrams" << std::endl <<
-		 "	K(program, c)		... c = arbitrary ASP code" << std::endl <<
-		 "	K(file, f)		... f = the name of a file with ASP code" << std::endl;
-		 "	K(maxint, m)		... m = maximum integer value to be passed to the reasoner" << std::endl;
+		 "    &operator[\"asp\", A, K](A)" << std::endl <<
+		 "         A(H1), ..., A(Hn)    ... Handles to n sets of decision diagrams" << std::endl <<
+		 "         K(program, c)        ... c = arbitrary ASP code" << std::endl <<
+		 "         K(file, f)           ... f = the name of a file with ASP code" << std::endl <<
+		 "         K(maxint, i)       . i = maximum integer value to be passed to the ASP reasoner" << std::endl <<
+		 "    The operator will add the input decision diagrams as facts to the user defined program before executing it," << std::endl <<
+		 "    where the diagrams are encoded as:" << std::endl <<
+		 "         rootIn(I,N)" << std::endl <<
+		 "         innernodeIn(I,N)" << std::endl <<
+		 "         leafnodeIn(I,N,C)" << std::endl <<
+		 "         conditionaledgeIn(I,N1,N2,O1,C,O2)" << std::endl <<
+		 "         elseedgeIn(I,N1,N2)" << std::endl <<
+		 "    where I is a running index denoting the number of the input decision diagram." << std::endl <<
+		 "    " << std::endl <<
+		 "    Additionally the fact ddcountIn(C) is added, which encodes the number of input diagrams." << std::endl <<
+		 "    " << std::endl <<
+		 "    The user-defined program is expected to produce zero to arbitrary many output decision diagrams (exactly one per answer set)," << std::endl <<
+		 "    encoded as:" << std::endl <<
+		 "         root(N)" << std::endl <<
+		 "         innernode(N)" << std::endl <<
+		 "         leafnode(N,C)" << std::endl <<
+		 "         conditionaledge(N1,N2,O1,C,O2)" << std::endl <<
+		 "         elseedge(N1,N2)" << std::endl;
 	return ss.str();
 }
 
@@ -51,18 +70,12 @@ std::set<std::string> OpASP::getRecognizedParameters(){
  * 	-) program: "some ASP program"
  * 	-) file: "some filename"
  * 	-) maxint: maximum integer value to be passed to the reasoner
- * \param arity The number of answer arguments
- * \param optAtom The unique name of the atom upon which optimization occurs
- * \param costSum The unique name of the atom where sourcewise cost aggregation occurs
- * \param weights Reference to the vector where the weights shall be written to
- * \param usedAtoms The list of atoms occurring in any source program
+ * \param parameters Reference to the set of parameters to write to
  * \param maxint Reference to the integer where the maximum int value shall be written to
- * \param ignoredPredicates Reference to the set where the ignored predicates shall be written to
  * \param program Reference to the program where constraints shall be appended
  * \param facts Reference to the facts part of the program where constraints shall be appended
- * \param aggregation Reference to the string where the aggregation function shall be written to
  */
-void OpASP::parseParameters(int& maxint, dlvhex::Program& program, dlvhex::AtomSet& facts){
+void OpASP::parseParameters(OperatorArguments& parameters, int& maxint, dlvhex::Program& program, dlvhex::AtomSet& facts){
 
 	bool penalizeSet = false;
 
@@ -71,11 +84,11 @@ void OpASP::parseParameters(int& maxint, dlvhex::Program& program, dlvhex::AtomS
 
 		// add program code
 		if (argIt->first == std::string("program")){
-			std::string program = argIt->second;
+			std::string programcode = argIt->second;
 			// parse it
 			try{
 				HexParserDriver hpd;
-				std::stringstream ss(program);
+				std::stringstream ss(programcode);
 				hpd.parse(ss, program, facts);
 			}catch(SyntaxError){
 				throw IOperator::OperatorException(std::string("Could not parse program due to a syntax error: \"") + argIt->second + std::string("\""));
@@ -111,52 +124,45 @@ void OpASP::parseParameters(int& maxint, dlvhex::Program& program, dlvhex::AtomS
 
 HexAnswer OpASP::apply(bool debug, int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException){
 
-	// Make dlvhex believe we work in firstorder mode
-	// This is a workaround due to a nasty assertion in dlvhex: otherwise we can not instanciate AggregateAtom
-	unsigned noPred = Globals::Instance()->getOption("NoPredicate");
-	Globals::Instance()->setOption("NoPredicate", 0);
-
 	// create a subprogram that computes the user defined ASP code
 	dlvhex::Program program;
 	dlvhex::AtomSet facts;
 
-	parseParameters(program, facts);
-
-
+	int maxint = 0;
+	parseParameters(parameters, maxint, program, facts);
 
 	// ---------- start building the program ----------
 
 	// add the ASP encoded decision diagrams as facts
 	std::vector<HexAnswer> sources;
 
-	// all sources
-	int sourceIndex = 0;
-	for (std::vector<HexAnswer*>::iterator argIt = arguments.begin(); argIt != arguments.end(); argIt++, sourceIndex++){
-
-		// all decision diagrams from this source
-		for (AtomSet::iterator asIt = argIt->begin(); asIt != arguments.end(); asIt++){
-			// interpret as decision diagram
-			DecisionDiagram dd(*asIt);
-
+	int ddNr = 0;
+	for (int answer = 0; answer < arity; answer++){
+		for (int answerset = 0; answerset < arguments[answer]->size(); answerset++){
 			// add this decision diagram as facts to the program
 			// Note: We do not use the usual encoding (root, innernode, leafnode, conditionaledge, elseedge) here,
 			//	 but rather add an additional parameter (index) at the 0-th position. This allows for encoding
 			//	 multiple diagrams within one set of facts.
 			//	 Furthermore, the fact "diagramNumber(N)" will encode the number of decision diagrams.
-			facts.add(dd.toAnswerSet(sourceIndex));
+			DecisionDiagram dd((*arguments[answer])[answerset]);
+			facts.insert(dd.toAnswerSet(true, ddNr++));
 		}
 	}
-	// add information on the number of decision diagrams
-	Tuple args;
-	args.push_back(Term(sourceIndex));
-	facts.add(new Atom(std::string("diagramNumber"), args));
+	if (ddNr > maxint) maxint = ddNr;
 
+	// add information on the number of decision diagrams
+	Tuple ddNrArgs;
+	ddNrArgs.push_back(Term(ddNr));
+	AtomPtr ddNrAtom = AtomPtr(new Atom("ddcountIn"));
+	ddNrAtom->setArguments(ddNrArgs);
+	facts.insert(ddNrAtom);
 
 	// build the resulting program and execute it
 	try{
 		ASPSolverManager& solver = ASPSolverManager::Instance();
 		typedef ASPSolverManager::SoftwareConfiguration<ASPSolver::DLVSoftware> DLVConfiguration;
 		DLVConfiguration dlv;
+		dlv.options.includeFacts = true;
 		std::stringstream maxint_str;
 		maxint_str << "-N=" << maxint;
 		dlv.options.arguments.push_back(maxint_str.str());
@@ -165,16 +171,8 @@ HexAnswer OpASP::apply(bool debug, int arity, std::vector<HexAnswer*>& arguments
 		solver.solve(dlv, program, facts, result);
 
 		// the result contains now the filtered or processed decision diagrams
-
-		// restore original setting of NoPredicate
-    // @todo this "NoPredicate" is no longer in use, higher order is configured in *Software::Options
-		Globals::Instance()->setOption("NoPredicte", noPred);
-
 		return result;
 	}catch(...){
-		// restore original setting of NoPredicate
-		Globals::Instance()->setOption("NoPredicate", noPred);
-
 		std::stringstream ss;
 		if (debug){
 			ss << ": " << std::endl;
@@ -182,6 +180,6 @@ HexAnswer OpASP::apply(bool debug, int arity, std::vector<HexAnswer*>& arguments
 			pv.PrintVisitor::visit(&program);
 			pv.PrintVisitor::visit(&facts);
 		}
-		throw OperatorException("Error while building and executing program: " << std::endl << ss.str());
+		throw OperatorException(std::string("Error while building and executing program") + ss.str());
 	}
 }

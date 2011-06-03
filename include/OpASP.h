@@ -1,17 +1,19 @@
 #ifndef __OPASP_H_
 #define __OPASP_H_
 
-#include "IOperator.h"
+#include "dlvhex-mergingplugin/IOperator.h"
 
+#include <DecisionDiagram.h>
 #include <dlvhex/Program.h>
 #include <dlvhex/AtomSet.h>
 
 DLVHEX_NAMESPACE_USE
 
-using namespace dlvhex::merging;
+using namespace dlvhex::merging::plugin;
+using namespace dlvhex::dd::util;
 
 namespace dlvhex{
-	namespace merging{
+	namespace dd{
 		namespace plugin{
 			/**
 			 * This class implements an operator which allows for calling ASP programs which reason over decision diagrams.
@@ -20,14 +22,28 @@ namespace dlvhex{
 			 *	A(H1), ..., A(Hn)	... Handles to n sets of decision diagrams
 			 *	K(program, c)		... c = arbitrary ASP code
 			 *	K(file, f)		... f = the name of a file with ASP code
+			 *	K(maxint, i)		... i = maximum integer value to be passed to the ASP reasoner
+			 * The operator will add the input decision diagrams as facts to the user defined program before executing it,
+			 * where the diagrams are encoded as:
+			 *      rootIn(I,N)
+			 *      innernodeIn(I,N)
+			 *      leafnodeIn(I,N,C)
+			 *      conditionaledgeIn(I,N1,N2,O1,C,O2)
+			 *      elseedgeIn(I,N1,N2)
+			 * where I is a running index denoting the number of the input decision diagram.
+			 * Additionally the fact ddcountIn(C) is added, which encodes the number of input diagrams.
+			 * The user-defined program is expected to produce zero to arbitrary many output decision diagrams (exactly one per answer set),
+			 * encoded as:
+			 *      root(N)
+			 *      innernode(N)
+			 *      leafnode(N,C)
+			 *      conditionaledge(N1,N2,O1,C,O2)
+			 *      elseedge(N1,N2)
 			 */
 			class OpASP : public IOperator{
 			private:
-				// helper methods
-std::string findUniqueAtomName(const std::string prefix, std::set<std::string>& usedPredNames);
-
 				// preprocessing
-				void parseParameters(int& maxint, dlvhex::Program& program, dlvhex::AtomSet& facts);
+				void parseParameters(OperatorArguments& parameters, int& maxint, dlvhex::Program& program, dlvhex::AtomSet& facts);
 
 			public:
 				virtual std::string getName();
