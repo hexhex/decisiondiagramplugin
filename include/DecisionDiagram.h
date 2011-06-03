@@ -563,6 +563,7 @@ namespace dlvhex{
 
 				// Output generation
 				AtomSet toAnswerSet() const;
+				AtomSet toAnswerSet(bool addIndex, int index) const;
 				std::string toString() const;
 			};
 		}
@@ -783,7 +784,14 @@ namespace dlvhex{
  */
 
 /*! \fn AtomSet dlvhex::dd::util::DecisionDiagram::toAnswerSet() const
- * Creates an answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), edge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
+ * Creates an answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), conditionaledge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
+ *  \return AtomSet An answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), edge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
+ */
+
+/*! \fn AtomSet dlvhex::dd::util::DecisionDiagram::toAnswerSet(bool addIndex, int index) const
+ * Creates an answer set representing this decision diagram with the predicates root([Index,]Name), innernode([Index,]Label), leafnode([Index,]Label, Classification), conditionaledge([Index,]Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge([Index,]Node1, Node2).
+ *  \param addIndex If true, the atoms from the general description will be extended by the given index as an additional parameter at position 0.
+ *  \param index Index to be added to the atoms from the general description at parameter position 0 (ignored if addIndex=false).
  *  \return AtomSet An answer set representing this decision diagram with the predicates root(Name), innernode(Label), leafnode(Label, Classification), edge(Node1, Node2, Operand1, comparisonOperator, Operand2) and elseedge(Node1, Node2).
  */
 

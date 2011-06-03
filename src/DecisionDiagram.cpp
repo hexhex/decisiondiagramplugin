@@ -882,6 +882,10 @@ DecisionDiagram::Node* DecisionDiagram::getNodeByLabel(std::string label) const{
 }
 
 AtomSet DecisionDiagram::toAnswerSet() const{
+	return toAnswerSet(false, 0):
+}
+
+AtomSet DecisionDiagram::toAnswerSet(bool addIndex, int index) const{
 	AtomSet	as;
 	// Create tuples for nodes
 	for (std::set<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
@@ -890,12 +894,14 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 		if (dynamic_cast<LeafNode*>(n) != NULL){
 			// leaf node
 			Tuple args;
+			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(n->getLabel()));
 			args.push_back(Term(dynamic_cast<struct LeafNode*>(n)->getClassification(), true));
 			as.insert(AtomPtr(new Atom(std::string("leafnode"), args)));
 		}else{
 			// inner node
 			Tuple args;
+			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(n->getLabel()));
 			as.insert(AtomPtr(new Atom(std::string("innernode"), args)));
 		}
@@ -908,6 +914,7 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 		if (dynamic_cast<ElseEdge*>(e) == NULL){
 			// conditional edge
 			Tuple args;
+			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(e->getFrom()->getLabel()));
 			args.push_back(Term(e->getTo()->getLabel()));
 			args.push_back(Term(e->getCondition().getOperand1(), true));
@@ -917,6 +924,7 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 		}else{
 			// else edge
 			Tuple args;
+			if (addIndex) args.push_back(Term(index));
 			args.push_back(Term(e->getFrom()->getLabel()));
 			args.push_back(Term(e->getTo()->getLabel()));
 			as.insert(AtomPtr(new Atom(std::string("elseedge"), args)));
@@ -926,6 +934,7 @@ AtomSet DecisionDiagram::toAnswerSet() const{
 	// Root node
 	if (root != NULL){
 		Tuple arg;
+		if (addIndex) args.push_back(Term(index));
 		arg.push_back(Term(root->getLabel()));
 		as.insert(AtomPtr(new Atom("root", arg)));
 	}

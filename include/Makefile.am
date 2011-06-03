@@ -8,4 +8,5 @@ noinst_HEADERS = OpUnfold.h \
 		 OpSimplify.h \
 		 OpDistributionMapVoting.h \
 		 DecisionDiagram.h \
-		 StringHelper.h
+		 StringHelper.h \
+		 OpASP.h
