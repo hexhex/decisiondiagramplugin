@@ -16,14 +16,16 @@ std::string RmxmlFormat::getNameAbbr(){
 	return "xml";
 }
 
-DecisionDiagram* RmxmlFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
+std::vector<DecisionDiagram*> RmxmlFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// load source document
 	TiXmlDocument doc;
 
 	if (doc.LoadFile(stdin)){
 		try{
 			DecisionDiagram dd = getDDDiag(&doc);
-			return new DecisionDiagram(dd);
+			std::vector<DecisionDiagram*> v;
+			v.push_back(new DecisionDiagram(dd));
+			return v;
 		}catch(...){
 			throw DecisionDiagram::InvalidDecisionDiagram("Error: XML document is well-formed, but does not encode a valid decision tree.");
 		}
@@ -32,7 +34,11 @@ DecisionDiagram* RmxmlFormat::read() throw (DecisionDiagram::InvalidDecisionDiag
 	}
 }
 
-void RmxmlFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
+void RmxmlFormat::write(std::vector<DecisionDiagram*> ddv) throw (DecisionDiagram::InvalidDecisionDiagram){
+	if (ddv.size() != 1) throw DecisionDiagram::InvalidDecisionDiagram("Error: Rmxml-writer can only write one diagram at one time.");
+
+	DecisionDiagram* dd = ddv[0];
+
 	if (!dd->isTree()){
 		throw DecisionDiagram::InvalidDecisionDiagram("Error: Could not write diagram. It must be a tree.");
 	}

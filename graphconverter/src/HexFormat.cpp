@@ -20,7 +20,7 @@ std::string HexFormat::getNameAbbr(){
 	return "hex";
 }
 
-DecisionDiagram* HexFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
+std::vector<DecisionDiagram*> HexFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// parse the hex program (a set of facts)
 	HexParserDriver hexparser;
 	Program prog;
@@ -44,13 +44,16 @@ DecisionDiagram* HexFormat::read() throw (DecisionDiagram::InvalidDecisionDiagra
 	}
 
 	// create a diagram (can throw exceptions)
-	DecisionDiagram* dd = new DecisionDiagram(atoms);
-	return dd;
+	std::vector<DecisionDiagram*> v;
+	v.push_back(new DecisionDiagram(atoms));
+	return v;
 }
 
-void HexFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
+void HexFormat::write(std::vector<DecisionDiagram*> ddv) throw (DecisionDiagram::InvalidDecisionDiagram){
+	if (ddv.size() != 1) throw DecisionDiagram::InvalidDecisionDiagram("Error: Hex-writer can only write one diagram at one time.");
+
 	// create an answer-set
-	AtomSet as = dd->toAnswerSet();
+	AtomSet as = ddv[0]->toAnswerSet();
 	// print it as dlv program
 	DLVPrintVisitor pv(std::cout);
 	pv.visit(&as);

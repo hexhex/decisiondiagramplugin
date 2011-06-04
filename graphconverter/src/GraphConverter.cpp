@@ -33,8 +33,8 @@ void unloadFormats(vector<IFormat*> formats){
 	}
 }
 
-// Will read a diagram in the given format and return a pointer (or NULL if the format is not recognized or the diagram is illegal)
-dlvhex::dd::util::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::string inputformat){
+// Will read diagrams in the given format and return a pointer (or NULL if the format is not recognized or the diagram is illegal)
+std::vector<dlvhex::dd::util::DecisionDiagram*> readDiagram(vector<IFormat*> formats, std::string inputformat){
 	dlvhex::dd::util::DecisionDiagram* dd = NULL;
 
 	// search and apply the appropriate format interpretation
@@ -47,8 +47,8 @@ dlvhex::dd::util::DecisionDiagram* readDiagram(vector<IFormat*> formats, std::st
 	throw DecisionDiagram::InvalidDecisionDiagram(std::string("Input format \"") + inputformat + std::string("\" was not recognized"));
 }
 
-// Writes a diagram in the given format to standard out. Returns a boolean value to notify the caller about the success.
-void writeDiagram(vector<IFormat*> formats, dlvhex::dd::util::DecisionDiagram* dd, std::string outputformat){
+// Writes diagrams in the given format to standard out. Returns a boolean value to notify the caller about the success.
+void writeDiagram(vector<IFormat*> formats, std::vector<dlvhex::dd::util::DecisionDiagram*> dd, std::string outputformat){
 
 	// search and apply the appropriate format interpretation
 	for (vector<IFormat*>::iterator fit = formats.begin(); fit != formats.end(); fit++){
@@ -105,8 +105,8 @@ int main(int argc, char **argv){
 
 	vector<IFormat*> formats = loadFormats();
 
-	// will point to the input decision diagram
-	dlvhex::dd::util::DecisionDiagram* dd = NULL;
+	// will point to the input decision diagrams
+	std::vector<dlvhex::dd::util::DecisionDiagram*> ddv;
 
 	std::string inputformat;
 	std::string outputformat;
@@ -139,13 +139,15 @@ int main(int argc, char **argv){
 
 	// actual translation
 	try{
-		dd = readDiagram(formats, inputformat);
+		ddv = readDiagram(formats, inputformat);
 
 		// reading succeeded: write it
-		writeDiagram(formats, dd, outputformat);
+		writeDiagram(formats, ddv, outputformat);
 
 		// writing successful
-		delete dd;
+		for (int i = 0; i < ddv.size(); i++){
+			delete ddv[i];
+		}
 		unloadFormats(formats);
 		return 0;
 	}catch(DecisionDiagram::InvalidDecisionDiagram idd){

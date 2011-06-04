@@ -31,8 +31,8 @@ namespace dlvhex{
 				public:
 					virtual std::string getName();
 					virtual std::string getNameAbbr();
-					virtual DecisionDiagram* read() throw (DecisionDiagram::InvalidDecisionDiagram);
-					virtual void write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram);
+					virtual std::vector<DecisionDiagram*> read() throw (DecisionDiagram::InvalidDecisionDiagram);
+					virtual void write(std::vector<DecisionDiagram*> dd) throw (DecisionDiagram::InvalidDecisionDiagram);
 				};
 			}
 		}

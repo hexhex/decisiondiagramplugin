@@ -13,7 +13,7 @@ std::string DotFormat::getName(){
 	return "dot";
 }
 
-DecisionDiagram* DotFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
+std::vector<DecisionDiagram*> DotFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram){
 	// Let graphviz lib parse the standard input
 	GVC_t *gvc;
 	graph_t *g;
@@ -46,42 +46,48 @@ DecisionDiagram* DotFormat::read() throw (DecisionDiagram::InvalidDecisionDiagra
 			delete dd;
 			throw idd;
 		}
-		return dd;
+		std::vector<DecisionDiagram*> vec;
+		vec.push_back(dd);
+		return vec;
 	}
 }
 
-void DotFormat::write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram){
-	// retrieve components of decision diagram
-	std::set<DecisionDiagram::Node*> nodes = dd->getNodes();
-	std::set<DecisionDiagram::Edge*> edges = dd->getEdges();
+void DotFormat::write(std::vector<DecisionDiagram*> ddv) throw (DecisionDiagram::InvalidDecisionDiagram){
+	for (int i = 0; i < ddv.size(); i++){
+		DecisionDiagram* dd = ddv[i];
 
-	std::cout << "digraph {" << std::endl;
+		// retrieve components of decision diagram
+		std::set<DecisionDiagram::Node*> nodes = dd->getNodes();
+		std::set<DecisionDiagram::Edge*> edges = dd->getEdges();
 
-	// Create list of edges
-	for (std::set<DecisionDiagram::Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
-		DecisionDiagram::Edge* e = *it;
-		if (dynamic_cast<DecisionDiagram::ElseEdge*>(e) != NULL){
-			std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"else\"];" << std::endl;
-		}else{
-			std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
+		std::cout << "digraph {" << std::endl;
+
+		// Create list of edges
+		for (std::set<DecisionDiagram::Edge*>::iterator it = edges.begin(); it != edges.end(); it++){
+			DecisionDiagram::Edge* e = *it;
+			if (dynamic_cast<DecisionDiagram::ElseEdge*>(e) != NULL){
+				std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"else\"];" << std::endl;
+			}else{
+				std::cout << "     " << e->getFrom()->getLabel() << " -> " << e->getTo()->getLabel() << " [label=\"" << e->getCondition().toString() << "\"]" << ";" << std::endl;
+			}
 		}
-	}
 
-	// Create a list of leaf nodes
-	for (std::set<DecisionDiagram::Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
-		DecisionDiagram::Node* n = *it;
+		// Create a list of leaf nodes
+		for (std::set<DecisionDiagram::Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
+			DecisionDiagram::Node* n = *it;
 
-		// extract a reasonable label for this node
-		std::string lab = n->getLabel();
-		if (lab.find_first_of("_") != std::string::npos) lab = lab.substr(0, lab.find_first_of("_"));
-		if (dynamic_cast<DecisionDiagram::LeafNode*>(n) != NULL){
-			std::cout << "     " << n->getLabel() << " [label=\"" << lab << " [" << dynamic_cast<DecisionDiagram::LeafNode*>(n)->getClassification() << "]\"];" << std::endl;
-		}else{
-			std::cout << "     " << n->getLabel() << " [label=\"" << lab << "\"];" << std::endl;
+			// extract a reasonable label for this node
+			std::string lab = n->getLabel();
+			if (lab.find_first_of("_") != std::string::npos) lab = lab.substr(0, lab.find_first_of("_"));
+			if (dynamic_cast<DecisionDiagram::LeafNode*>(n) != NULL){
+				std::cout << "     " << n->getLabel() << " [label=\"" << lab << " [" << dynamic_cast<DecisionDiagram::LeafNode*>(n)->getClassification() << "]\"];" << std::endl;
+			}else{
+				std::cout << "     " << n->getLabel() << " [label=\"" << lab << "\"];" << std::endl;
+			}
 		}
-	}
 
-	std::cout << "}" << std::endl;
+		std::cout << "}" << std::endl;
+	}
 }
 
 /**

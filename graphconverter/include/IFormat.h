@@ -1,6 +1,7 @@
 #ifndef _IFORMAT_H_
 #define _IFORMAT_H_
 
+#include <vector>
 #include <DecisionDiagram.h>
 
 #include <string>
@@ -20,8 +21,8 @@ namespace dlvhex{
 					virtual std::string getName() = 0;
 					virtual std::string getNameAbbr();
 
-					virtual DecisionDiagram* read() throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
-					virtual void write(DecisionDiagram* dd) throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
+					virtual std::vector<DecisionDiagram*> read() throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
+					virtual void write(std::vector<DecisionDiagram*> dd) throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
 				};
 			}
 		}
@@ -40,14 +41,14 @@ namespace dlvhex{
  *  \return std::string The short name of this file format
  */
 
-/*! \fn virtual DecisionDiagram* dlvhex::dd::tools::graphconverter::IFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
+/*! \fn virtual std::vector<DecisionDiagram*> dlvhex::dd::tools::graphconverter::IFormat::read() throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
  *  \brief Reads a decision diagram from standard input.
- *  \return DecisionDiagram* A pointer to the read diagram
+ *  \return std::vector<DecisionDiagram*> Vector of pointers to the read diagrams
  *  \throw DecisionDiagram::InvalidDecisionDiagram In case of an error
  */
 
-/*! \fn virtual void dlvhex::dd::tools::graphconverter::IFormat::write(DecisionDiagram*) throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
+/*! \fn virtual void dlvhex::dd::tools::graphconverter::IFormat::write(std::vector<DecisionDiagram*>) throw (DecisionDiagram::InvalidDecisionDiagram) = 0;
  *  \brief Writes a decision diagram to standard output.
- *  \param dd* A pointer to the diagram to write
+ *  \param dd* Vector of pointers to the diagrams to write
  *  \throw DecisionDiagram::InvalidDecisionDiagram In case of an error
  */
