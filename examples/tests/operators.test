@@ -12,6 +12,7 @@
 ../OpMajorityVoting1.mp OpMajorityVoting1.dot
 ../OpMajorityVoting2.mp OpMajorityVoting2.dot
 ../OpDistributionMapVoting1.mp OpDistributionMapVoting1.dot
+../OpDistributionMapVoting2.mp OpDistributionMapVoting2.as
 ../OpUserPreferences1.mp OpUserPreferences1.dot
 ../OpUserPreferences2.mp OpUserPreferences2.dot
 ../OpUserPreferences3.mp OpUserPreferences3.dot

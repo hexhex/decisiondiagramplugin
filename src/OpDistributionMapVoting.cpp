@@ -28,14 +28,16 @@ std::string OpDistributionMapVoting::getInfo(){
 		 "Usage:" << std::endl <<
 		 "   &operator[\"majorityvoting\", DD, K](A)" << std::endl <<
 		 "     DD     ... predicate with indices 0-1 and handles to exactly 2 answers containing one decision diagram each" << std::endl <<
-		 "     A      ... answer to the operator result";
-
+		 "     A      ... answer to the operator result" << std::endl <<
+		 "     K      ... may specifies an epsilon value \"eps=P\" where P is a percentage value;" << std::endl <<
+		 "                if a class frequency is greater than P*max, also this alternative diagram will be produces";
 	return ss.str();
 
 }
 
 std::set<std::string> OpDistributionMapVoting::getRecognizedParameters(){
 	std::set<std::string> list;
+	list.insert("eps");
 	return list;
 }
 
@@ -98,6 +100,14 @@ void OpDistributionMapVoting::insert(DecisionDiagram& input, DecisionDiagram& ou
 
 HexAnswer OpDistributionMapVoting::apply(int arity, std::vector<HexAnswer*>& arguments, OperatorArguments& parameters) throw (OperatorException){
 
+	// Process parameters
+	eps = 1.0f;
+	for (OperatorArguments::iterator it = parameters.begin(); it != parameters.end(); ++it){
+		if (it->first == std::string("eps")){
+			eps = ((float)atoi(it->second.c_str()) / 100);
+		}
+	}
+
 	try{
 		// Check arity
 		if (arity != 2){
@@ -140,6 +150,15 @@ HexAnswer OpDistributionMapVoting::apply(int arity, std::vector<HexAnswer*>& arg
 		// Insert the second decision diagram into the first one
 		insert(diag2, diag1);
 
+		// Set all class labels of the final diagram to empty "" (=not yet computed)
+		std::set<DecisionDiagram::LeafNode*> outputLeafs = diag1.getLeafNodes();
+		for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = outputLeafs.begin(); leafIt != outputLeafs.end(); leafIt++){
+			(*leafIt)->setClassification("");
+		}
+
+		// Now extract the final diagrams, respecting the eps value
+		std::vector<DecisionDiagram> result = extractDiagrams(eps, diag1);
+/*
 		// Finally, for all remaining leaf nodes, take the classification with the highest number of votes
 		std::set<DecisionDiagram::LeafNode*> outputLeafs = diag1.getLeafNodes();
 		for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = outputLeafs.begin(); leafIt != outputLeafs.end(); leafIt++){
@@ -159,12 +178,66 @@ HexAnswer OpDistributionMapVoting::apply(int arity, std::vector<HexAnswer*>& arg
 			(*leafIt)->setClassification(highestVotedClass + StringHelper::encodeDistributionMap(votes->v));
 			delete votes;
 		}
+*/
 
-		// Convert the final decision diagram into a hex answer
+		// Convert the final decision diagrams into hex answers
 		HexAnswer answer;
-		answer.push_back(diag1.toAnswerSet());
+		for (std::vector<DecisionDiagram>::iterator it = result.begin(); it != result.end(); ++it){
+			answer.push_back(it->toAnswerSet());
+		}
 		return answer;
 	}catch(DecisionDiagram::InvalidDecisionDiagram idde){
 		throw IOperator::OperatorException(std::string("InvalidDecisionDiagram: ") + idde.getMessage());
 	}
+}
+//#include <iostream>
+std::vector<DecisionDiagram> OpDistributionMapVoting::extractDiagrams(float eps, DecisionDiagram& diag){
+
+	std::vector<DecisionDiagram> result;
+
+	// Go through all leaf nodes
+//int d = 0;
+	std::set<DecisionDiagram::LeafNode*> leafs = diag.getLeafNodes();
+	for (std::set<DecisionDiagram::LeafNode*>::iterator leafIt = leafs.begin(); leafIt != leafs.end(); leafIt++){
+//d++;
+		// make sure that this terminates: go to the first unprocessed leaf node
+		if ((*leafIt)->getClassification() == std::string("")){
+			int highestVotes = 0;
+			std::string highestVotedClass("unknown");
+
+			// search for the highest voted classification
+			Votes* votes = dynamic_cast<Votes*>((*leafIt)->getData());
+			for (Votings::iterator vIt = votes->v.begin(); vIt != votes->v.end(); vIt++){
+				if ((*vIt).second > highestVotes || ((*vIt).second == highestVotes && (*vIt).first.compare(highestVotedClass) < 0)){
+					highestVotes = (*vIt).second;
+					highestVotedClass = (*vIt).first;
+				}
+			}
+
+			// for each class label with >= eps * highestVotes create a copy of the diagram
+//std::cout << votes->v.size() <<  " " ;
+			for (Votings::iterator vIt = votes->v.begin(); vIt != votes->v.end(); vIt++){
+				if ((*vIt).second > (int)((float)highestVotes * eps) || ((*vIt).second == highestVotes && eps == 1.0f)){
+//std::cout << "+";
+//for (int j = 0; j < d; j++) std::cout << "     ";
+//std::cout << "Try " << (*vIt).first << std::endl;
+					(*leafIt)->setClassification((*vIt).first + StringHelper::encodeDistributionMap(votes->v));
+
+					// Recursively compute the outcome for the other leaf nodes
+					std::vector<DecisionDiagram> subresult = extractDiagrams(eps, diag);
+					result.insert(result.end(), subresult.begin(), subresult.end());
+//std::cout << "#" << subresult.size() << " " ;
+				}
+			}
+			// Backtrack: Restore "unprocessedness" of the current leaf node
+			(*leafIt)->setClassification("");
+
+			// finally we have processed all leaf nodes
+			return result;
+		}
+	}
+
+	// no more unprocessed diagrams -> done
+	result.push_back(diag);
+	return result;
 }

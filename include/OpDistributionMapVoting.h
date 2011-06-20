@@ -21,23 +21,28 @@ namespace dlvhex{
 			 * "class1" and the distribution map is "class1:4,class2:2".
 			 * The syntax is as follows:
 			 * 	"classification {c1:n1,c2:n2,...,cn:nm}"
-			 * The result will be another decision diagram which combines diagrams by inserting the second into all leaf nodes of the first one, and recomputing the classification according
+			 * The result will be a set of decision diagrams which combines the diagrams by inserting the second into all leaf nodes of the first one, and recomputing the classification according
 			 * to the (combined) distribution map.
 			 * Usage:
 			 * <pre>
-			 * &operator["majorityvoting", DD, K](A)
+			 * &operator["distributionmapvoting", DD, K](A)
 			 *	DD	... predicate with indices 0-1 and handles to exactly 2 answers containing one decision diagram each
 			 *	A	... answer to the operator result
+			 *	K	... may specifies an epsilon value "eps=P" where P is a percentage value;
+			 *		    if a class frequency is greater than P*max, also this alternative diagram will be produces
 			 * </pre>
 			 */
 			class OpDistributionMapVoting : public OpMajorityVoting{
 			protected:
 				virtual void insert(DecisionDiagram& input, DecisionDiagram& output);
+			private:
+				float eps;
 			public:
 				virtual std::string getName();
 				virtual std::string getInfo();
 				virtual std::set<std::string> getRecognizedParameters();
 				virtual HexAnswer apply(int arity, std::vector<HexAnswer*>& answers, OperatorArguments& parameters) throw (OperatorException);
+				virtual std::vector<DecisionDiagram> extractDiagrams(float eps, DecisionDiagram& diag);
 			};
 		}
 	}

@@ -30,6 +30,7 @@ mapping: "
 [merging plan]
 {
 	operator: distributionmapvoting;
+	eps: 50;
 	{
 		kb1
 	};

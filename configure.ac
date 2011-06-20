@@ -1,4 +1,4 @@
-AC_PREREQ(2.64)
+AC_PREREQ([2.67])
 AC_INIT([dlvhex-decisiondiagramplugin],[1.0.0],[christoph.redl@tuwien.ac.at])
 AC_CONFIG_SRCDIR([src/DecisionDiagramPlugin.cpp])
 AC_CONFIG_MACRO_DIR([m4])
