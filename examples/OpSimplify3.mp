@@ -23,7 +23,7 @@ mapping: "
 	conditionaledge(root, v1, v, \'<\', y).
 	conditionaledge(root, v2, w, \'<\', y).
 	conditionaledge(v1, x, x, \'<\', a).
-	elseedge(v1, y, y, \'<\', b).
+	elseedge(v1, y).
 	conditionaledge(x, leaf11, xx, \'<\', c).
 	elseedge(x, leaf12).
 	conditionaledge(y, leaf21, xx, \'<\', c).
